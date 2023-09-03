@@ -1,0 +1,51 @@
+
+-- 用户表 (user)
+CREATE TABLE user (
+    user_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '用户ID',
+    username VARCHAR(255) NOT NULL COMMENT '用户名',
+    email VARCHAR(255) NOT NULL COMMENT '电子邮件',
+    password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT='用户信息表';
+
+-- 费用项目表 (expense_project)
+CREATE TABLE expense_project (
+    expense_project_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用项目ID',
+    user_id INT NOT NULL COMMENT '创建者用户ID',
+    name VARCHAR(100) NOT NULL COMMENT '项目名称',
+    description TEXT COMMENT '项目描述',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT='费用项目信息表';
+
+-- 费用项目成员表 (expense_project_member)
+CREATE TABLE expense_project_member (
+    expense_project_member_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用项目成员ID',
+    expense_project_id INT NOT NULL COMMENT '所属费用项目ID',
+    user_id INT NOT NULL COMMENT '用户ID',
+    is_accepted BOOLEAN COMMENT '是否接受邀请',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+) COMMENT='费用项目成员关联表';
+
+-- 费用记录表 (expense_record)
+CREATE TABLE expense_record (
+    expense_record_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用记录ID',
+    user_id INT NOT NULL COMMENT '用户ID',
+    expense_project_id INT NOT NULL COMMENT '费用项目ID',
+    source VARCHAR(255) NOT NULL COMMENT '费用来源',
+    amount DECIMAL(10, 2) NOT NULL COMMENT '费用金额',
+    date DATE NOT NULL COMMENT '费用日期',
+    is_shared BOOLEAN COMMENT '是否已均摊',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+) COMMENT='费用记录信息表';
+
+-- 费用均摊记录表 (expense_sharing)
+CREATE TABLE expense_sharing (
+    expense_sharing_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用均摊记录ID',
+    expense_record_id INT NOT NULL COMMENT '费用记录ID',
+    user_id INT NOT NULL COMMENT '用户ID',
+    weight DECIMAL(5, 2) COMMENT '均摊权重',
+    amount DECIMAL(10, 2) COMMENT '均摊金额', -- 新增的金额字段
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+) COMMENT='费用均摊记录表';
