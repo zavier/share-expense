@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
@@ -41,6 +40,7 @@ public class UserValidator {
 
     public void validatePassword(String password) {
         Assert.isTrue(StringUtils.isNotBlank(password), "密码不能为空");
+        Assert.isTrue(password.length() >= 5, "密码不能小于5位");
     }
 
 }

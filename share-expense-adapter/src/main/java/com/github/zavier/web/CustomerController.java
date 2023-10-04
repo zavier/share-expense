@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
 
     @Autowired
-    private CustomerServiceI customerService;
+    private CustomerServiceI customerServiceI;
 
     @GetMapping(value = "/helloworld")
     public String helloWorld(){
@@ -24,11 +24,11 @@ public class CustomerController {
     public MultiResponse<CustomerDTO> listCustomerByName(@RequestParam(required = false) String name){
         CustomerListByNameQry customerListByNameQry = new CustomerListByNameQry();
         customerListByNameQry.setName(name);
-        return customerService.listByName(customerListByNameQry);
+        return customerServiceI.listByName(customerListByNameQry);
     }
 
     @PostMapping(value = "/customer")
     public Response addCustomer(@RequestBody CustomerAddCmd customerAddCmd){
-        return customerService.addCustomer(customerAddCmd);
+        return customerServiceI.addCustomer(customerAddCmd);
     }
 }

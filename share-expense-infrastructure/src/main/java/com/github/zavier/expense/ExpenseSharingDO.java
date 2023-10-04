@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 @Data
 @Entity.Table(value = "expense_sharing", remark = "费用均摊记录信息", autoResultMap = true)
 public class ExpenseSharingDO {
-    @Entity.Column(value = "expense_sharing_id", remark = "费用均摊记录ID")
-    private Integer expenseSharingId;
+    @Entity.Column(value = "id", remark = "费用均摊记录ID")
+    private Integer id;
     @Entity.Column(value = "expense_record_id", remark = "费用记录ID")
     private Integer expenseRecordId;
     @Entity.Column(value = "user_id", remark = "用户ID")

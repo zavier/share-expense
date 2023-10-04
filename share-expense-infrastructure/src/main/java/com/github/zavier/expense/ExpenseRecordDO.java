@@ -9,8 +9,8 @@ import java.util.Date;
 @Data
 @Entity.Table(value = "expense_record", remark = "费用记录信息", autoResultMap = true)
 public class ExpenseRecordDO {
-    @Entity.Column(value = "expense_record_id", remark = "费用记录ID")
-    private Integer expenseRecordId;
+    @Entity.Column(value = "id", remark = "费用记录ID")
+    private Integer id;
     @Entity.Column(value = "user_id", remark = "用户ID")
     private Integer userId;
     @Entity.Column(value = "expense_project_id", remark = "费用项目ID")

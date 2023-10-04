@@ -8,8 +8,8 @@ import java.util.Date;
 @Data
 @Entity.Table(value = "expense_project", remark = "费用项目信息", autoResultMap = true)
 public class ExpenseProjectDO {
-    @Entity.Column(value = "expense_project_id", remark = "费用项目ID")
-    private Integer expenseProjectId;
+    @Entity.Column(value = "id", remark = "费用项目ID")
+    private Integer id;
     @Entity.Column(value = "user_id", remark = "创建者用户ID")
     private Integer userId;
     @Entity.Column(value = "name", remark = "项目名称")

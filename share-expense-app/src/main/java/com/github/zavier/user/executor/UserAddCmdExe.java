@@ -1,10 +1,10 @@
 package com.github.zavier.user.executor;
 
 import com.alibaba.cola.dto.Response;
+import com.github.zavier.domain.user.User;
 import com.github.zavier.domain.user.domainservice.UserValidator;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserAddCmd;
-import com.github.zavier.dto.data.UserDto;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -19,10 +19,13 @@ public class UserAddCmdExe {
 
     public Response execute(UserAddCmd userAddCmd) {
         validate(userAddCmd);
-        // TODO
-        return null;
 
-//        userGateway.getByEmail()
+        User user = new User();
+        user.setUsername(userAddCmd.getUsername());
+        user.setEmail(userAddCmd.getEmail());
+        user.setPasswordHash(user.generatePasswordHash(userAddCmd.getPassword()));
+        userGateway.save(user);
+        return Response.buildSuccess();
     }
 
     private void validate(UserAddCmd userAddCmd) {

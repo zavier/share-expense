@@ -6,4 +6,5 @@ import com.github.zavier.dto.UserAddCmd;
 public interface UserService {
 
     Response addUser(UserAddCmd userAddCmd);
+
 }
