@@ -9,7 +9,6 @@ import com.github.zavier.domain.user.User;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-@Slf4j
 @Component
 public class ExpenseRecordValidator {
 

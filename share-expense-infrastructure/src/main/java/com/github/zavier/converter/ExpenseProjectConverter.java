@@ -12,7 +12,7 @@ public class ExpenseProjectConverter {
 
     public static ExpenseProject toEntity(ExpenseProjectDO expenseProjectDO, List<ExpenseProjectMemberDO> memberDOList) {
         final ExpenseProject expenseProject = new ExpenseProject();
-        expenseProject.setExpenseProjectId(expenseProjectDO.getId());
+        expenseProject.setId(expenseProjectDO.getId());
         expenseProject.setUserId(expenseProjectDO.getUserId());
         expenseProject.setName(expenseProjectDO.getName());
         expenseProject.setDescription(expenseProjectDO.getDescription());
@@ -28,7 +28,7 @@ public class ExpenseProjectConverter {
 
     public static ExpenseProjectDO toInsertDO(ExpenseProject expenseProject) {
         final ExpenseProjectDO expenseProjectDO = new ExpenseProjectDO();
-        expenseProjectDO.setId(expenseProject.getExpenseProjectId());
+        expenseProjectDO.setId(expenseProject.getId());
         expenseProjectDO.setUserId(expenseProject.getUserId());
         expenseProjectDO.setName(expenseProject.getName());
         expenseProjectDO.setDescription(expenseProject.getDescription());

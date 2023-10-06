@@ -55,7 +55,7 @@ public class ExpenseRecordDoConverter {
         expenseRecordDO.setRemark(expenseRecord.getRemark());
         final Date now = new Date();
         expenseRecordDO.setUpdatedAt(now);
-        expenseRecordDO.setVersion(expenseRecordDO.getVersion() + 1);
+        expenseRecordDO.setVersion(expenseRecord.getVersion() + 1);
         return expenseRecordDO;
     }
 
@@ -68,6 +68,7 @@ public class ExpenseRecordDoConverter {
         expenseRecord.setDate(expenseRecordDO.getDate());
         expenseRecord.setExpenseType(expenseRecordDO.getExpenseType());
         expenseRecord.setRemark(expenseRecordDO.getRemark());
+        expenseRecord.setVersion(expenseRecordDO.getVersion());
         return expenseRecord;
     }
 }

@@ -21,7 +21,7 @@ public class ExpenseProject {
      */
     @Getter
     @Setter
-    private Integer expenseProjectId;
+    private Integer id;
 
     /**
      * 创建者用户ID

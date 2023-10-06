@@ -28,19 +28,20 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         final List<Integer> memberIds = expenseProject.getMemberIds();
 
         final Integer projectId = saveProject(expenseProject, memberIds);
+        expenseProject.setId(projectId);
 
-        saveProjectMembers(expenseProject, memberIds, projectId);
+        saveProjectMembers(expenseProject, memberIds);
     }
 
-    private void saveProjectMembers(ExpenseProject expenseProject, List<Integer> memberIds, Integer projectId) {
+    private void saveProjectMembers(ExpenseProject expenseProject, List<Integer> memberIds) {
         // 删除关联的人员
         expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProject.getExpenseProjectId())
+                .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProject.getId())
                 .delete();
         if (CollectionUtils.isNotEmpty(memberIds)) {
             for (Integer memberId : memberIds) {
                 final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
-                expenseProjectMemberDO.setExpenseProjectId(projectId);
+                expenseProjectMemberDO.setExpenseProjectId(expenseProject.getId());
                 expenseProjectMemberDO.setUserId(memberId);
                 expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
             }
@@ -63,14 +64,14 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 expenseProjectMapper.insertSelective(projectDO);
                 return projectDO.getId();
             case UPDATED:
-                Assert.notNull(expenseProject.getExpenseProjectId(), "费用项目ID不能为空");
+                Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
                 final ExpenseProjectDO updateProjectDo = ExpenseProjectConverter.toUpdateDO(expenseProject);
                 final int update = expenseProjectMapper.wrapper()
-                        .eq(ExpenseProjectDO::getId, expenseProject.getExpenseProjectId())
+                        .eq(ExpenseProjectDO::getId, expenseProject.getId())
                         .eq(ExpenseProjectDO::getVersion, expenseProject.getVersion())
                         .updateSelective(updateProjectDo);
                 Assert.isTrue(update == 1, "当前项目已被其他人更新，请稍后重试");
-                return expenseProject.getExpenseProjectId();
+                return expenseProject.getId();
             default:
                 throw new BizException("不支持的操作");
         }
