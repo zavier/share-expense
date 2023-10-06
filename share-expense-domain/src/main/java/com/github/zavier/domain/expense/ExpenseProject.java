@@ -64,6 +64,10 @@ public class ExpenseProject {
         memberIds.add(userId);
     }
 
+    public boolean existMember(Integer userId) {
+        return memberIds.contains(userId);
+    }
+
 
     public void checkUserIdExist() {
         Assert.notNull(userId, "创建人不能为空");

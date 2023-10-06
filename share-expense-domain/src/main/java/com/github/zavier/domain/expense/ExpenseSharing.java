@@ -1,20 +1,13 @@
 package com.github.zavier.domain.expense;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 public class ExpenseSharing {
-    /**
-     * 费用均摊记录ID
-     */
-    private Integer expenseSharingId;
-
-    /**
-     * 费用记录ID
-     */
-    private Integer expenseRecordId;
 
     /**
      * 用户ID
@@ -24,12 +17,20 @@ public class ExpenseSharing {
     /**
      * 均摊权重
      */
-    private BigDecimal weight;
+    private Integer weight;
 
     /**
      * 均摊金额
      */
     private BigDecimal amount;
+
+    public ExpenseSharing() {}
+
+    public ExpenseSharing(Integer userId, Integer weight) {
+        this.userId = userId;
+        this.weight = weight;
+    }
+
 }
 
 

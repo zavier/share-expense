@@ -32,6 +32,12 @@ public class UserGateWayImpl implements UserGateway {
     }
 
     @Override
+    public Optional<User> getUserById(@NotNull Integer userId) {
+        return userMapper.selectByPrimaryKey(userId)
+                .map(UserConverter::toUser);
+    }
+
+    @Override
     public Optional<User> getByEmail(@NotNull String email) {
         final UserDO userDO = new UserDO();
         userDO.setEmail(email);

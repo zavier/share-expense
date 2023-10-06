@@ -23,6 +23,8 @@ public class ExpenseRecordDO {
     private String expenseType;
     @Entity.Column(value = "remark", remark = "备注")
     private String remark;
+    @Entity.Column(value = "version", remark = "版本号")
+    private Integer version;
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
     @Entity.Column(value = "updated_at", remark = "更新时间")

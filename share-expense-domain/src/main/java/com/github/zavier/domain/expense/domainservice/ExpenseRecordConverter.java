@@ -1,4 +1,4 @@
-package com.github.zavier.converter;
+package com.github.zavier.domain.expense.domainservice;
 
 import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseRecord;

@@ -29,6 +29,14 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
         final Integer projectId = saveProject(expenseProject, memberIds);
 
+        saveProjectMembers(expenseProject, memberIds, projectId);
+    }
+
+    private void saveProjectMembers(ExpenseProject expenseProject, List<Integer> memberIds, Integer projectId) {
+        // 删除关联的人员
+        expenseProjectMemberMapper.wrapper()
+                .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProject.getExpenseProjectId())
+                .delete();
         if (CollectionUtils.isNotEmpty(memberIds)) {
             for (Integer memberId : memberIds) {
                 final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
@@ -62,13 +70,6 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                         .eq(ExpenseProjectDO::getVersion, expenseProject.getVersion())
                         .updateSelective(updateProjectDo);
                 Assert.isTrue(update == 1, "当前项目已被其他人更新，请稍后重试");
-
-                // 删除关联的人员
-                if (CollectionUtils.isNotEmpty(memberIds)) {
-                    expenseProjectMemberMapper.wrapper()
-                            .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProject.getExpenseProjectId())
-                            .delete();
-                }
                 return expenseProject.getExpenseProjectId();
             default:
                 throw new BizException("不支持的操作");

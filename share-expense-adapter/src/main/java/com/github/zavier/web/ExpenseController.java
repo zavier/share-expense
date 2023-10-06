@@ -3,6 +3,7 @@ package com.github.zavier.web;
 import com.alibaba.cola.dto.Response;
 import com.github.zavier.api.ExpenseService;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
+import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,5 +21,10 @@ public class ExpenseController {
     @PostMapping("/addRecord")
     public Response saveExpenseRecord(@RequestBody ExpenseRecordAddCmd expenseRecordAddCmd) {
         return expenseService.addExpenseRecord(expenseRecordAddCmd);
+    }
+
+    @PostMapping("/addRecordSharing")
+    public Response addExpenseRecordSharing(@RequestBody ExpenseRecordSharingAddCmd expenseRecordSharingAddCmd){
+        return expenseService.addExpenseRecordSharing(expenseRecordSharingAddCmd);
     }
 }

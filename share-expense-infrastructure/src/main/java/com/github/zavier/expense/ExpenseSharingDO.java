@@ -15,7 +15,7 @@ public class ExpenseSharingDO {
     @Entity.Column(value = "user_id", remark = "用户ID")
     private Integer userId;
     @Entity.Column(value = "weight", remark = "均摊权重")
-    private BigDecimal weight;
+    private Integer weight;
     @Entity.Column(value = "amount", remark = "均摊金额")
     private BigDecimal amount;
 }
