@@ -1,6 +1,5 @@
 package com.github.zavier.dto;
 
-import com.github.zavier.dto.data.UserDto;
 import lombok.Data;
 
 @Data

@@ -1,12 +1,12 @@
 package com.github.zavier.web;
 
+import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
 import com.github.zavier.api.UserService;
 import com.github.zavier.dto.UserAddCmd;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.github.zavier.dto.UserListQry;
+import com.github.zavier.dto.data.UserDTO;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -20,5 +20,10 @@ public class UserController {
     @PostMapping("/add")
     public Response addUser(@RequestBody UserAddCmd userAddCmd){
         return userService.addUser(userAddCmd);
+    }
+
+    @GetMapping("/list")
+    public PageResponse<UserDTO> listUser(UserListQry userListQry){
+        return userService.listUser(userListQry);
     }
 }
