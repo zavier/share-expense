@@ -15,17 +15,18 @@ CREATE TABLE expense_project (
     user_id INT NOT NULL COMMENT '创建者用户ID',
     name VARCHAR(100) NOT NULL COMMENT '项目名称',
     description TEXT COMMENT '项目描述',
+    version INT NOT NULL DEFAULT '0' COMMENT '版本号',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用项目信息表';
 
 -- 费用项目成员表 (expense_project_member)
 CREATE TABLE expense_project_member (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用项目成员ID',
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     expense_project_id INT NOT NULL COMMENT '所属费用项目ID',
     user_id INT NOT NULL COMMENT '用户ID',
-    is_accepted BOOLEAN COMMENT '是否接受邀请',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用项目成员关联表';
 
 -- 费用记录表 (expense_record)

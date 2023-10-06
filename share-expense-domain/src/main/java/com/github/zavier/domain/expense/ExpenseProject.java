@@ -1,38 +1,76 @@
 package com.github.zavier.domain.expense;
 
-import lombok.Data;
+import com.alibaba.cola.exception.Assert;
+import com.github.zavier.domain.common.ChangingStatus;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-@Data
 public class ExpenseProject {
     /**
      * 费用项目ID
      */
+    @Getter
+    @Setter
     private Integer expenseProjectId;
 
     /**
      * 创建者用户ID
      */
+    @Getter
+    @Setter
     private Integer userId;
 
     /**
      * 项目名称
      */
+    @Getter
+    @Setter
     private String name;
 
     /**
      * 项目描述
      */
+    @Getter
+    @Setter
     private String description;
 
     /**
-     * 创建时间
+     * 版本号
      */
-    private Date createdAt;
+    @Getter
+    @Setter
+    private Integer version;
+
+    @Getter
+    @Setter
+    private ChangingStatus changingStatus = ChangingStatus.NEW;
 
     /**
-     * 更新时间
+     * 项目成员ID
      */
-    private Date updatedAt;
+    private final List<Integer> memberIds = new ArrayList<>();
+
+    public List<Integer> getMemberIds() {
+        return Collections.unmodifiableList(memberIds);
+    }
+
+    public void addMember(Integer userId) {
+        Assert.isFalse(memberIds.contains(userId), "用户已存在");
+        memberIds.add(userId);
+    }
+
+
+    public void checkUserIdExist() {
+        Assert.notNull(userId, "创建人不能为空");
+    }
+
+    public void checkProjectNameValid() {
+        Assert.notNull(name, "项目名称不能为空");
+        Assert.isTrue(name.length() < 100, "项目名称长度不能超过100字");
+    }
+
 }

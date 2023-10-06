@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 @Entity.Table(value = "user", remark = "用户信息表", autoResultMap = true)
 public class UserDO {
-    @Entity.Column(value = "id", remark = "用户ID")
+    @Entity.Column(value = "id", remark = "用户ID", id = true)
     private Integer id;
 
     @Entity.Column(value = "username", remark = "用户名")

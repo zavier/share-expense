@@ -12,6 +12,4 @@ public class ExpenseProjectMemberDO {
     private Integer expenseProjectId;
     @Entity.Column(value = "user_id", remark = "用户ID")
     private Integer userId;
-    @Entity.Column(value = "is_accepted", remark = "是否接受邀请")
-    private Boolean isAccepted;
 }
