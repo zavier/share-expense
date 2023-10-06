@@ -4,8 +4,10 @@ import com.alibaba.cola.catchlog.CatchAndLog;
 import com.alibaba.cola.dto.Response;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.dto.ProjectAddCmd;
+import com.github.zavier.dto.ProjectDeleteCmd;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import com.github.zavier.project.executor.ProjectAddCmdExe;
+import com.github.zavier.project.executor.ProjectDeleteCmdExe;
 import com.github.zavier.project.executor.ProjectMemberAddCmdExe;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectAddCmdExe projectAddCmdExe;
     @Resource
     private ProjectMemberAddCmdExe projectMemberAddCmdExe;
+    @Resource
+    private ProjectDeleteCmdExe projectDeleteCmdExe;
 
     @Override
     public Response createProject(ProjectAddCmd projectAddCmd) {
@@ -28,5 +32,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
         return projectMemberAddCmdExe.addProjectMember(projectMemberAddCmd);
+    }
+
+    @Override
+    public Response deleteProject(ProjectDeleteCmd projectDeleteCmd) {
+        return projectDeleteCmdExe.execute(projectDeleteCmd.getProjectId(), projectDeleteCmd.getOperatorId());
     }
 }

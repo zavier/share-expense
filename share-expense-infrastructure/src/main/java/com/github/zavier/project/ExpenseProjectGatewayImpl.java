@@ -39,6 +39,15 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         }
     }
 
+    @Override
+    @Transactional
+    public void delete(Integer projectId) {
+        expenseProjectMapper.deleteByPrimaryKey(projectId);
+        expenseProjectMemberMapper.wrapper()
+                .eq(ExpenseProjectMemberDO::getExpenseProjectId, projectId)
+                .delete();
+    }
+
     private Integer saveProject(ExpenseProject expenseProject, List<Integer> memberIds) {
         switch (expenseProject.getChangingStatus()) {
             case NEW:

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface ExpenseProjectGateway {
     void save(ExpenseProject expenseProject);
 
+    void delete(Integer projectId);
+
     Optional<ExpenseProject> getProjectById(@NotNull Integer expenseProjectId);
 
 }

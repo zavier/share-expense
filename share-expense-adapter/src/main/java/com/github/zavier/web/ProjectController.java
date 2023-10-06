@@ -3,6 +3,7 @@ package com.github.zavier.web;
 import com.alibaba.cola.dto.Response;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.dto.ProjectAddCmd;
+import com.github.zavier.dto.ProjectDeleteCmd;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,11 @@ public class ProjectController {
     @PostMapping("/create")
     public Response createProject(@RequestBody ProjectAddCmd projectAddCmd) {
         return projectService.createProject(projectAddCmd);
+    }
+
+    @PostMapping("/delete")
+    public Response deleteProject(@RequestBody ProjectDeleteCmd projectDeleteCmd) {
+        return projectService.deleteProject(projectDeleteCmd);
     }
 
     @PostMapping("/addMember")
