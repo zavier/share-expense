@@ -1,20 +1,16 @@
-package com.github.zavier.domain.expense;
+package com.github.zavier.dto;
 
-import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-public class ExpenseRecord {
-    private Integer id;
+public class ExpenseRecordAddCmd {
     private Integer userId;
     private Integer expenseProjectId;
     private BigDecimal amount;
     private Date date;
     private String expenseType;
     private String remark;
-
-    private ChangingStatus changingStatus = ChangingStatus.NEW;
 }

@@ -9,20 +9,24 @@ import java.util.Date;
 @Data
 @Entity.Table(value = "expense_record", remark = "费用记录信息", autoResultMap = true)
 public class ExpenseRecordDO {
-    @Entity.Column(value = "id", remark = "费用记录ID")
+    @Entity.Column(value = "id", remark = "费用记录ID", id = true)
     private Integer id;
     @Entity.Column(value = "user_id", remark = "用户ID")
     private Integer userId;
     @Entity.Column(value = "expense_project_id", remark = "费用项目ID")
     private Integer expenseProjectId;
-    @Entity.Column(value = "source", remark = "费用来源")
-    private String source;
     @Entity.Column(value = "amount", remark = "费用金额")
     private BigDecimal amount;
     @Entity.Column(value = "date", remark = "费用日期")
     private Date date;
-    @Entity.Column(value = "is_shared", remark = "是否已均摊")
-    private Boolean isShared;
+    @Entity.Column(value = "expense_type", remark = "费用类型")
+    private String expenseType;
+    @Entity.Column(value = "remark", remark = "备注")
+    private String remark;
+    @Entity.Column(value = "created_at", remark = "创建时间")
+    private Date createdAt;
+    @Entity.Column(value = "updated_at", remark = "更新时间")
+    private Date updatedAt;
 }
 
 

@@ -10,6 +10,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class ExpenseProject {
+
+    /**
+     * 项目成员ID
+     */
+    private final List<Integer> memberIds = new ArrayList<>();
+
     /**
      * 费用项目ID
      */
@@ -48,11 +54,6 @@ public class ExpenseProject {
     @Getter
     @Setter
     private ChangingStatus changingStatus = ChangingStatus.NEW;
-
-    /**
-     * 项目成员ID
-     */
-    private final List<Integer> memberIds = new ArrayList<>();
 
     public List<Integer> getMemberIds() {
         return Collections.unmodifiableList(memberIds);

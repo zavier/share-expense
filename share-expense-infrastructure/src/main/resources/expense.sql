@@ -34,11 +34,12 @@ CREATE TABLE expense_record (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT '费用记录ID',
     user_id INT NOT NULL COMMENT '用户ID',
     expense_project_id INT NOT NULL COMMENT '费用项目ID',
-    source VARCHAR(255) NOT NULL COMMENT '费用来源',
     amount DECIMAL(10, 2) NOT NULL COMMENT '费用金额',
     date DATE NOT NULL COMMENT '费用日期',
-    is_shared BOOLEAN COMMENT '是否已均摊',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    expense_type INT NOT NULL COMMENT '费用类型',
+    remark varchar(300) NOT NULL DEFAULT '' COMMENT '备注',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用记录信息表';
 
 -- 费用均摊记录表 (expense_sharing)
@@ -48,5 +49,6 @@ CREATE TABLE expense_sharing (
     user_id INT NOT NULL COMMENT '用户ID',
     weight DECIMAL(5, 2) COMMENT '均摊权重',
     amount DECIMAL(10, 2) COMMENT '均摊金额', -- 新增的金额字段
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用均摊记录表';
