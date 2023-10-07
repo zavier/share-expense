@@ -22,7 +22,7 @@ public class UserListQryExe {
         Assert.notNull(userListQry.getPage(), "页码不能为空");
         Assert.notNull(userListQry.getSize(), "页大小不能为空");
 
-        final PageResponse<User> userPageResponse = userGateway.listUser(userListQry);
+        final PageResponse<User> userPageResponse = userGateway.pageUser(userListQry);
 
         final List<UserDTO> collect = userPageResponse.getData().stream()
                 .map(it -> {

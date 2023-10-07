@@ -63,7 +63,7 @@ public class UserGateWayImpl implements UserGateway {
     }
 
     @Override
-    public PageResponse<User> listUser(UserListQry userListQry){
+    public PageResponse<User> pageUser(UserListQry userListQry){
         PageHelper.startPage(userListQry.getPage(), userListQry.getSize());
         final ExampleWrapper<UserDO, Integer> wrapper = userMapper.wrapper();
         if (StringUtils.isNotBlank(userListQry.getUserName())) {

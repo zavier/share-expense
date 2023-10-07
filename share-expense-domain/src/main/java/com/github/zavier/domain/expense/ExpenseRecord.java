@@ -63,6 +63,8 @@ public class ExpenseRecord {
 
         Assert.isFalse(userIdSharingMap.containsKey(userId), "用户ID重复");
         userIdSharingMap.put(userId, new ExpenseSharing(userId, weight));
+
+        calcSharingAmount();
     }
 
 
@@ -72,6 +74,8 @@ public class ExpenseRecord {
 
         Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
         userIdSharingMap.get(userId).setWeight(weight);
+
+        calcSharingAmount();
     }
 
     public void removeUserSharing(Integer userId) {
@@ -79,9 +83,11 @@ public class ExpenseRecord {
 
         Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
         userIdSharingMap.remove(userId);
+
+        calcSharingAmount();
     }
 
-    public void calcSharingAmount() {
+    private void calcSharingAmount() {
         if (!hasSharing()) {
             return;
         }

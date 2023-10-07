@@ -31,7 +31,6 @@ public class ExpenseRecordSharingAddCmdExe {
         expenseRecord.addUserSharing(sharingAddCmd.getUserId(), sharingAddCmd.getWeight());
 
         expenseRecord.setChangingStatus(ChangingStatus.UPDATED);
-        expenseRecord.calcSharingAmount();
         expenseRecordGateway.save(expenseRecord);
     }
 }

@@ -17,5 +17,5 @@ public interface UserGateway {
 
     User save(User user);
 
-    PageResponse<User> listUser(UserListQry userListQry);
+    PageResponse<User> pageUser(UserListQry userListQry);
 }

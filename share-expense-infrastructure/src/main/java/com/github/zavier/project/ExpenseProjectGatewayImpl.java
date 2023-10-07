@@ -1,10 +1,15 @@
 package com.github.zavier.project;
 
+import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.exception.Assert;
 import com.alibaba.cola.exception.BizException;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.github.zavier.converter.ExpenseProjectConverter;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
+import com.github.zavier.dto.ProjectListQry;
+import io.mybatis.mapper.example.ExampleWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
@@ -13,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
@@ -83,6 +89,22 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
         return expenseProjectMapper.selectByPrimaryKey(expenseProjectId)
                 .map(it -> ExpenseProjectConverter.toEntity(it, expenseProjectMemberDOS));
+    }
+
+    @Override
+    public PageResponse<ExpenseProject> pageProject(ProjectListQry projectListQry) {
+        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
+        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper();
+        if (projectListQry.getUserId() != null) {
+            wrapper.eq(ExpenseProjectDO::getUserId, projectListQry.getUserId());
+        }
+        final List<ExpenseProjectDO> list = wrapper.list();
+        final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
+
+        final List<ExpenseProject> projectList = list.stream()
+                .map(it -> ExpenseProjectConverter.toEntity(it, null)).collect(Collectors.toList());
+        return PageResponse.of(projectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
+
     }
 
     @NotNull
