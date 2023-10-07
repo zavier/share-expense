@@ -89,9 +89,8 @@ public class ExpenseRecord {
         final Integer totalWeight = userIdSharingMap.values().stream()
                 .map(ExpenseSharing::getWeight)
                 .reduce(0, Integer::sum);
-        final BigDecimal perWeightAmount = amount.divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP);
         userIdSharingMap.values().forEach(expenseSharing ->
-                expenseSharing.setAmount(perWeightAmount.multiply(new BigDecimal(expenseSharing.getWeight()))));
+                expenseSharing.setAmount(amount.multiply(new BigDecimal(expenseSharing.getWeight())).divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP)));
     }
 
     public boolean hasSharing() {
