@@ -93,11 +93,21 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
     @Override
     public PageResponse<ExpenseProject> pageProject(ProjectListQry projectListQry) {
-        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
         final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper();
         if (projectListQry.getUserId() != null) {
-            wrapper.eq(ExpenseProjectDO::getUserId, projectListQry.getUserId());
+            final List<ExpenseProjectMemberDO> list = expenseProjectMemberMapper.wrapper()
+                    .eq(ExpenseProjectMemberDO::getUserId, projectListQry.getUserId())
+                    .list();
+            if (CollectionUtils.isEmpty(list)) {
+                return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
+            }
+            final List<Integer> projectIdList = list.stream().map(ExpenseProjectMemberDO::getExpenseProjectId).distinct()
+                    .collect(Collectors.toList());
+
+            wrapper.in(ExpenseProjectDO::getId, projectIdList);
         }
+        // 分页
+        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
         final List<ExpenseProjectDO> list = wrapper.list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
