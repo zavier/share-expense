@@ -8,6 +8,8 @@ import com.github.zavier.dto.ProjectDeleteCmd;
 import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import com.github.zavier.dto.data.ProjectDTO;
+import com.github.zavier.vo.PageResponseVo;
+import com.github.zavier.vo.ResponseVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -20,22 +22,26 @@ public class ProjectController {
     private ProjectService projectService;
 
     @PostMapping("/create")
-    public Response createProject(@RequestBody ProjectAddCmd projectAddCmd) {
-        return projectService.createProject(projectAddCmd);
+    public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
+        final Response response = projectService.createProject(projectAddCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @PostMapping("/delete")
-    public Response deleteProject(@RequestBody ProjectDeleteCmd projectDeleteCmd) {
-        return projectService.deleteProject(projectDeleteCmd);
+    public ResponseVo deleteProject(@RequestBody ProjectDeleteCmd projectDeleteCmd) {
+        final Response response = projectService.deleteProject(projectDeleteCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @PostMapping("/addMember")
-    private Response addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
-        return projectService.addProjectMember(projectMemberAddCmd);
+    private ResponseVo addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
+        final Response response =  projectService.addProjectMember(projectMemberAddCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @GetMapping("/list")
-    public PageResponse<ProjectDTO> pageProject(ProjectListQry projectListQry) {
-        return projectService.pageProject(projectListQry);
+    public PageResponseVo<ProjectDTO> pageProject(ProjectListQry projectListQry) {
+        final PageResponse<ProjectDTO> pageResponse = projectService.pageProject(projectListQry);
+        return PageResponseVo.buildFromPageResponse(pageResponse);
     }
 }

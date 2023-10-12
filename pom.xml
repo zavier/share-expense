@@ -21,6 +21,12 @@
         <spring-boot.version>2.7.2</spring-boot.version>
         <mybatis-starter.version>2.2.2</mybatis-starter.version>
         <mybatis.mapper.version>1.2.2</mybatis.mapper.version>
+        <javax.el-api.version>3.0.0</javax.el-api.version>
+        <fastjson.version>1.2.83</fastjson.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
+        <commons.collection.version>4.4</commons.collection.version>
+        <pagehelper.version>5.3.2</pagehelper.version>
+        <jjwt.version>0.12.2</jjwt.version>
     </properties>
 
     <modules>
@@ -116,7 +122,7 @@
             <dependency>
                 <groupId>javax.el</groupId>
                 <artifactId>javax.el-api</artifactId>
-                <version>3.0.0</version>
+                <version>${javax.el-api.version}</version>
             </dependency>
             <!--Validation API End -->
 
@@ -124,7 +130,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.83</version>
+                <version>${fastjson.version}</version>
             </dependency>
             <!-- Misc End -->
 
@@ -132,18 +138,24 @@
             <dependency>
                 <groupId>org.mindrot</groupId>
                 <artifactId>jbcrypt</artifactId>
-                <version>0.4</version>
+                <version>${jbcrypt.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
-                <version>4.4</version>
+                <version>${commons.collection.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
                 <artifactId>pagehelper</artifactId>
-                <version>5.3.2</version>
+                <version>${pagehelper.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
 
         </dependencies>

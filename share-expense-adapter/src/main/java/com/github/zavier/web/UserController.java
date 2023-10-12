@@ -2,13 +2,19 @@ package com.github.zavier.web;
 
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
+import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.UserService;
 import com.github.zavier.dto.UserAddCmd;
 import com.github.zavier.dto.UserListQry;
+import com.github.zavier.dto.UserLoginCmd;
 import com.github.zavier.dto.data.UserDTO;
+import com.github.zavier.vo.PageResponseVo;
+import com.github.zavier.vo.ResponseVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/user")
@@ -18,12 +24,27 @@ public class UserController {
 
 
     @PostMapping("/add")
-    public Response addUser(@RequestBody UserAddCmd userAddCmd){
-        return userService.addUser(userAddCmd);
+    public ResponseVo addUser(@RequestBody UserAddCmd userAddCmd){
+        final Response response =  userService.addUser(userAddCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @GetMapping("/list")
-    public PageResponse<UserDTO> listUser(UserListQry userListQry){
-        return userService.listUser(userListQry);
+    public PageResponseVo<UserDTO> listUser(UserListQry userListQry){
+        final PageResponse<UserDTO> pageResponse =  userService.listUser(userListQry);
+        return PageResponseVo.buildFromPageResponse(pageResponse);
     }
+
+    @PostMapping("/login")
+    public ResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse){
+        final SingleResponse<String> tokenResp = userService.login(userLoginCmd);
+        if (!tokenResp.isSuccess()) {
+            return ResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
+        }
+
+        httpServletResponse.addCookie(new Cookie("jwtToken", tokenResp.getData()));
+        return ResponseVo.buildSuccess();
+    }
+
+
 }

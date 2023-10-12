@@ -1,7 +1,8 @@
 package com.github.zavier.domain.user;
 
+import com.github.zavier.domain.utils.PasswordEncoder;
+import com.github.zavier.domain.utils.TokenHelper;
 import lombok.Data;
-import org.mindrot.jbcrypt.BCrypt;
 
 @Data
 public class User {
@@ -27,14 +28,14 @@ public class User {
 
 
     public String generatePasswordHash(String pwd) {
-        // 生成盐值
-        String salt = BCrypt.gensalt();
-        // 使用盐值和密码生成哈希值
-        return BCrypt.hashpw(pwd, salt);
+        return PasswordEncoder.encode(pwd);
     }
 
     public boolean checkPassword(String pwd) {
-        return BCrypt.checkpw(pwd, this.passwordHash);
+        return PasswordEncoder.checkPassword(pwd, this.passwordHash);
     }
 
+    public String generateToken() {
+        return TokenHelper.generateToken(this);
+    }
 }
