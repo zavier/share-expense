@@ -12,7 +12,7 @@ public class UserDTO {
     /**
      * 用户名
      */
-    private String username;
+    private String userName;
 
     /**
      * 电子邮件

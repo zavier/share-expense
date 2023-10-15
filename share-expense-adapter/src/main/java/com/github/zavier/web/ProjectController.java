@@ -10,6 +10,7 @@ import com.github.zavier.dto.ProjectMemberAddCmd;
 import com.github.zavier.dto.data.ProjectDTO;
 import com.github.zavier.vo.PageResponseVo;
 import com.github.zavier.vo.ResponseVo;
+import com.github.zavier.web.filter.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -23,12 +24,14 @@ public class ProjectController {
 
     @PostMapping("/create")
     public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
+        projectAddCmd.setOperatorId(UserHolder.getUser().getUserId());
         final Response response = projectService.createProject(projectAddCmd);
         return ResponseVo.buildFromResponse(response);
     }
 
     @PostMapping("/delete")
     public ResponseVo deleteProject(@RequestBody ProjectDeleteCmd projectDeleteCmd) {
+        projectDeleteCmd.setOperatorId(UserHolder.getUser().getUserId());
         final Response response = projectService.deleteProject(projectDeleteCmd);
         return ResponseVo.buildFromResponse(response);
     }
@@ -41,6 +44,8 @@ public class ProjectController {
 
     @GetMapping("/list")
     public PageResponseVo<ProjectDTO> pageProject(ProjectListQry projectListQry) {
+        final int userId = UserHolder.getUser().getUserId();
+        projectListQry.setUserId(userId);
         final PageResponse<ProjectDTO> pageResponse = projectService.pageProject(projectListQry);
         return PageResponseVo.buildFromPageResponse(pageResponse);
     }

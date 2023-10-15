@@ -6,14 +6,17 @@ import com.github.zavier.converter.ExpenseRecordDoConverter;
 import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseRecordGateway;
+import com.github.zavier.user.UserDO;
+import com.github.zavier.user.UserMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -23,6 +26,8 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
     private ExpenseRecordMapper expenseRecordMapper;
     @Resource
     private ExpenseSharingMapper expenseSharingMapper;
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     @Transactional
@@ -64,19 +69,60 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
 
     @Override
     public Optional<ExpenseRecord> getRecordById(@NotNull Integer recordId) {
-        final Optional<ExpenseRecord> expenseRecord = expenseRecordMapper.selectByPrimaryKey(recordId)
+        final Optional<ExpenseRecord> expenseRecordOpt = expenseRecordMapper.selectByPrimaryKey(recordId)
                 .map(ExpenseRecordDoConverter::toExpenseRecord);
 
-        expenseRecord.ifPresent(expenseRecordDO -> {
-            final List<ExpenseSharingDO> list = expenseSharingMapper.wrapper()
-                    .eq(ExpenseSharingDO::getExpenseRecordId, recordId)
-                    .list();
-            list.forEach(expenseSharingDO -> {
-                expenseRecordDO.addUserSharing(expenseSharingDO.getUserId(), expenseSharingDO.getWeight());
-            });
+        expenseRecordOpt.ifPresent(expenseRecord -> {
+            wrapUserSharingDetail(recordId, expenseRecord);
         });
 
-        return expenseRecord;
+        return expenseRecordOpt;
     }
 
+    private void wrapUserSharingDetail(@NotNull Integer recordId, ExpenseRecord expenseRecord) {
+        final List<ExpenseSharingDO> list = expenseSharingMapper.wrapper()
+                .eq(ExpenseSharingDO::getExpenseRecordId, recordId)
+                .list();
+        list.forEach(expenseSharingDO -> {
+            expenseRecord.addUserSharing(expenseSharingDO.getUserId(), expenseSharingDO.getWeight());
+        });
+    }
+
+    @Override
+    public List<ExpenseRecord> listRecord(@NotNull Integer projectId) {
+        final List<ExpenseRecordDO> list = expenseRecordMapper.wrapper()
+                .eq(ExpenseRecordDO::getExpenseProjectId, projectId)
+                .list();
+        Set<Integer> userIdSet = new HashSet<>();
+
+        final List<ExpenseRecord> expenseRecords = list.stream().map(expenseRecordDO -> {
+            final ExpenseRecord expenseRecord = ExpenseRecordDoConverter.toExpenseRecord(expenseRecordDO);
+            wrapUserSharingDetail(expenseRecordDO.getId(), expenseRecord);
+
+            // 获取用户ID
+            userIdSet.add(expenseRecord.getUserId());
+            expenseRecord.getUserIdSharingMap().values().forEach(expenseSharing -> {
+                userIdSet.add(expenseSharing.getUserId());
+            });
+            return expenseRecord;
+        }).collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(userIdSet)) {
+            // 查询用户名称，进行填充
+            final Map<Integer, String> userIdNameMap = userMapper.wrapper()
+                    .in(UserDO::getId, new ArrayList<>(userIdSet))
+                    .list()
+                    .stream()
+                    .collect(Collectors.toMap(UserDO::getId, UserDO::getUserName, (v1, v2) -> v2));
+
+            expenseRecords.forEach(expenseRecord -> {
+                expenseRecord.setUserName(userIdNameMap.get(expenseRecord.getUserId()));
+                expenseRecord.getUserIdSharingMap().values().forEach(expenseSharing -> {
+                    expenseSharing.setUserName(userIdNameMap.get(expenseSharing.getUserId()));
+                });
+            });
+        }
+
+        return expenseRecords;
+    }
 }

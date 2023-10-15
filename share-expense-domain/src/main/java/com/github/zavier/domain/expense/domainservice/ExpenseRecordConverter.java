@@ -12,7 +12,7 @@ public class ExpenseRecordConverter {
     public static ExpenseRecord toExpenseRecord(ExpenseRecordAddCmd expenseRecordAddCmd) {
         final ExpenseRecord expenseRecord = new ExpenseRecord();
         expenseRecord.setUserId(expenseRecordAddCmd.getUserId());
-        expenseRecord.setExpenseProjectId(expenseRecordAddCmd.getExpenseProjectId());
+        expenseRecord.setExpenseProjectId(expenseRecordAddCmd.getProjectId());
         expenseRecord.setAmount(expenseRecordAddCmd.getAmount());
         expenseRecord.setDate(Optional.ofNullable(expenseRecordAddCmd.getDate()).orElse(new Date()));
         expenseRecord.setExpenseType(expenseRecordAddCmd.getExpenseType());

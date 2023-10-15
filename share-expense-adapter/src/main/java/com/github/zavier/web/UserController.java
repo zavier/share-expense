@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -42,7 +43,11 @@ public class UserController {
             return ResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
         }
 
-        httpServletResponse.addCookie(new Cookie("jwtToken", tokenResp.getData()));
+        // 临时方案
+        final Cookie cookie = new Cookie("jwtToken", tokenResp.getData());
+        cookie.setPath("/");
+        cookie.setMaxAge((int) TimeUnit.DAYS.toSeconds(30));
+        httpServletResponse.addCookie(cookie);
         return ResponseVo.buildSuccess();
     }
 

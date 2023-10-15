@@ -13,6 +13,10 @@ public class ExpenseSharing {
      * 用户ID
      */
     private Integer userId;
+    /**
+     * 用户名称
+     */
+    private String userName;
 
     /**
      * 均摊权重

@@ -12,7 +12,7 @@ public class UserDO {
     private Integer id;
 
     @Entity.Column(value = "username", remark = "用户名")
-    private String username;
+    private String userName;
 
     @Entity.Column(value = "email", remark = "电子邮件")
     private String email;

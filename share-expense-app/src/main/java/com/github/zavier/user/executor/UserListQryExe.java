@@ -28,7 +28,7 @@ public class UserListQryExe {
                 .map(it -> {
                     final UserDTO userDTO = new UserDTO();
                     userDTO.setUserId(it.getUserId());
-                    userDTO.setUsername(it.getUsername());
+                    userDTO.setUserName(it.getUserName());
                     userDTO.setEmail(it.getEmail());
                     return userDTO;
                 }).collect(Collectors.toList());

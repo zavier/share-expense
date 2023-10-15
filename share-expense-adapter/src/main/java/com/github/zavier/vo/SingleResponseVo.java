@@ -1,5 +1,7 @@
 package com.github.zavier.vo;
 
+import com.alibaba.cola.dto.SingleResponse;
+
 public class SingleResponseVo<T> extends ResponseVo {
 
     private T data;
@@ -10,6 +12,13 @@ public class SingleResponseVo<T> extends ResponseVo {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public static SingleResponseVo buildFromSingleResponse(SingleResponse singleResponse) {
+        if (!singleResponse.isSuccess()) {
+            return SingleResponseVo.buildFailure(singleResponse.getErrCode(), singleResponse.getErrMessage());
+        }
+        return SingleResponseVo.of(singleResponse.getData());
     }
 
     public static SingleResponseVo buildSuccess() {

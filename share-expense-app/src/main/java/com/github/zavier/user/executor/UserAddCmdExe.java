@@ -21,7 +21,7 @@ public class UserAddCmdExe {
         validate(userAddCmd);
 
         User user = new User();
-        user.setUsername(userAddCmd.getUsername());
+        user.setUserName(userAddCmd.getUsername());
         user.setEmail(userAddCmd.getEmail());
         user.setPasswordHash(user.generatePasswordHash(userAddCmd.getPassword()));
         userGateway.save(user);

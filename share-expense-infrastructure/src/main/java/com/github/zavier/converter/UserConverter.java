@@ -8,7 +8,7 @@ public class UserConverter {
     public static User toUser(UserDO userDO) {
         final User user = new User();
         user.setUserId(userDO.getId());
-        user.setUsername(userDO.getUsername());
+        user.setUserName(userDO.getUserName());
         user.setEmail(userDO.getEmail());
         user.setPasswordHash(userDO.getPasswordHash());
         return user;

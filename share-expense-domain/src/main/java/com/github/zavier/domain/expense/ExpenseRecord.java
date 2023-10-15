@@ -22,6 +22,9 @@ public class ExpenseRecord {
     private Integer userId;
     @Getter
     @Setter
+    private String userName;
+    @Getter
+    @Setter
     private Integer expenseProjectId;
     @Getter
     @Setter

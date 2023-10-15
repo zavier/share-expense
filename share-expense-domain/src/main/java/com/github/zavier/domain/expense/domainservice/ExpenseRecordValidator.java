@@ -30,11 +30,11 @@ public class ExpenseRecordValidator {
         // 基础数据校验
         recordAddBaseCheck(expenseRecordAddCmd);
         // 项目存在校验
-        projectIsExist(expenseRecordAddCmd.getExpenseProjectId());
+        projectIsExist(expenseRecordAddCmd.getProjectId());
     }
 
     private static void recordAddBaseCheck(ExpenseRecordAddCmd expenseRecordAddCmd) {
-        Assert.notNull(expenseRecordAddCmd.getExpenseProjectId(), "项目ID不能为空");
+        Assert.notNull(expenseRecordAddCmd.getProjectId(), "项目ID不能为空");
         Assert.notNull(expenseRecordAddCmd.getUserId(), "创建人不能为空");
         Assert.notNull(expenseRecordAddCmd.getAmount(), "金额不能为空");
         Assert.notNull(expenseRecordAddCmd.getExpenseType(), "费用类型不能为空");

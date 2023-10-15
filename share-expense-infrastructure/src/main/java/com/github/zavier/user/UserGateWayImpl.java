@@ -8,6 +8,7 @@ import com.github.zavier.domain.user.User;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserListQry;
 import io.mybatis.mapper.example.ExampleWrapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +28,7 @@ public class UserGateWayImpl implements UserGateway {
     @Override
     public Optional<User> getByUserName(@NotNull String username) {
         final UserDO userDO = new UserDO();
-        userDO.setUsername(username);
+        userDO.setUserName(username);
         return getByUserDo(userDO);
     }
 
@@ -52,7 +53,7 @@ public class UserGateWayImpl implements UserGateway {
     @Override
     public User save(User user) {
         final UserDO userDO = new UserDO();
-        userDO.setUsername(user.getUsername());
+        userDO.setUserName(user.getUserName());
         userDO.setEmail(user.getEmail());
         userDO.setPasswordHash(user.getPasswordHash());
         userDO.setCreatedAt(new Date());
@@ -67,10 +68,16 @@ public class UserGateWayImpl implements UserGateway {
         PageHelper.startPage(userListQry.getPage(), userListQry.getSize());
         final ExampleWrapper<UserDO, Integer> wrapper = userMapper.wrapper();
         if (StringUtils.isNotBlank(userListQry.getUserName())) {
-            wrapper.like(UserDO::getUsername, userListQry.getUserName() + "%");
+            wrapper.like(UserDO::getUserName, userListQry.getUserName() + "%");
         }
         if (StringUtils.isNotBlank(userListQry.getEmail())) {
             wrapper.like(UserDO::getEmail, userListQry.getEmail() + "%");
+        }
+        if (userListQry.getUserId() != null) {
+            wrapper.eq(UserDO::getId, userListQry.getUserId());
+        }
+        if (CollectionUtils.isNotEmpty(userListQry.getUserIdList())) {
+            wrapper.in(UserDO::getId, userListQry.getUserIdList());
         }
         final List<UserDO> list = wrapper.list();
         final Page<UserDO> page = (Page<UserDO>) list;

@@ -12,6 +12,8 @@ import com.github.zavier.dto.data.UserDTO;
 import com.github.zavier.user.executor.UserAddCmdExe;
 import com.github.zavier.user.executor.UserListQryExe;
 import com.github.zavier.user.executor.UserLoginExe;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,6 +32,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response addUser(UserAddCmd userAddCmd) {
         return userAddCmdExe.execute(userAddCmd);
+    }
+
+    @Override
+    public SingleResponse<UserDTO> getUserById(@NotNull Integer userId) {
+        final UserListQry userListQry = new UserListQry();
+        userListQry.setUserId(userId);
+        userListQry.setPage(1);
+        userListQry.setSize(1);
+        final PageResponse<UserDTO> execute = userListQryExe.execute(userListQry);
+        if (!execute.isSuccess()) {
+            return SingleResponse.buildFailure(execute.getErrCode(), execute.getErrMessage());
+        }
+        if (CollectionUtils.isEmpty(execute.getData())) {
+            return SingleResponse.buildSuccess();
+        }
+        return SingleResponse.of(execute.getData().get(0));
     }
 
 
