@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,27 +33,25 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void save(ExpenseProject expenseProject) {
-        final List<Integer> memberIds = expenseProject.getMemberIds();
-
-        final Integer projectId = saveProject(expenseProject, memberIds);
+        final Integer projectId = saveProject(expenseProject);
         expenseProject.setId(projectId);
 
-        saveProjectMembers(expenseProject, memberIds);
+        saveProjectMembers(expenseProject);
     }
 
-    private void saveProjectMembers(ExpenseProject expenseProject, List<Integer> memberIds) {
+    private void saveProjectMembers(ExpenseProject expenseProject) {
         // 删除关联的人员
         expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProject.getId())
+                .eq(ExpenseProjectMemberDO::getProjectId, expenseProject.getId())
                 .delete();
-        if (CollectionUtils.isNotEmpty(memberIds)) {
-            for (Integer memberId : memberIds) {
-                final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
-                expenseProjectMemberDO.setExpenseProjectId(expenseProject.getId());
-                expenseProjectMemberDO.setUserId(memberId);
-                expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
-            }
-        }
+
+        expenseProject.listMember().forEach(projectMember -> {
+            final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
+            expenseProjectMemberDO.setProjectId(expenseProject.getId());
+            expenseProjectMemberDO.setUserId(projectMember.getUserId());
+            expenseProjectMemberDO.setUserName(projectMember.getUserName());
+            expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
+        });
     }
 
     @Override
@@ -59,11 +59,11 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     public void delete(Integer projectId) {
         expenseProjectMapper.deleteByPrimaryKey(projectId);
         expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getExpenseProjectId, projectId)
+                .eq(ExpenseProjectMemberDO::getProjectId, projectId)
                 .delete();
     }
 
-    private Integer saveProject(ExpenseProject expenseProject, List<Integer> memberIds) {
+    private Integer saveProject(ExpenseProject expenseProject) {
         switch (expenseProject.getChangingStatus()) {
             case NEW:
                 final ExpenseProjectDO projectDO = ExpenseProjectConverter.toInsertDO(expenseProject);
@@ -101,7 +101,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             if (CollectionUtils.isEmpty(list)) {
                 return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
             }
-            final List<Integer> projectIdList = list.stream().map(ExpenseProjectMemberDO::getExpenseProjectId).distinct()
+            final List<Integer> projectIdList = list.stream().map(ExpenseProjectMemberDO::getProjectId).distinct()
                     .collect(Collectors.toList());
 
             wrapper.in(ExpenseProjectDO::getId, projectIdList);
@@ -111,8 +111,11 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         final List<ExpenseProjectDO> list = wrapper.list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
+        final List<Integer> projectIdList = list.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
+        final Map<Integer, List<ExpenseProjectMemberDO>> projectIdMap = listProjectMembers(projectIdList);
+
         final List<ExpenseProject> projectList = list.stream()
-                .map(it -> ExpenseProjectConverter.toEntity(it, null)).collect(Collectors.toList());
+                .map(it -> ExpenseProjectConverter.toEntity(it, projectIdMap.get(it.getId()))).collect(Collectors.toList());
         return PageResponse.of(projectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
 
     }
@@ -120,7 +123,19 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @NotNull
     private List<ExpenseProjectMemberDO> listProjectMembers(@NotNull Integer expenseProjectId) {
         return expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getExpenseProjectId, expenseProjectId)
+                .eq(ExpenseProjectMemberDO::getProjectId, expenseProjectId)
                 .list();
+    }
+
+    private Map<Integer, List<ExpenseProjectMemberDO>> listProjectMembers(List<Integer> projectIdList) {
+        if (CollectionUtils.isEmpty(projectIdList)) {
+            return Collections.emptyMap();
+        }
+        final List<ExpenseProjectMemberDO> list = expenseProjectMemberMapper.wrapper()
+                .in(ExpenseProjectMemberDO::getProjectId, projectIdList)
+                .list();
+        return list.stream()
+                .collect(Collectors.groupingBy(ExpenseProjectMemberDO::getProjectId));
+
     }
 }

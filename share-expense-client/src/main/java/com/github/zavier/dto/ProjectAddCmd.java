@@ -7,5 +7,9 @@ public class ProjectAddCmd {
     private String projectName;
     private String projectDesc;
 
-    private Integer operatorId;
+    /**
+     * 创建人
+     */
+    private Integer userId;
+    private String userName;
 }

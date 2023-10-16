@@ -19,12 +19,13 @@ public class ProjectMemberAddCmdExe {
 
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
         Assert.notNull(projectMemberAddCmd.getProjectId(), "项目ID不能为空");
-        Assert.notNull(projectMemberAddCmd.getMemberId(), "成员ID不能为空");
+        Assert.notNull(projectMemberAddCmd.getUserId(), "成员ID不能为空");
+        Assert.notNull(projectMemberAddCmd.getUserName(), "成员名称不能为空");
 
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectMemberAddCmd.getProjectId());
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
-        expenseProject.addMember(projectMemberAddCmd.getMemberId());
+        expenseProject.addMember(projectMemberAddCmd.getUserId(), projectMemberAddCmd.getUserName());
         expenseProject.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(expenseProject);
         return Response.buildSuccess();

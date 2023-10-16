@@ -15,8 +15,9 @@ public class ExpenseRecordDoConverter {
 
     public static ExpenseRecordDO toInsertExpenseRecordDO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDO expenseRecordDO = new ExpenseRecordDO();
-        expenseRecordDO.setUserId(expenseRecord.getUserId());
-        expenseRecordDO.setExpenseProjectId(expenseRecord.getExpenseProjectId());
+        expenseRecordDO.setCostUserId(expenseRecord.getCostUserId());
+        expenseRecordDO.setCostUserName(expenseRecord.getCostUserName());
+        expenseRecordDO.setProjectId(expenseRecord.getProjectId());
         expenseRecordDO.setAmount(expenseRecord.getAmount());
         expenseRecordDO.setDate(expenseRecord.getDate());
         expenseRecordDO.setExpenseType(expenseRecord.getExpenseType());
@@ -36,8 +37,9 @@ public class ExpenseRecordDoConverter {
         final Map<Integer, ExpenseSharing> userIdSharingMap = expenseRecord.getUserIdSharingMap();
         return userIdSharingMap.values().stream().map(expenseSharing -> {
             final ExpenseSharingDO expenseSharingDO = new ExpenseSharingDO();
-            expenseSharingDO.setExpenseRecordId(expenseRecord.getId());
+            expenseSharingDO.setRecordId(expenseRecord.getId());
             expenseSharingDO.setUserId(expenseSharing.getUserId());
+            expenseSharingDO.setUserName(expenseSharing.getUserName());
             expenseSharingDO.setWeight(expenseSharing.getWeight());
             expenseSharingDO.setAmount(expenseSharing.getAmount());
             return expenseSharingDO;
@@ -47,8 +49,9 @@ public class ExpenseRecordDoConverter {
     public static ExpenseRecordDO toUpdateExpenseRecordDO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDO expenseRecordDO = new ExpenseRecordDO();
         expenseRecordDO.setId(expenseRecord.getId());
-        expenseRecordDO.setUserId(expenseRecord.getUserId());
-        expenseRecordDO.setExpenseProjectId(expenseRecord.getExpenseProjectId());
+        expenseRecordDO.setCostUserId(expenseRecord.getCostUserId());
+        expenseRecordDO.setCostUserName(expenseRecord.getCostUserName());
+        expenseRecordDO.setProjectId(expenseRecord.getProjectId());
         expenseRecordDO.setAmount(expenseRecord.getAmount());
         expenseRecordDO.setDate(expenseRecord.getDate());
         expenseRecordDO.setExpenseType(expenseRecord.getExpenseType());
@@ -62,8 +65,9 @@ public class ExpenseRecordDoConverter {
     public static ExpenseRecord toExpenseRecord(ExpenseRecordDO expenseRecordDO) {
         final ExpenseRecord expenseRecord = new ExpenseRecord();
         expenseRecord.setId(expenseRecordDO.getId());
-        expenseRecord.setUserId(expenseRecordDO.getUserId());
-        expenseRecord.setExpenseProjectId(expenseRecordDO.getExpenseProjectId());
+        expenseRecord.setProjectId(expenseRecordDO.getProjectId());
+        expenseRecord.setCostUserId(expenseRecordDO.getCostUserId());
+        expenseRecord.setCostUserName(expenseRecordDO.getCostUserName());
         expenseRecord.setAmount(expenseRecordDO.getAmount());
         expenseRecord.setDate(expenseRecordDO.getDate());
         expenseRecord.setExpenseType(expenseRecordDO.getExpenseType());

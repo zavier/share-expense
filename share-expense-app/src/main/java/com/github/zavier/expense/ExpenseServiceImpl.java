@@ -59,9 +59,9 @@ public class ExpenseServiceImpl implements ExpenseService {
     private ExpenseRecordDTO convertToDTO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDTO expenseRecordDTO = new ExpenseRecordDTO();
         expenseRecordDTO.setId(expenseRecord.getId());
-        expenseRecordDTO.setUserId(expenseRecord.getUserId());
-        expenseRecordDTO.setUserName(expenseRecord.getUserName());
-        expenseRecordDTO.setExpenseProjectId(expenseRecord.getExpenseProjectId());
+        expenseRecordDTO.setUserId(expenseRecord.getCostUserId());
+        expenseRecordDTO.setUserName(expenseRecord.getCostUserName());
+        expenseRecordDTO.setExpenseProjectId(expenseRecord.getProjectId());
         expenseRecordDTO.setAmount(expenseRecord.getAmount());
         expenseRecordDTO.setDate(expenseRecord.getDate());
         expenseRecordDTO.setExpenseType(expenseRecord.getExpenseType());

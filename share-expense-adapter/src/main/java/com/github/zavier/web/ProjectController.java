@@ -24,7 +24,8 @@ public class ProjectController {
 
     @PostMapping("/create")
     public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
-        projectAddCmd.setOperatorId(UserHolder.getUser().getUserId());
+        projectAddCmd.setUserId(UserHolder.getUser().getUserId());
+        projectAddCmd.setUserName(UserHolder.getUser().getUserName());
         final Response response = projectService.createProject(projectAddCmd);
         return ResponseVo.buildFromResponse(response);
     }

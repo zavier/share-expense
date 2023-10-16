@@ -35,7 +35,8 @@ public class ExpenseRecordValidator {
 
     private static void recordAddBaseCheck(ExpenseRecordAddCmd expenseRecordAddCmd) {
         Assert.notNull(expenseRecordAddCmd.getProjectId(), "项目ID不能为空");
-        Assert.notNull(expenseRecordAddCmd.getUserId(), "创建人不能为空");
+        Assert.notNull(expenseRecordAddCmd.getUserId(), "花费人ID不能为空");
+        Assert.notNull(expenseRecordAddCmd.getUserName(), "花费人姓名不能为空");
         Assert.notNull(expenseRecordAddCmd.getAmount(), "金额不能为空");
         Assert.notNull(expenseRecordAddCmd.getExpenseType(), "费用类型不能为空");
 
@@ -81,7 +82,7 @@ public class ExpenseRecordValidator {
         final Optional<ExpenseRecord> recordById = expenseRecordGateway.getRecordById(expenseRecordId);
         Assert.isTrue(recordById.isPresent(), "费用记录不存在");
 
-        final Integer expenseProjectId = recordById.get().getExpenseProjectId();
+        final Integer expenseProjectId = recordById.get().getProjectId();
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(expenseProjectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
 

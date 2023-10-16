@@ -16,10 +16,10 @@ public class ProjectAddCmdExe {
 
     public Response execute(ProjectAddCmd projectAddCmd) {
         final ExpenseProject expenseProject = new ExpenseProject();
-        expenseProject.setUserId(projectAddCmd.getOperatorId());
+        expenseProject.setUserId(projectAddCmd.getUserId());
         expenseProject.setName(projectAddCmd.getProjectName());
         expenseProject.setDescription(projectAddCmd.getProjectDesc());
-        expenseProject.addMember(projectAddCmd.getOperatorId());
+        expenseProject.addMember(projectAddCmd.getUserId(), projectAddCmd.getUserName());
 
         expenseProject.checkUserIdExist();
         expenseProject.checkProjectNameValid();

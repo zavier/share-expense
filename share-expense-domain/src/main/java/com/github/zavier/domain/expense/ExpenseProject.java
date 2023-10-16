@@ -1,20 +1,19 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.Assert;
+import com.alibaba.cola.exception.BizException;
 import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ExpenseProject {
 
     /**
      * 项目成员ID
      */
-    private final List<Integer> memberIds = new ArrayList<>();
+    private final Map<Integer, ExpenseProjectMember> userIdMap = new HashMap<>();
 
     /**
      * 费用项目ID
@@ -55,17 +54,23 @@ public class ExpenseProject {
     @Setter
     private ChangingStatus changingStatus = ChangingStatus.NEW;
 
-    public List<Integer> getMemberIds() {
-        return Collections.unmodifiableList(memberIds);
+    public List<ExpenseProjectMember> listMember() {
+        return Collections.unmodifiableList(new ArrayList<>(userIdMap.values()));
     }
 
-    public void addMember(Integer userId) {
-        Assert.isFalse(memberIds.contains(userId), "用户已存在");
-        memberIds.add(userId);
+    public void addMember(Integer userId, String userName) {
+        final ExpenseProjectMember projectMember = new ExpenseProjectMember()
+                .setProjectId(this.getId())
+                .setUserId(userId)
+                .setUserName(userName);
+        final ExpenseProjectMember previous = userIdMap.putIfAbsent(userId, projectMember);
+        if (previous != null) {
+            throw new BizException("用户已存在");
+        }
     }
 
     public boolean existMember(Integer userId) {
-        return memberIds.contains(userId);
+        return userIdMap.containsKey(userId);
     }
 
 

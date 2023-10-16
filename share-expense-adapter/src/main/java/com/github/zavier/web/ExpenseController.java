@@ -3,14 +3,12 @@ package com.github.zavier.web;
 import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ExpenseService;
-import com.github.zavier.domain.user.User;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import com.github.zavier.dto.ExpenseRecordQry;
 import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
 import com.github.zavier.vo.ResponseVo;
 import com.github.zavier.vo.SingleResponseVo;
-import com.github.zavier.web.filter.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -27,8 +25,6 @@ public class ExpenseController {
 
     @PostMapping("/addRecord")
     public ResponseVo saveExpenseRecord(@RequestBody ExpenseRecordAddCmd expenseRecordAddCmd) {
-        final User user = UserHolder.getUser();
-        expenseRecordAddCmd.setUserId(user.getUserId());
         final Response response = expenseService.addExpenseRecord(expenseRecordAddCmd);
         return ResponseVo.buildFromResponse(response);
     }

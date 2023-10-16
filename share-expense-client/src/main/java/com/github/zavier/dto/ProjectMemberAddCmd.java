@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ProjectMemberAddCmd  {
     private Integer projectId;
-    private Integer memberId;
 
-    private Integer operatorId;
+    private Integer userId;
+    private String userName;
 }

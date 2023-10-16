@@ -60,7 +60,7 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
 
     private void saveExpenseRecordSharing(ExpenseRecord expenseRecord) {
         expenseSharingMapper.wrapper()
-                .eq(ExpenseSharingDO::getExpenseRecordId, expenseRecord.getId())
+                .eq(ExpenseSharingDO::getRecordId, expenseRecord.getId())
                 .delete();
         ExpenseRecordDoConverter.toExpenseSharingDOList(expenseRecord).forEach(expenseSharingDO -> {
             expenseSharingMapper.insertSelective(expenseSharingDO);
@@ -81,7 +81,7 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
 
     private void wrapUserSharingDetail(@NotNull Integer recordId, ExpenseRecord expenseRecord) {
         final List<ExpenseSharingDO> list = expenseSharingMapper.wrapper()
-                .eq(ExpenseSharingDO::getExpenseRecordId, recordId)
+                .eq(ExpenseSharingDO::getRecordId, recordId)
                 .list();
         list.forEach(expenseSharingDO -> {
             expenseRecord.addUserSharing(expenseSharingDO.getUserId(), expenseSharingDO.getWeight());
@@ -91,7 +91,7 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
     @Override
     public List<ExpenseRecord> listRecord(@NotNull Integer projectId) {
         final List<ExpenseRecordDO> list = expenseRecordMapper.wrapper()
-                .eq(ExpenseRecordDO::getExpenseProjectId, projectId)
+                .eq(ExpenseRecordDO::getProjectId, projectId)
                 .list();
         Set<Integer> userIdSet = new HashSet<>();
 
@@ -100,7 +100,7 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
             wrapUserSharingDetail(expenseRecordDO.getId(), expenseRecord);
 
             // 获取用户ID
-            userIdSet.add(expenseRecord.getUserId());
+            userIdSet.add(expenseRecord.getCostUserId());
             expenseRecord.getUserIdSharingMap().values().forEach(expenseSharing -> {
                 userIdSet.add(expenseSharing.getUserId());
             });
@@ -116,7 +116,7 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
                     .collect(Collectors.toMap(UserDO::getId, UserDO::getUserName, (v1, v2) -> v2));
 
             expenseRecords.forEach(expenseRecord -> {
-                expenseRecord.setUserName(userIdNameMap.get(expenseRecord.getUserId()));
+                expenseRecord.setCostUserName(userIdNameMap.get(expenseRecord.getCostUserId()));
                 expenseRecord.getUserIdSharingMap().values().forEach(expenseSharing -> {
                     expenseSharing.setUserName(userIdNameMap.get(expenseSharing.getUserId()));
                 });

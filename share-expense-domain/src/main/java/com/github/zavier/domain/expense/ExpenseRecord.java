@@ -19,13 +19,14 @@ public class ExpenseRecord {
     private Integer id;
     @Getter
     @Setter
-    private Integer userId;
+    private Integer projectId;
+
     @Getter
     @Setter
-    private String userName;
+    private Integer costUserId;
     @Getter
     @Setter
-    private Integer expenseProjectId;
+    private String costUserName;
     @Getter
     @Setter
     private BigDecimal amount;

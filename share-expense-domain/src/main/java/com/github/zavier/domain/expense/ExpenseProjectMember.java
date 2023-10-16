@@ -1,18 +1,15 @@
 package com.github.zavier.domain.expense;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 public class ExpenseProjectMember {
-    /**
-     * 费用项目成员ID
-     */
-    private Integer expenseProjectMemberId;
-
     /**
      * 所属费用项目ID
      */
-    private Integer expenseProjectId;
+    private Integer projectId;
 
     /**
      * 用户ID
@@ -20,7 +17,9 @@ public class ExpenseProjectMember {
     private Integer userId;
 
     /**
-     * 是否接受邀请
+     * 用户姓名
      */
-    private Boolean isAccepted;
+    private String userName;
+
+
 }

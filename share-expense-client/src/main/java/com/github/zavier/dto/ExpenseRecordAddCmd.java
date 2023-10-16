@@ -7,10 +7,12 @@ import java.util.Date;
 
 @Data
 public class ExpenseRecordAddCmd {
-    private Integer userId;
     private Integer projectId;
     private BigDecimal amount;
     private Date date;
     private String expenseType;
     private String remark;
+
+    private Integer userId;
+    private String userName;
 }
