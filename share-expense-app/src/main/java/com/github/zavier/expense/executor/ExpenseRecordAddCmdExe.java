@@ -18,12 +18,14 @@ public class ExpenseRecordAddCmdExe {
     private ExpenseRecordGateway expenseRecordGateway;
     @Resource
     private ExpenseRecordValidator expenseRecordValidator;
+    @Resource
+    private ExpenseRecordConverter expenseRecordConverter;
 
     public void execute(ExpenseRecordAddCmd expenseRecordAddCmd) {
         log.info("expenseRecordAddCmd: {}", expenseRecordAddCmd);
         expenseRecordValidator.valid(expenseRecordAddCmd);
 
-        final ExpenseRecord expenseRecord = ExpenseRecordConverter.toExpenseRecord(expenseRecordAddCmd);
+        final ExpenseRecord expenseRecord = expenseRecordConverter.toExpenseRecord(expenseRecordAddCmd);
         expenseRecordGateway.save(expenseRecord);
     }
 }

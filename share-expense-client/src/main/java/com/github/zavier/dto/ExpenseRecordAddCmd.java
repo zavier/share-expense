@@ -14,5 +14,4 @@ public class ExpenseRecordAddCmd {
     private String remark;
 
     private Integer userId;
-    private String userName;
 }

@@ -5,6 +5,8 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
+import com.github.zavier.domain.user.User;
+import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +18,20 @@ public class ProjectMemberAddCmdExe {
 
     @Resource
     private ExpenseProjectGateway expenseProjectGateway;
+    @Resource
+    private UserGateway userGateway;
 
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
         Assert.notNull(projectMemberAddCmd.getProjectId(), "项目ID不能为空");
         Assert.notNull(projectMemberAddCmd.getUserId(), "成员ID不能为空");
-        Assert.notNull(projectMemberAddCmd.getUserName(), "成员名称不能为空");
+
+        final Optional<User> userOpt = userGateway.getUserById(projectMemberAddCmd.getUserId());
+        Assert.isTrue(userOpt.isPresent(), "成员不存在");
 
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectMemberAddCmd.getProjectId());
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
-        expenseProject.addMember(projectMemberAddCmd.getUserId(), projectMemberAddCmd.getUserName());
+        expenseProject.addMember(projectMemberAddCmd.getUserId(), userOpt.get().getUserName());
         expenseProject.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(expenseProject);
         return Response.buildSuccess();

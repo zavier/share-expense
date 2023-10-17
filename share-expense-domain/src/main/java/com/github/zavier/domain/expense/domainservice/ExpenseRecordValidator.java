@@ -29,6 +29,8 @@ public class ExpenseRecordValidator {
     public void valid(ExpenseRecordAddCmd expenseRecordAddCmd) {
         // 基础数据校验
         recordAddBaseCheck(expenseRecordAddCmd);
+        // 用户ID存在
+        userIsExist(expenseRecordAddCmd.getUserId());
         // 项目存在校验
         projectIsExist(expenseRecordAddCmd.getProjectId());
     }
@@ -36,7 +38,6 @@ public class ExpenseRecordValidator {
     private static void recordAddBaseCheck(ExpenseRecordAddCmd expenseRecordAddCmd) {
         Assert.notNull(expenseRecordAddCmd.getProjectId(), "项目ID不能为空");
         Assert.notNull(expenseRecordAddCmd.getUserId(), "花费人ID不能为空");
-        Assert.notNull(expenseRecordAddCmd.getUserName(), "花费人姓名不能为空");
         Assert.notNull(expenseRecordAddCmd.getAmount(), "金额不能为空");
         Assert.notNull(expenseRecordAddCmd.getExpenseType(), "费用类型不能为空");
 

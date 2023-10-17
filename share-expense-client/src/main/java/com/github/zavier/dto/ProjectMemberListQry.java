@@ -4,8 +4,6 @@ package com.github.zavier.dto;
 import lombok.Data;
 
 @Data
-public class ProjectMemberAddCmd  {
+public class ProjectMemberListQry {
     private Integer projectId;
-
-    private Integer userId;
 }

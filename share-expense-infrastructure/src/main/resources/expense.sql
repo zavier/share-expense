@@ -38,7 +38,7 @@ CREATE TABLE expense_record (
     cost_user_name VARCHAR(255) NOT NULL COMMENT '花费的用户名称',
     amount DECIMAL(10, 2) NOT NULL COMMENT '费用金额',
     date DATE NOT NULL COMMENT '费用日期',
-    expense_type INT NOT NULL COMMENT '费用类型',
+    expense_type VARCHAR(30) NOT NULL COMMENT '费用类型',
     remark varchar(300) NOT NULL DEFAULT '' COMMENT '备注',
     version INT NOT NULL DEFAULT '0' COMMENT '版本号',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

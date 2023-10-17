@@ -2,18 +2,19 @@ package com.github.zavier.web;
 
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
+import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
-import com.github.zavier.dto.ProjectAddCmd;
-import com.github.zavier.dto.ProjectDeleteCmd;
-import com.github.zavier.dto.ProjectListQry;
-import com.github.zavier.dto.ProjectMemberAddCmd;
+import com.github.zavier.dto.*;
+import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ProjectDTO;
 import com.github.zavier.vo.PageResponseVo;
 import com.github.zavier.vo.ResponseVo;
+import com.github.zavier.vo.SingleResponseVo;
 import com.github.zavier.web.filter.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/project")
@@ -41,6 +42,12 @@ public class ProjectController {
     private ResponseVo addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
         final Response response =  projectService.addProjectMember(projectMemberAddCmd);
         return ResponseVo.buildFromResponse(response);
+    }
+
+    @GetMapping("/listMember")
+    private SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
+        final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
+        return SingleResponseVo.buildFromSingleResponse(listSingleResponse);
     }
 
     @GetMapping("/list")
