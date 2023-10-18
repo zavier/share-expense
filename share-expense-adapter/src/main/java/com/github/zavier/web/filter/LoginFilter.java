@@ -57,6 +57,9 @@ public class LoginFilter implements Filter {
 
     private Optional<Cookie> getJwtCookie(HttpServletRequest httpServletRequest) {
         final Cookie[] cookies = httpServletRequest.getCookies();
+        if (cookies == null) {
+            return Optional.empty();
+        }
         for (Cookie cookie : cookies) {
             final String name = cookie.getName();
             if ("jwtToken".equals(name)) {
@@ -84,6 +87,7 @@ public class LoginFilter implements Filter {
 
     private boolean notNeedLogin(String url) {
         return url.contains("user/login")
+                || url.contains("user/add")
                 || "/".equals(url)
                 || url.endsWith(".html")
                 || url.endsWith(".css")

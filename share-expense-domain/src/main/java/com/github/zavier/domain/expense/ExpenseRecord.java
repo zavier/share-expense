@@ -60,13 +60,18 @@ public class ExpenseRecord {
 
     private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
 
+    public void addUserSharing(Integer userId, String userName) {
+        // 默认权重1
+        addUserSharing(userId, userName, 1);
+    }
 
-    public void addUserSharing(Integer userId, Integer weight) {
+    public void addUserSharing(Integer userId, String userName, Integer weight) {
         Assert.notNull(userId, "用户ID不能为空");
+        Assert.notNull(userName, "用户名称不能为空");
         Assert.notNull(weight, "权重不能为空");
 
         Assert.isFalse(userIdSharingMap.containsKey(userId), "用户ID重复");
-        userIdSharingMap.put(userId, new ExpenseSharing(userId, weight));
+        userIdSharingMap.put(userId, new ExpenseSharing(userId, userName, weight));
 
         calcSharingAmount();
     }

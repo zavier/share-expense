@@ -84,7 +84,8 @@ public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
                 .eq(ExpenseSharingDO::getRecordId, recordId)
                 .list();
         list.forEach(expenseSharingDO -> {
-            expenseRecord.addUserSharing(expenseSharingDO.getUserId(), expenseSharingDO.getWeight());
+            expenseRecord.addUserSharing(expenseSharingDO.getUserId(),
+                    expenseSharingDO.getUserName(), expenseSharingDO.getWeight());
         });
     }
 

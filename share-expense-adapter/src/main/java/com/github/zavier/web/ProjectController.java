@@ -14,7 +14,9 @@ import com.github.zavier.web.filter.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/project")
@@ -48,6 +50,16 @@ public class ProjectController {
     private SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
         return SingleResponseVo.buildFromSingleResponse(listSingleResponse);
+    }
+
+    @GetMapping("/pageMember")
+    private SingleResponseVo pageProjectMember(ProjectMemberListQry projectMemberListQry) {
+        final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
+        final List<ExpenseProjectMemberDTO> data = listSingleResponse.getData();
+        Map<String, Object> map = new HashMap<>();
+        map.put("count", data.size());
+        map.put("rows", data);
+        return SingleResponseVo.of(map);
     }
 
     @GetMapping("/list")

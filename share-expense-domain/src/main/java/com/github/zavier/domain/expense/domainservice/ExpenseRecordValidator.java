@@ -49,15 +49,15 @@ public class ExpenseRecordValidator {
         // 基础数据校验
         shardingAddBaseCheck(expenseRecordSharingAddCmd);
         // 费用记录存在校验
-        recordIsExist(expenseRecordSharingAddCmd.getExpenseRecordId());
+        recordIsExist(expenseRecordSharingAddCmd.getRecordId());
         // 用户存在校验
         userIsExist(expenseRecordSharingAddCmd.getUserId());
         // 分摊的用户在项目组中
-        userIsInProject(expenseRecordSharingAddCmd.getUserId(), expenseRecordSharingAddCmd.getExpenseRecordId());
+        userIsInProject(expenseRecordSharingAddCmd.getUserId(), expenseRecordSharingAddCmd.getRecordId());
     }
 
     private static void shardingAddBaseCheck(ExpenseRecordSharingAddCmd expenseRecordSharingAddCmd) {
-        Assert.notNull(expenseRecordSharingAddCmd.getExpenseRecordId(), "费用记录ID不能为空");
+        Assert.notNull(expenseRecordSharingAddCmd.getRecordId(), "费用记录ID不能为空");
         Assert.notNull(expenseRecordSharingAddCmd.getUserId(), "创建人不能为空");
         Assert.notNull(expenseRecordSharingAddCmd.getWeight(), "权重不能为空");
 

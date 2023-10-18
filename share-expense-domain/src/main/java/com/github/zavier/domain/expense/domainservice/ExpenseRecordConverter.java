@@ -33,6 +33,9 @@ public class ExpenseRecordConverter {
         expenseRecord.setCostUserId(expenseRecordAddCmd.getUserId());
         expenseRecord.setCostUserName(userOpt.get().getUserName());
 
+        // 默认自己分摊
+        expenseRecord.addUserSharing(expenseRecord.getCostUserId(), expenseRecord.getCostUserName());
+
         expenseRecord.setChangingStatus(ChangingStatus.NEW);
         return expenseRecord;
     }

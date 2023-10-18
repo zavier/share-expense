@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class ExpenseRecordDTO {
 
-    private Integer id;
+    private Integer recordId;
     private Integer userId;
     private String userName;
     private Integer expenseProjectId;

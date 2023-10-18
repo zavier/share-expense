@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ExpenseRecordSharingAddCmd {
-    private Integer expenseRecordId;
+    private Integer recordId;
     private Integer userId;
     private Integer weight;
 }

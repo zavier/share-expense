@@ -30,8 +30,9 @@ public class ExpenseSharing {
 
     public ExpenseSharing() {}
 
-    public ExpenseSharing(Integer userId, Integer weight) {
+    public ExpenseSharing(Integer userId, String userName, Integer weight) {
         this.userId = userId;
+        this.userName = userName;
         this.weight = weight;
     }
 
