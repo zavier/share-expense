@@ -9,17 +9,14 @@ import com.github.zavier.converter.ExpenseProjectConverter;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectListQry;
-import io.mybatis.mapper.example.ExampleWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -50,6 +47,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             expenseProjectMemberDO.setProjectId(expenseProject.getId());
             expenseProjectMemberDO.setUserId(projectMember.getUserId());
             expenseProjectMemberDO.setUserName(projectMember.getUserName());
+            expenseProjectMemberDO.setWeight(projectMember.getWeight());
             expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
         });
     }
@@ -93,22 +91,19 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
     @Override
     public PageResponse<ExpenseProject> pageProject(ProjectListQry projectListQry) {
-        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper();
+        // 查询出全部自己创建+自己加入的项目
         if (projectListQry.getUserId() != null) {
-            final List<ExpenseProjectMemberDO> list = expenseProjectMemberMapper.wrapper()
-                    .eq(ExpenseProjectMemberDO::getUserId, projectListQry.getUserId())
-                    .list();
-            if (CollectionUtils.isEmpty(list)) {
-                return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
-            }
-            final List<Integer> projectIdList = list.stream().map(ExpenseProjectMemberDO::getProjectId).distinct()
-                    .collect(Collectors.toList());
-
-            wrapper.in(ExpenseProjectDO::getId, projectIdList);
+            return pageProjectByUser(projectListQry);
         }
         // 分页
+        return pageAllProject(projectListQry);
+
+    }
+
+    @NotNull
+    private PageResponse<ExpenseProject> pageAllProject(ProjectListQry projectListQry) {
         PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
-        final List<ExpenseProjectDO> list = wrapper.list();
+        final List<ExpenseProjectDO> list =  expenseProjectMapper.wrapper().list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
         final List<Integer> projectIdList = list.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
@@ -117,7 +112,51 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         final List<ExpenseProject> projectList = list.stream()
                 .map(it -> ExpenseProjectConverter.toEntity(it, projectIdMap.get(it.getId()))).collect(Collectors.toList());
         return PageResponse.of(projectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
+    }
 
+    @Nullable
+    private PageResponse<ExpenseProject> pageProjectByUser(ProjectListQry projectListQry) {
+        List<ExpenseProjectDO> resultList = new ArrayList<>();
+
+        // 创建的
+        final List<ExpenseProjectDO> createdList = expenseProjectMapper.wrapper()
+                .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getUserId())
+                .list();
+        resultList.addAll(createdList);
+
+        // 加入的
+        final List<ExpenseProjectMemberDO> memberDOList = expenseProjectMemberMapper.wrapper()
+                .eq(ExpenseProjectMemberDO::getUserId, projectListQry.getUserId())
+                .list();
+        if (CollectionUtils.isNotEmpty(memberDOList)) {
+            final List<Integer> projectIdList = memberDOList.stream().map(ExpenseProjectMemberDO::getProjectId).distinct()
+                    .collect(Collectors.toList());
+            final List<ExpenseProjectDO> joinedList = expenseProjectMapper.wrapper()
+                    .in(ExpenseProjectDO::getId, projectIdList)
+                    .list();
+            resultList.addAll(joinedList);
+        }
+
+        if (CollectionUtils.isEmpty(resultList)) {
+            return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
+        }
+
+        // 转换结果
+        int total = resultList.size();
+        int offset = (projectListQry.getPage() - 1) * projectListQry.getSize();
+        final List<ExpenseProjectDO> collect = resultList.stream()
+                .skip(offset)
+                .limit(projectListQry.getSize())
+                .collect(Collectors.toList());
+
+        // 聚合member
+        final List<Integer> projectIdList = collect.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
+        final Map<Integer, List<ExpenseProjectMemberDO>> projectIdMap = listProjectMembers(projectIdList);
+
+        final List<ExpenseProject> projectList = collect.stream()
+                .map(it -> ExpenseProjectConverter.toEntity(it, projectIdMap.get(it.getId()))).collect(Collectors.toList());
+
+        return PageResponse.of(projectList, total, projectListQry.getSize(), projectListQry.getPage());
     }
 
     @NotNull

@@ -20,7 +20,7 @@ public class ExpenseProjectConverter {
 
         if (CollectionUtils.isNotEmpty(memberDOList)) {
             for (ExpenseProjectMemberDO memberDO : memberDOList) {
-                expenseProject.addMember(memberDO.getUserId(), memberDO.getUserName());
+                expenseProject.addMember(memberDO.getUserId(), memberDO.getUserName(), memberDO.getWeight());
             }
         }
         return expenseProject;

@@ -7,7 +7,7 @@ var dataJson =
     "aside": [
         {
             "type": "tpl",
-            "tpl": "这是侧边栏部分"
+            "tpl": ""
         }
     ],
     "toolbar": [
@@ -111,7 +111,7 @@ var dataJson =
                             "type": "input-text",
                             "name": "projectDesc",
                             "label": "项目描述",
-                            "required": true
+                            "required": false
                         }
                     ]
                 }
@@ -139,45 +139,80 @@ var dataJson =
                     "label": "操作",
                     "buttons": [
                         {
-                            "label": "费用明细",
+                            "label": "添加成员",
                             "type": "button",
                             "level": "link",
                             "actionType": "dialog",
                             "dialog": {
-                                "title": "费用明细",
+                                "title": "添加成员",
+                                "body": {
+                                    "type": "form",
+                                    "api": "post:/project/addMember",
+                                    "body": [
+                                        {
+                                            "type": "input-number",
+                                            "name": "projectId",
+                                            "label": "项目ID",
+                                            "required": true,
+                                            "readOnly": true,
+                                            "visible": false
+                                        },
+                                        {
+                                            "label": "成员",
+                                            "type": "select",
+                                            "name": "userId",
+                                            "source": "/user/list?page=1&size=1000",
+                                            "labelField": "userName",
+                                            "valueField": "userId",
+                                            "required": true,
+                                        },
+                                        {
+                                            "type": "input-number",
+                                            "name": "weight",
+                                            "label": "项目分摊权重",
+                                            "required": true,
+                                            "displayMode": "enhance",
+                                            "min": 1,
+                                            "precision": 0,
+                                            "value": 1
+
+                                        },
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "label": "项目成员",
+                            "type": "button",
+                            "level": "link",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "title": "项目成员",
                                 "body": {
                                     "type": "service",
-                                    "api": "/expense/listRecord?projectId=${projectId}",
-                                    "body": [
-                                      {
-                                        "type": "table",
-                                        "title": "表格1",
+                                    "api": "/project/pageMember?projectId=${projectId}",
+                                    "body": {
+                                        "type": "list",
                                         "source": "$rows",
-                                        "columns": [
-                                          {
-                                            "name": "userId",
-                                            "label": "用户ID"
-                                          },
-                                          {
-                                            "name": "userName",
-                                            "label": "用户姓名"
-                                          },
-                                          {
-                                            "name": "expenseType",
-                                            "label": "费用类型"
-                                          },
-                                          {
-                                            "name": "amount",
-                                            "label": "金额"
-                                          },
-                                          {
-                                            "name": "remark",
-                                            "label": "备注"
-                                          },
-                                        ]
-                                      }
-                                    ]
-                                  }
+                                        "listItem": {
+                                            "body": [
+                                                {
+                                                    "type": "hbox",
+                                                    "columns": [
+                                                        {
+                                                            "name": "userName",
+                                                            "label": "用户姓名"
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "label": "分摊权重(人份)"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
                             }
                         },
                         {
@@ -199,6 +234,15 @@ var dataJson =
                                             "readOnly": true
                                         },
                                         {
+                                            "label": "花费人",
+                                            "type": "select",
+                                            "name": "userId",
+                                            "source": "/project/listMember?projectId=${projectId}",
+                                            "labelField": "userName",
+                                            "valueField": "userId",
+                                            "required": true,
+                                        },
+                                        {
                                             "type": "input-number",
                                             "name": "amount",
                                             "label": "金额",
@@ -217,6 +261,8 @@ var dataJson =
                                             "label": "费用类型",
                                             "type": "select",
                                             "name": "expenseType",
+                                            "required": true,
+                                            "creatable": true,
                                             "options": [
                                                 {
                                                     "label": "饮食",
@@ -232,6 +278,90 @@ var dataJson =
                                             "type": "input-text",
                                             "name": "reamrk",
                                             "label": "备注"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "label": "费用明细",
+                            "type": "button",
+                            "level": "link",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "title": "费用明细",
+                                "body": {
+                                    "type": "service",
+                                    "api": "/expense/listRecord?projectId=${projectId}",
+                                    "body": [
+                                        {
+                                            "type": "table",
+                                            "title": "明细信息",
+                                            "source": "$rows",
+                                            "columns": [
+                                                {
+                                                    "name": "userId",
+                                                    "label": "用户ID"
+                                                },
+                                                {
+                                                    "name": "userName",
+                                                    "label": "用户姓名"
+                                                },
+                                                {
+                                                    "name": "expenseType",
+                                                    "label": "费用类型"
+                                                },
+                                                {
+                                                    "name": "amount",
+                                                    "label": "金额"
+                                                },
+                                                {
+                                                    "name": "remark",
+                                                    "label": "备注"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "label": "分摊明细",
+                            "type": "button",
+                            "level": "link",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "title": "分摊明细",
+                                "body": {
+                                    "type": "service",
+                                    "api": "/expense/listRecord?projectId=${projectId}",
+                                    "body": [
+                                        {
+                                            "type": "table",
+                                            "title": "明细信息",
+                                            "source": "$rows",
+                                            "columns": [
+                                                {
+                                                    "name": "userId",
+                                                    "label": "用户ID"
+                                                },
+                                                {
+                                                    "name": "userName",
+                                                    "label": "用户姓名"
+                                                },
+                                                {
+                                                    "name": "expenseType",
+                                                    "label": "费用类型"
+                                                },
+                                                {
+                                                    "name": "amount",
+                                                    "label": "金额"
+                                                },
+                                                {
+                                                    "name": "remark",
+                                                    "label": "备注"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

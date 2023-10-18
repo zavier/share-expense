@@ -22,4 +22,8 @@ public class ExpenseProjectMember {
     private String userName;
 
 
+    /**
+     * 均摊人份
+     */
+    private Integer weight;
 }

@@ -58,11 +58,12 @@ public class ExpenseProject {
         return Collections.unmodifiableList(new ArrayList<>(userIdMap.values()));
     }
 
-    public void addMember(Integer userId, String userName) {
+    public void addMember(Integer userId, String userName, Integer weight) {
         final ExpenseProjectMember projectMember = new ExpenseProjectMember()
                 .setProjectId(this.getId())
                 .setUserId(userId)
-                .setUserName(userName);
+                .setUserName(userName)
+                .setWeight(weight);
         final ExpenseProjectMember previous = userIdMap.putIfAbsent(userId, projectMember);
         if (previous != null) {
             throw new BizException("用户已存在");

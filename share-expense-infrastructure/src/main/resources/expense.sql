@@ -26,6 +26,7 @@ CREATE TABLE expense_project_member (
     project_id INT NOT NULL COMMENT '所属费用项目ID',
     user_id INT NOT NULL COMMENT '用户ID',
     user_name VARCHAR(255) NOT NULL COMMENT '用户名',
+    weight INT NOT NULL DEFAULT '1' COMMENT '均摊权重(人份)',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用项目成员关联表';
@@ -52,7 +53,7 @@ CREATE TABLE expense_sharing (
     user_id INT NOT NULL COMMENT '用户ID',
     user_name VARCHAR(255) NOT NULL COMMENT '用户名',
     weight INT NOT NULL DEFAULT '1' COMMENT '均摊权重',
-    amount DECIMAL(10, 2) COMMENT '均摊金额',
+    amount DECIMAL(10, 2) COMMENT '均摊金额(人份)',
     is_paid TINYINT NOT NULL DEFAULT '0' COMMENT '是否已支付，0:否 1:是',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'

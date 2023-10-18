@@ -8,4 +8,6 @@ public class ProjectMemberAddCmd  {
     private Integer projectId;
 
     private Integer userId;
+
+    private Integer weight;
 }

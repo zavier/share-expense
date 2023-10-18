@@ -60,6 +60,7 @@ public class ProjectServiceImpl implements ProjectService {
         memberDTO.setProjectId(expenseProjectMember.getProjectId());
         memberDTO.setUserId(expenseProjectMember.getUserId());
         memberDTO.setUserName(expenseProjectMember.getUserName());
+        memberDTO.setWeight(expenseProjectMember.getWeight());
         return memberDTO;
     }
 

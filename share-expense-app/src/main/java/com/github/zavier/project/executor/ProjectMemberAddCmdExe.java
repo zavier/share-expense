@@ -24,6 +24,7 @@ public class ProjectMemberAddCmdExe {
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
         Assert.notNull(projectMemberAddCmd.getProjectId(), "项目ID不能为空");
         Assert.notNull(projectMemberAddCmd.getUserId(), "成员ID不能为空");
+        Assert.notNull(projectMemberAddCmd.getWeight(), "成员分摊权重不能为空");
 
         final Optional<User> userOpt = userGateway.getUserById(projectMemberAddCmd.getUserId());
         Assert.isTrue(userOpt.isPresent(), "成员不存在");
@@ -31,7 +32,7 @@ public class ProjectMemberAddCmdExe {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectMemberAddCmd.getProjectId());
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
-        expenseProject.addMember(projectMemberAddCmd.getUserId(), userOpt.get().getUserName());
+        expenseProject.addMember(projectMemberAddCmd.getUserId(), userOpt.get().getUserName(), projectMemberAddCmd.getWeight());
         expenseProject.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(expenseProject);
         return Response.buildSuccess();

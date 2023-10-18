@@ -5,13 +5,17 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ExpenseService;
 import com.github.zavier.domain.expense.ExpenseRecord;
+import com.github.zavier.domain.expense.ExpenseSharing;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import com.github.zavier.dto.ExpenseRecordQry;
 import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
+import com.github.zavier.dto.ExpenseRecordSharingListQry;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
+import com.github.zavier.dto.data.ExpenseRecordSharingDTO;
 import com.github.zavier.expense.executor.ExpenseRecordAddCmdExe;
 import com.github.zavier.expense.executor.ExpenseRecordListQryExe;
 import com.github.zavier.expense.executor.ExpenseRecordSharingAddCmdExe;
+import com.github.zavier.expense.executor.ExpenseRecordSharingListQryExe;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO 合并到 projectService ?
 @Service
 @CatchAndLog
 public class ExpenseServiceImpl implements ExpenseService {
@@ -30,6 +35,8 @@ public class ExpenseServiceImpl implements ExpenseService {
     private ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe;
     @Resource
     private ExpenseRecordListQryExe expenseRecordListQryExe;
+    @Resource
+    private ExpenseRecordSharingListQryExe expenseRecordSharingListQryExe;
 
     @Override
     public Response addExpenseRecord(ExpenseRecordAddCmd expenseRecordAddCmd) {
@@ -56,6 +63,21 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     }
 
+    @Override
+    public Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd) {
+        expenseRecordSharingAddCmdExe.execute(sharingAddCmd);
+        return Response.buildSuccess();
+    }
+
+    @Override
+    public SingleResponse<List<ExpenseRecordSharingDTO>> listRecordSharing(ExpenseRecordSharingListQry expenseRecordSharingQry){
+        final List<ExpenseSharing> execute = expenseRecordSharingListQryExe.execute(expenseRecordSharingQry);
+        final List<ExpenseRecordSharingDTO> collect = execute.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return SingleResponse.of(collect);
+    }
+
     private ExpenseRecordDTO convertToDTO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDTO expenseRecordDTO = new ExpenseRecordDTO();
         expenseRecordDTO.setRecordId(expenseRecord.getId());
@@ -69,9 +91,12 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRecordDTO;
     }
 
-    @Override
-    public Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd) {
-        expenseRecordSharingAddCmdExe.execute(sharingAddCmd);
-        return Response.buildSuccess();
+    private ExpenseRecordSharingDTO convertToDTO(ExpenseSharing expenseSharing) {
+        final ExpenseRecordSharingDTO sharingDTO = new ExpenseRecordSharingDTO();
+        sharingDTO.setUserId(expenseSharing.getUserId());
+        sharingDTO.setUserName(expenseSharing.getUserName());
+        sharingDTO.setWeight(expenseSharing.getWeight());
+        sharingDTO.setAmount(expenseSharing.getAmount());
+        return sharingDTO;
     }
 }

@@ -5,7 +5,9 @@ import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import com.github.zavier.dto.ExpenseRecordQry;
 import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
+import com.github.zavier.dto.ExpenseRecordSharingListQry;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
+import com.github.zavier.dto.data.ExpenseRecordSharingDTO;
 
 import java.util.List;
 
@@ -15,4 +17,6 @@ public interface ExpenseService {
     SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry expenseRecordQry);
 
     Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd);
+
+    SingleResponse<List<ExpenseRecordSharingDTO>> listRecordSharing(ExpenseRecordSharingListQry expenseRecordSharingQry);
 }

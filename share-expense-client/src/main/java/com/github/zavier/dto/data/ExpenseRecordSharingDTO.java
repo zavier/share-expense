@@ -2,25 +2,26 @@ package com.github.zavier.dto.data;
 
 import lombok.Data;
 
-@Data
-public class ExpenseProjectMemberDTO {
-    /**
-     * 所属费用项目ID
-     */
-    private Integer projectId;
+import java.math.BigDecimal;
 
+@Data
+public class ExpenseRecordSharingDTO {
     /**
      * 用户ID
      */
     private Integer userId;
-
     /**
-     * 用户姓名
+     * 用户名称
      */
     private String userName;
 
     /**
-     * 分摊权重（人份）
+     * 均摊权重
      */
     private Integer weight;
+
+    /**
+     * 均摊金额
+     */
+    private BigDecimal amount;
 }

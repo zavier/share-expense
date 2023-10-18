@@ -19,7 +19,6 @@ public class ProjectAddCmdExe {
         expenseProject.setUserId(projectAddCmd.getUserId());
         expenseProject.setName(projectAddCmd.getProjectName());
         expenseProject.setDescription(projectAddCmd.getProjectDesc());
-        expenseProject.addMember(projectAddCmd.getUserId(), projectAddCmd.getUserName());
 
         expenseProject.checkUserIdExist();
         expenseProject.checkProjectNameValid();
