@@ -103,7 +103,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @NotNull
     private PageResponse<ExpenseProject> pageAllProject(ProjectListQry projectListQry) {
         PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
-        final List<ExpenseProjectDO> list =  expenseProjectMapper.wrapper().list();
+        final List<ExpenseProjectDO> list =  expenseProjectMapper.wrapper()
+                .orderByDesc(ExpenseProjectDO::getId)
+                .list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
         final List<Integer> projectIdList = list.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
@@ -136,6 +138,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                     .list();
             resultList.addAll(joinedList);
         }
+
+        // 排序
+        resultList.sort(Comparator.comparing(ExpenseProjectDO::getId).reversed());
 
         if (CollectionUtils.isEmpty(resultList)) {
             return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
