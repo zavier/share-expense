@@ -1,17 +1,26 @@
 package com.github.zavier.dto.data;
 
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 
 @Data
-@Accessors(chain = true)
 public class UserSharingDTO {
     private Integer userId;
     private String userName;
 
-    // 可能为负数
-    private BigDecimal amount;
+    public UserSharingDTO(Integer userId, String userName) {
+        this.userId = userId;
+        this.userName = userName;
+    }
 
+    private BigDecimal shareAmount = BigDecimal.ZERO;
+
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+
+    // 可能为负数
+    public BigDecimal getAmount() {
+        return shareAmount.subtract(paidAmount);
+    }
 }

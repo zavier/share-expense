@@ -113,41 +113,27 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
-        List<UserSharingDTO> sharingDTOList = new ArrayList<>();
+        Map<Integer, UserSharingDTO> sharingDTOMap = new HashMap<>();
 
         // TODO 迁移到领域对象中 ?
         final List<ExpenseRecord> execute = projectSharingQryExe.execute(projectSharingQry);
-        Map<Integer, BigDecimal> userIdShareAmount = new HashMap<>();
-        Map<Integer, String> userIdNameMap = new HashMap<>();
         execute.forEach(expenseRecord -> {
             // 需要均摊的
             final Map<Integer, ExpenseSharing> userIdSharingMap = expenseRecord.getUserIdSharingMap();
             userIdSharingMap.forEach((userId, sharing) -> {
-                final BigDecimal defaultValue = userIdShareAmount.getOrDefault(userId, BigDecimal.ZERO);
-                userIdShareAmount.put(userId, defaultValue.add(sharing.getAmount()));
-
-                userIdNameMap.put(userId, sharing.getUserName());
+                final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(userId, new UserSharingDTO(userId, sharing.getUserName()));
+                orDefault.setShareAmount(orDefault.getShareAmount().add(sharing.getAmount()));
+                sharingDTOMap.put(userId, orDefault);
             });
 
             // 减去自己花费的
             final Integer costUserId = expenseRecord.getCostUserId();
             final BigDecimal amount = expenseRecord.getAmount();
-            userIdShareAmount.put(costUserId,
-                    userIdShareAmount.getOrDefault(costUserId, BigDecimal.ZERO).subtract(amount));
-
-            userIdNameMap.put(costUserId, expenseRecord.getCostUserName());
+            final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(costUserId, new UserSharingDTO(costUserId, expenseRecord.getCostUserName()));
+            orDefault.setPaidAmount(orDefault.getPaidAmount().add(amount));
+            sharingDTOMap.put(costUserId, orDefault);
         });
 
-
-        userIdShareAmount.forEach((userIdShare, amount) -> {
-            final String userName = userIdNameMap.get(userIdShare);
-            final UserSharingDTO userSharingDTO = new UserSharingDTO()
-                    .setUserId(userIdShare)
-                    .setUserName(userName)
-                    .setAmount(amount);
-            sharingDTOList.add(userSharingDTO);
-        });
-
-        return SingleResponse.of(sharingDTOList);
+        return SingleResponse.of(new ArrayList<>(sharingDTOMap.values()));
     }
 }

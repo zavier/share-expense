@@ -351,7 +351,15 @@ var dataJson =
                                                 },
                                                 {
                                                     "name": "amount",
-                                                    "label": "金额"
+                                                    "label": "应付(收)金额"
+                                                },
+                                                {
+                                                    "name": "shareAmount",
+                                                    "label": "需分摊金额"
+                                                },
+                                                {
+                                                    "name": "paidAmount",
+                                                    "label": "已花费金额"
                                                 }
                                             ]
                                         }
