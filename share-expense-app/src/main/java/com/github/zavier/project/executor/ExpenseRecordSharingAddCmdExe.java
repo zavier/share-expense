@@ -1,4 +1,4 @@
-package com.github.zavier.expense.executor;
+package com.github.zavier.project.executor;
 
 import com.alibaba.cola.exception.Assert;
 import com.alibaba.cola.exception.BizException;

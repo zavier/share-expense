@@ -14,6 +14,8 @@ import java.util.Map;
 
 public class ExpenseRecord {
 
+    private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
+
     @Getter
     @Setter
     private Integer id;
@@ -57,13 +59,6 @@ public class ExpenseRecord {
     @Getter
     @Setter
     private Boolean needSharding = false;
-
-    private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
-
-    public void addUserSharing(Integer userId, String userName) {
-        // 默认权重1
-        addUserSharing(userId, userName, 1);
-    }
 
     public void addUserSharing(Integer userId, String userName, Integer weight) {
         Assert.notNull(userId, "用户ID不能为空");

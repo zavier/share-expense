@@ -99,7 +99,7 @@ var dataJson =
                 "title": "新增项目",
                 "body": {
                     "type": "form",
-                    "api": "post:/project/create",
+                    "api": "post:/expense/project/create",
                     "body": [
                         {
                             "type": "input-text",
@@ -119,7 +119,7 @@ var dataJson =
         },
         {
             "type": "crud",
-            "api": "/project/list?page=${page}&size=${perPage}",
+            "api": "/expense/project/list?page=${page}&size=${perPage}",
             "syncLocation": false,
             "columns": [
                 {
@@ -147,7 +147,7 @@ var dataJson =
                                 "title": "添加成员",
                                 "body": {
                                     "type": "form",
-                                    "api": "post:/project/addMember",
+                                    "api": "post:/expense/project/addMember",
                                     "body": [
                                         {
                                             "type": "input-number",
@@ -190,7 +190,7 @@ var dataJson =
                                 "title": "项目成员",
                                 "body": {
                                     "type": "service",
-                                    "api": "/project/pageMember?projectId=${projectId}",
+                                    "api": "/expense/project/pageMember?projectId=${projectId}",
                                     "body": {
                                         "type": "list",
                                         "source": "$rows",
@@ -224,7 +224,7 @@ var dataJson =
                                 "title": "费用信息",
                                 "body": {
                                     "type": "form",
-                                    "api": "post:/expense/addRecord",
+                                    "api": "post:/expense/project/addRecord",
                                     "body": [
                                         {
                                             "type": "input-number",
@@ -237,7 +237,7 @@ var dataJson =
                                             "label": "花费人",
                                             "type": "select",
                                             "name": "userId",
-                                            "source": "/project/listMember?projectId=${projectId}",
+                                            "source": "/expense/project/listMember?projectId=${projectId}",
                                             "labelField": "userName",
                                             "valueField": "userId",
                                             "required": true,
@@ -292,7 +292,7 @@ var dataJson =
                                 "title": "费用明细",
                                 "body": {
                                     "type": "service",
-                                    "api": "/expense/listRecord?projectId=${projectId}",
+                                    "api": "/expense/project/listRecord?projectId=${projectId}",
                                     "body": [
                                         {
                                             "type": "table",
@@ -334,7 +334,7 @@ var dataJson =
                                 "title": "分摊明细",
                                 "body": {
                                     "type": "service",
-                                    "api": "/expense/listRecord?projectId=${projectId}",
+                                    "api": "/expense/project/sharing?projectId=${projectId}",
                                     "body": [
                                         {
                                             "type": "table",
@@ -350,16 +350,8 @@ var dataJson =
                                                     "label": "用户姓名"
                                                 },
                                                 {
-                                                    "name": "expenseType",
-                                                    "label": "费用类型"
-                                                },
-                                                {
                                                     "name": "amount",
                                                     "label": "金额"
-                                                },
-                                                {
-                                                    "name": "remark",
-                                                    "label": "备注"
                                                 }
                                             ]
                                         }

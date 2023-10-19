@@ -1,4 +1,4 @@
-package com.github.zavier.expense.executor;
+package com.github.zavier.project.executor;
 
 import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
 import com.github.zavier.domain.expense.ExpenseRecord;

@@ -6,18 +6,24 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.domain.expense.ExpenseProjectMember;
+import com.github.zavier.domain.expense.ExpenseRecord;
+import com.github.zavier.domain.expense.ExpenseSharing;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
+import com.github.zavier.dto.data.ExpenseRecordDTO;
 import com.github.zavier.dto.data.ProjectDTO;
-import com.github.zavier.project.executor.ProjectAddCmdExe;
-import com.github.zavier.project.executor.ProjectDeleteCmdExe;
-import com.github.zavier.project.executor.ProjectMemberAddCmdExe;
+import com.github.zavier.dto.data.UserSharingDTO;
+import com.github.zavier.project.executor.*;
+import com.github.zavier.project.executor.converter.ProjectConverter;
 import com.github.zavier.project.executor.query.ProjectListQryExe;
 import com.github.zavier.project.executor.query.ProjectMemberListQryExe;
+import com.github.zavier.project.executor.query.ProjectSharingQryExe;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +40,14 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectListQryExe projectListQryExe;
     @Resource
     private ProjectMemberListQryExe projectMemberListQryExe;
+    @Resource
+    private ExpenseRecordAddCmdExe expenseRecordAddCmdExe;
+    @Resource
+    private ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe;
+    @Resource
+    private ExpenseRecordListQryExe expenseRecordListQryExe;
+    @Resource
+    private ProjectSharingQryExe projectSharingQryExe;
 
     @Override
     public Response createProject(ProjectAddCmd projectAddCmd) {
@@ -49,19 +63,10 @@ public class ProjectServiceImpl implements ProjectService {
     public SingleResponse<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
         final List<ExpenseProjectMember> execute = projectMemberListQryExe.execute(projectMemberListQry);
         final List<ExpenseProjectMemberDTO> collect = execute.stream()
-                .map(this::convertToDTO)
+                .map(ProjectConverter::convertToDTO)
                 .collect(Collectors.toList());
 
         return SingleResponse.of(collect);
-    }
-
-    private ExpenseProjectMemberDTO convertToDTO(ExpenseProjectMember expenseProjectMember){
-        final ExpenseProjectMemberDTO memberDTO = new ExpenseProjectMemberDTO();
-        memberDTO.setProjectId(expenseProjectMember.getProjectId());
-        memberDTO.setUserId(expenseProjectMember.getUserId());
-        memberDTO.setUserName(expenseProjectMember.getUserName());
-        memberDTO.setWeight(expenseProjectMember.getWeight());
-        return memberDTO;
     }
 
     @Override
@@ -72,5 +77,77 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public PageResponse<ProjectDTO> pageProject(ProjectListQry projectListQry) {
         return projectListQryExe.execute(projectListQry);
+    }
+
+    @Override
+    public Response addExpenseRecord(ExpenseRecordAddCmd expenseRecordAddCmd) {
+        expenseRecordAddCmdExe.execute(expenseRecordAddCmd);
+        return Response.buildSuccess();
+    }
+
+    @Override
+    public SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry expenseRecordQry) {
+        final SingleResponse<List<ExpenseRecord>> response = expenseRecordListQryExe.execute(expenseRecordQry);
+        if (!response.isSuccess()) {
+            return SingleResponse.buildFailure(response.getErrCode(), response.getErrMessage());
+        }
+        final List<ExpenseRecord> data = response.getData();
+        if (CollectionUtils.isEmpty(data)) {
+            return SingleResponse.of(Collections.emptyList());
+        }
+
+        final List<ExpenseRecordDTO> collect = data.stream()
+                .map(ProjectConverter::convertToDTO)
+                .collect(Collectors.toList());
+
+        return SingleResponse.of(collect);
+
+    }
+
+    @Override
+    public Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd) {
+        expenseRecordSharingAddCmdExe.execute(sharingAddCmd);
+        return Response.buildSuccess();
+    }
+
+
+    @Override
+    public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
+        List<UserSharingDTO> sharingDTOList = new ArrayList<>();
+
+        // TODO 迁移到领域对象中 ?
+        final List<ExpenseRecord> execute = projectSharingQryExe.execute(projectSharingQry);
+        Map<Integer, BigDecimal> userIdShareAmount = new HashMap<>();
+        Map<Integer, String> userIdNameMap = new HashMap<>();
+        execute.forEach(expenseRecord -> {
+            // 需要均摊的
+            final Map<Integer, ExpenseSharing> userIdSharingMap = expenseRecord.getUserIdSharingMap();
+            userIdSharingMap.forEach((userId, sharing) -> {
+                final BigDecimal defaultValue = userIdShareAmount.getOrDefault(userId, BigDecimal.ZERO);
+                userIdShareAmount.put(userId, defaultValue.add(sharing.getAmount()));
+
+                userIdNameMap.put(userId, sharing.getUserName());
+            });
+
+            // 减去自己花费的
+            final Integer costUserId = expenseRecord.getCostUserId();
+            final BigDecimal amount = expenseRecord.getAmount();
+            userIdShareAmount.put(costUserId,
+                    userIdShareAmount.getOrDefault(costUserId, BigDecimal.ZERO).subtract(amount));
+
+            userIdNameMap.put(costUserId, expenseRecord.getCostUserName());
+        });
+
+
+        userIdShareAmount.forEach((userIdShare, amount) -> {
+            final String userName = userIdNameMap.get(userIdShare);
+            final UserSharingDTO userSharingDTO = new UserSharingDTO()
+                    .setUserId(userIdShare)
+                    .setUserName(userName)
+                    .setAmount(amount);
+            sharingDTOList.add(userSharingDTO);
+        });
+
+        return SingleResponse.of(sharingDTOList);
     }
 }
