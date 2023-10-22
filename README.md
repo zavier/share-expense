@@ -19,11 +19,18 @@
 
 启动项目，访问 http://localhost:8080/ 即可，部分截图如下
 
+### 项目列表
+自己创建或者加入的项目
 ![](https://raw.githubusercontent.com/zavier/share-expense/main/img/projectList.png)
 
+### 添加项目成员
 ![](https://raw.githubusercontent.com/zavier/share-expense/main/img/addMember.png)
 
-
+### 添加费用信息
 ![](https://raw.githubusercontent.com/zavier/share-expense/main/img/addRecord.png)
 
+### 全部费用明细
+![](https://raw.githubusercontent.com/zavier/share-expense/main/img/recordInfo.png)
+
+### 费用分摊明细
 ![](https://raw.githubusercontent.com/zavier/share-expense/main/img/shareDetail.png)
