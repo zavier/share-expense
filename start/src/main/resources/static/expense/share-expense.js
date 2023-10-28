@@ -344,8 +344,12 @@ var dataJson =
                                                     "label": "用户姓名"
                                                 },
                                                 {
-                                                    "name": "amount",
-                                                    "label": "应付(收)金额"
+                                                    "name": "needPaid",
+                                                    "label": "应付金额"
+                                                },
+                                                {
+                                                    "name": "needReceive",
+                                                    "label": "应收金额"
                                                 },
                                                 {
                                                     "name": "shareAmount",
