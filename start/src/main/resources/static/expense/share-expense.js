@@ -29,7 +29,7 @@ var dataJson =
                                     "title": "注册",
                                     "body": {
                                         "type": "form",
-                                        "api": "post:/user/add",
+                                        "api": "post:/expense/user/add",
                                         "body": [
                                             {
                                                 "type": "input-text",
@@ -62,7 +62,7 @@ var dataJson =
                                     "title": "登陆",
                                     "body": {
                                         "type": "form",
-                                        "api": "post:/user/login",
+                                        "api": "post:/expense/user/login",
                                         "redirect": "/",
                                         "body": [
                                             {

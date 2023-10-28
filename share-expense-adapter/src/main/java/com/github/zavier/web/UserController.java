@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeUnit;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/expense/user")
 public class UserController {
     @Resource
     private UserService userService;

@@ -23,4 +23,12 @@ public class UserSharingDTO {
     public BigDecimal getAmount() {
         return shareAmount.subtract(paidAmount);
     }
+
+    public BigDecimal getNeedPaid() {
+        return shareAmount.compareTo(paidAmount) > 0 ? shareAmount.subtract(paidAmount) : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getNeedReceive() {
+        return paidAmount.compareTo(shareAmount) > 0 ? paidAmount.subtract(shareAmount) : BigDecimal.ZERO;
+    }
 }
