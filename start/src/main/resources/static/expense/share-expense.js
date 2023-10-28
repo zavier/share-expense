@@ -192,25 +192,19 @@ var dataJson =
                                     "type": "service",
                                     "api": "/expense/project/pageMember?projectId=${projectId}",
                                     "body": {
-                                        "type": "list",
+                                        "type": "table",
                                         "source": "$rows",
-                                        "listItem": {
-                                            "body": [
-                                                {
-                                                    "type": "hbox",
-                                                    "columns": [
-                                                        {
-                                                            "name": "userName",
-                                                            "label": "用户姓名"
-                                                        },
-                                                        {
-                                                            "name": "weight",
-                                                            "label": "分摊权重(人份)"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
+                                        "columns": [
+                                            {
+                                                "name": "userName",
+                                                "label": "用户姓名"
+                                            },
+                                            {
+                                                "name": "weight",
+                                                "label": "分摊权重(人份)"
+                                            }
+                                        ]
+
                                     }
                                 }
                             }
