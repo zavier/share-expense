@@ -11,7 +11,6 @@ import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectListQry;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,15 +115,16 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         return PageResponse.of(projectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
     }
 
-    @Nullable
+
     private PageResponse<ExpenseProject> pageProjectByUser(ProjectListQry projectListQry) {
         List<ExpenseProjectDO> resultList = new ArrayList<>();
 
+        List<ExpenseProjectDO> repeatbleList = new ArrayList<>();
         // 创建的
         final List<ExpenseProjectDO> createdList = expenseProjectMapper.wrapper()
                 .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getUserId())
                 .list();
-        resultList.addAll(createdList);
+        repeatbleList.addAll(createdList);
 
         // 加入的
         final List<ExpenseProjectMemberDO> memberDOList = expenseProjectMemberMapper.wrapper()
@@ -136,8 +136,17 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             final List<ExpenseProjectDO> joinedList = expenseProjectMapper.wrapper()
                     .in(ExpenseProjectDO::getId, projectIdList)
                     .list();
-            resultList.addAll(joinedList);
+            repeatbleList.addAll(joinedList);
         }
+
+        // 去重复
+        Set<Integer> projectIdSet = new HashSet<>();
+        repeatbleList.forEach(it -> {
+            if (projectIdSet.add(it.getId())) {
+                resultList.add(it);
+            }
+        });
+
 
         // 排序
         resultList.sort(Comparator.comparing(ExpenseProjectDO::getId).reversed());
