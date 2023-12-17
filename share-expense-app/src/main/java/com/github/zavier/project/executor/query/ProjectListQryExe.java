@@ -8,15 +8,17 @@ import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.dto.data.ProjectDTO;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ProjectListQryExe {
 
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+
+    public ProjectListQryExe(ExpenseProjectGateway expenseProjectGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+    }
 
     public PageResponse<ProjectDTO> execute(ProjectListQry projectListQry) {
         Assert.notNull(projectListQry.getPage(), "页码不能为空");

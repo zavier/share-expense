@@ -6,14 +6,16 @@ import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 import java.util.Optional;
 
 @Component
 public class ProjectDeleteCmdExe {
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+
+    public ProjectDeleteCmdExe(ExpenseProjectGateway expenseProjectGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+    }
 
     public Response execute(Integer projectId, Integer operatorId) {
         Assert.notNull(projectId, "项目ID不能为空");

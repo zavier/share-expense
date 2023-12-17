@@ -7,15 +7,17 @@ import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectMemberListQry;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class ProjectMemberListQryExe {
 
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+
+    public ProjectMemberListQryExe(ExpenseProjectGateway expenseProjectGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+    }
 
     public List<ExpenseProjectMember> execute(ProjectMemberListQry projectMemberListQry) {
         Assert.notNull(projectMemberListQry.getProjectId(), "项目ID不能为空");

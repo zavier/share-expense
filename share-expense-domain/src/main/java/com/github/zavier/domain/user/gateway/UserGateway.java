@@ -3,8 +3,8 @@ package com.github.zavier.domain.user.gateway;
 import com.alibaba.cola.dto.PageResponse;
 import com.github.zavier.domain.user.User;
 import com.github.zavier.dto.UserListQry;
+import org.jetbrains.annotations.NotNull;
 
-import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 public interface UserGateway {

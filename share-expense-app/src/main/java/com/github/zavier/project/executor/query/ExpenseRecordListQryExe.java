@@ -1,4 +1,4 @@
-package com.github.zavier.project.executor;
+package com.github.zavier.project.executor.query;
 
 import com.alibaba.cola.dto.SingleResponse;
 import com.alibaba.cola.exception.Assert;
@@ -9,17 +9,19 @@ import com.github.zavier.dto.ExpenseRecordQry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 @Slf4j
 @Component
 public class ExpenseRecordListQryExe {
 
-    @Resource
-    private ExpenseRecordGateway expenseRecordGateway;
-    @Resource
-    private UserGateway userGateway;
+    private final ExpenseRecordGateway expenseRecordGateway;
+    private final UserGateway userGateway;
+
+    public ExpenseRecordListQryExe(ExpenseRecordGateway expenseRecordGateway, UserGateway userGateway) {
+        this.expenseRecordGateway = expenseRecordGateway;
+        this.userGateway = userGateway;
+    }
 
     public SingleResponse<List<ExpenseRecord>> execute(ExpenseRecordQry expenseRecordQry) {
         final Integer projectId = expenseRecordQry.getProjectId();

@@ -7,12 +7,13 @@ import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectAddCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 @Component
 public class ProjectAddCmdExe {
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+
+    public ProjectAddCmdExe(ExpenseProjectGateway expenseProjectGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+    }
 
     public Response execute(ProjectAddCmd projectAddCmd) {
         final ExpenseProject expenseProject = new ExpenseProject();

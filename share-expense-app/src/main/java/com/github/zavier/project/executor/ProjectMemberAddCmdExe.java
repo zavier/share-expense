@@ -10,16 +10,18 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 
 @Component
 public class ProjectMemberAddCmdExe {
 
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
-    @Resource
-    private UserGateway userGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+    private final UserGateway userGateway;
+
+    public ProjectMemberAddCmdExe(ExpenseProjectGateway expenseProjectGateway, UserGateway userGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+        this.userGateway = userGateway;
+    }
 
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
         Assert.notNull(projectMemberAddCmd.getProjectId(), "项目ID不能为空");

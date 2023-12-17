@@ -12,19 +12,21 @@ import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 
 @Component
 public class ExpenseRecordValidator {
 
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
-    @Resource
-    private ExpenseRecordGateway expenseRecordGateway;
-    @Resource
-    private UserGateway userGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseRecordGateway expenseRecordGateway;
+    private final UserGateway userGateway;
+
+    public ExpenseRecordValidator(ExpenseProjectGateway expenseProjectGateway, ExpenseRecordGateway expenseRecordGateway, UserGateway userGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+        this.expenseRecordGateway = expenseRecordGateway;
+        this.userGateway = userGateway;
+    }
 
     public void valid(ExpenseRecordAddCmd expenseRecordAddCmd) {
         // 基础数据校验

@@ -16,18 +16,21 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-
 @Service
 @CatchAndLog
 public class UserServiceImpl implements UserService {
 
-    @Resource
-    private UserAddCmdExe userAddCmdExe;
-    @Resource
-    private UserListQryExe userListQryExe;
-    @Resource
-    private UserLoginExe userLoginExe;
+    private final UserAddCmdExe userAddCmdExe;
+    private final UserListQryExe userListQryExe;
+    private final UserLoginExe userLoginExe;
+
+    public UserServiceImpl(UserAddCmdExe userAddCmdExe,
+                           UserListQryExe userListQryExe,
+                           UserLoginExe userLoginExe) {
+        this.userAddCmdExe = userAddCmdExe;
+        this.userListQryExe = userListQryExe;
+        this.userLoginExe = userLoginExe;
+    }
 
     @Override
     public Response addUser(UserAddCmd userAddCmd) {

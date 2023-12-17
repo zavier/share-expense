@@ -8,17 +8,20 @@ import com.github.zavier.domain.expense.gateway.ExpenseRecordGateway;
 import com.github.zavier.dto.ProjectSharingQry;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class ProjectSharingQryExe {
 
-    @Resource
-    private ExpenseProjectGateway expenseProjectGateway;
-    @Resource
-    private ExpenseRecordGateway expenseRecordGateway;
+    private final ExpenseProjectGateway expenseProjectGateway;
+    private final ExpenseRecordGateway expenseRecordGateway;
+
+    public ProjectSharingQryExe(ExpenseProjectGateway expenseProjectGateway, ExpenseRecordGateway expenseRecordGateway) {
+        this.expenseProjectGateway = expenseProjectGateway;
+        this.expenseRecordGateway = expenseRecordGateway;
+    }
+
 
     public List<ExpenseRecord> execute(ProjectSharingQry projectSharingQry) {
         Assert.notNull(projectSharingQry.getProjectId(), "项目ID不能为空");

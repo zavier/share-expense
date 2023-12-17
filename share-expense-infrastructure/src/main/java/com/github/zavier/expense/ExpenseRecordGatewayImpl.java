@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,12 +21,15 @@ import java.util.stream.Collectors;
 @Repository
 public class ExpenseRecordGatewayImpl implements ExpenseRecordGateway {
 
-    @Resource
-    private ExpenseRecordMapper expenseRecordMapper;
-    @Resource
-    private ExpenseSharingMapper expenseSharingMapper;
-    @Resource
-    private UserMapper userMapper;
+    private final ExpenseRecordMapper expenseRecordMapper;
+    private final ExpenseSharingMapper expenseSharingMapper;
+    private final UserMapper userMapper;
+
+    public ExpenseRecordGatewayImpl(ExpenseRecordMapper expenseRecordMapper, ExpenseSharingMapper expenseSharingMapper, UserMapper userMapper) {
+        this.expenseRecordMapper = expenseRecordMapper;
+        this.expenseSharingMapper = expenseSharingMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional

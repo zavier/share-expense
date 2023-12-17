@@ -12,19 +12,21 @@ import com.github.zavier.dto.ExpenseRecordSharingAddCmd;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 
 @Slf4j
 @Component
 public class ExpenseRecordSharingAddCmdExe {
 
-    @Resource
-    private ExpenseRecordGateway expenseRecordGateway;
-    @Resource
-    private ExpenseRecordValidator expenseRecordValidator;
-    @Resource
-    private UserGateway userGateway;
+    private final ExpenseRecordGateway expenseRecordGateway;
+    private final ExpenseRecordValidator expenseRecordValidator;
+    private final UserGateway userGateway;
+
+    public ExpenseRecordSharingAddCmdExe(ExpenseRecordGateway expenseRecordGateway, ExpenseRecordValidator expenseRecordValidator, UserGateway userGateway) {
+        this.expenseRecordGateway = expenseRecordGateway;
+        this.expenseRecordValidator = expenseRecordValidator;
+        this.userGateway = userGateway;
+    }
 
     public void execute(ExpenseRecordSharingAddCmd sharingAddCmd) {
         expenseRecordValidator.valid(sharingAddCmd);

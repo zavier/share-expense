@@ -8,15 +8,17 @@ import com.github.zavier.dto.UserListQry;
 import com.github.zavier.dto.data.UserDTO;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class UserListQryExe {
 
-    @Resource
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
+
+    public UserListQryExe(UserGateway userGateway) {
+        this.userGateway = userGateway;
+    }
 
     public PageResponse<UserDTO> execute(UserListQry userListQry) {
         Assert.notNull(userListQry.getPage(), "页码不能为空");

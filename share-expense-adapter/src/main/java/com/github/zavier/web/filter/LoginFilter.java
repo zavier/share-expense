@@ -1,12 +1,12 @@
 package com.github.zavier.web.filter;
 
 import com.github.zavier.domain.utils.TokenHelper;
+import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -88,6 +88,7 @@ public class LoginFilter implements Filter {
     private boolean notNeedLogin(String url) {
         return url.contains("user/login")
                 || url.contains("user/add")
+                || url.contains("wx/")
                 || "/".equals(url)
                 || url.endsWith(".html")
                 || url.endsWith(".css")

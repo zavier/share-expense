@@ -8,7 +8,6 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -18,8 +17,11 @@ public class UserValidator {
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
     private static final Pattern emailPattern = Pattern.compile(EMAIL_PATTERN);
 
-    @Resource
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
+
+    public UserValidator(UserGateway userGateway) {
+        this.userGateway = userGateway;
+    }
 
     public void validateUserName(String username) {
         Assert.isTrue(StringUtils.isNotBlank(username), "名称不能为空");

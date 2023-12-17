@@ -7,15 +7,16 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserAddCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 @Component
 public class UserAddCmdExe {
 
-    @Resource
-    private UserGateway userGateway;
-    @Resource
-    private UserValidator userValidator;
+    private final UserGateway userGateway;
+    private final UserValidator userValidator;
+
+    public UserAddCmdExe(UserGateway userGateway, UserValidator userValidator) {
+        this.userGateway = userGateway;
+        this.userValidator = userValidator;
+    }
 
     public Response execute(UserAddCmd userAddCmd) {
         validate(userAddCmd);

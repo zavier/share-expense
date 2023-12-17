@@ -7,14 +7,16 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserLoginCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 
 @Component
 public class UserLoginExe {
 
-    @Resource
-    private UserGateway userGateway;
+    private final UserGateway userGateway;
+
+    public UserLoginExe(UserGateway userGateway) {
+        this.userGateway = userGateway;
+    }
 
     public SingleResponse<String> execute(UserLoginCmd userLoginCmd) {
         Assert.notNull(userLoginCmd.getUsername(), "用户名不能为空");

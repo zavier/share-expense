@@ -8,15 +8,16 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Optional;
 
 @Component
 public class ExpenseRecordConverter {
+    private final UserGateway userGateway;
 
-    @Resource
-    private UserGateway userGateway;
+    public ExpenseRecordConverter(UserGateway userGateway) {
+        this.userGateway = userGateway;
+    }
 
     public ExpenseRecord toExpenseRecord(ExpenseRecordAddCmd expenseRecordAddCmd) {
         final ExpenseRecord expenseRecord = new ExpenseRecord();

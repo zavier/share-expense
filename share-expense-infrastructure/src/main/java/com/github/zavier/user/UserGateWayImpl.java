@@ -10,10 +10,9 @@ import com.github.zavier.dto.UserListQry;
 import io.mybatis.mapper.example.ExampleWrapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +20,11 @@ import java.util.stream.Collectors;
 
 @Repository
 public class UserGateWayImpl implements UserGateway {
-    @Resource
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+
+    public UserGateWayImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
 
     @Override

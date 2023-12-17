@@ -15,13 +15,13 @@ import com.github.zavier.dto.data.ProjectDTO;
 import com.github.zavier.dto.data.UserSharingDTO;
 import com.github.zavier.project.executor.*;
 import com.github.zavier.project.executor.converter.ProjectConverter;
+import com.github.zavier.project.executor.query.ExpenseRecordListQryExe;
 import com.github.zavier.project.executor.query.ProjectListQryExe;
 import com.github.zavier.project.executor.query.ProjectMemberListQryExe;
 import com.github.zavier.project.executor.query.ProjectSharingQryExe;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,24 +30,35 @@ import java.util.stream.Collectors;
 @CatchAndLog
 public class ProjectServiceImpl implements ProjectService {
 
-    @Resource
-    private ProjectAddCmdExe projectAddCmdExe;
-    @Resource
-    private ProjectMemberAddCmdExe projectMemberAddCmdExe;
-    @Resource
-    private ProjectDeleteCmdExe projectDeleteCmdExe;
-    @Resource
-    private ProjectListQryExe projectListQryExe;
-    @Resource
-    private ProjectMemberListQryExe projectMemberListQryExe;
-    @Resource
-    private ExpenseRecordAddCmdExe expenseRecordAddCmdExe;
-    @Resource
-    private ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe;
-    @Resource
-    private ExpenseRecordListQryExe expenseRecordListQryExe;
-    @Resource
-    private ProjectSharingQryExe projectSharingQryExe;
+    private final ProjectAddCmdExe projectAddCmdExe;
+    private final ProjectMemberAddCmdExe projectMemberAddCmdExe;
+    private final ProjectDeleteCmdExe projectDeleteCmdExe;
+    private final ProjectListQryExe projectListQryExe;
+    private final ProjectMemberListQryExe projectMemberListQryExe;
+    private final ExpenseRecordAddCmdExe expenseRecordAddCmdExe;
+    private final ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe;
+    private final ExpenseRecordListQryExe expenseRecordListQryExe;
+    private final ProjectSharingQryExe projectSharingQryExe;
+
+    public ProjectServiceImpl(ProjectAddCmdExe projectAddCmdExe,
+                              ProjectMemberAddCmdExe projectMemberAddCmdExe,
+                              ProjectDeleteCmdExe projectDeleteCmdExe,
+                              ProjectListQryExe projectListQryExe,
+                              ProjectMemberListQryExe projectMemberListQryExe,
+                              ExpenseRecordAddCmdExe expenseRecordAddCmdExe,
+                              ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe,
+                              ExpenseRecordListQryExe expenseRecordListQryExe,
+                              ProjectSharingQryExe projectSharingQryExe) {
+        this.projectAddCmdExe = projectAddCmdExe;
+        this.projectMemberAddCmdExe = projectMemberAddCmdExe;
+        this.projectDeleteCmdExe = projectDeleteCmdExe;
+        this.projectListQryExe = projectListQryExe;
+        this.projectMemberListQryExe = projectMemberListQryExe;
+        this.expenseRecordAddCmdExe = expenseRecordAddCmdExe;
+        this.expenseRecordSharingAddCmdExe = expenseRecordSharingAddCmdExe;
+        this.expenseRecordListQryExe = expenseRecordListQryExe;
+        this.projectSharingQryExe = projectSharingQryExe;
+    }
 
     @Override
     public Response createProject(ProjectAddCmd projectAddCmd) {

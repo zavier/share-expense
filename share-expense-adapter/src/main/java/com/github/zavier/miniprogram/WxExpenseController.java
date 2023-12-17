@@ -1,4 +1,4 @@
-package com.github.zavier.web;
+package com.github.zavier.miniprogram;
 
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/expense")
-public class ExpenseController {
+@RequestMapping("/wx/expense")
+public class WxExpenseController {
 
     private final ProjectService projectService;
 
-    public ExpenseController(ProjectService projectService) {
+    public WxExpenseController(ProjectService projectService) {
         this.projectService = projectService;
     }
 
@@ -83,7 +83,7 @@ public class ExpenseController {
 
     @GetMapping("/project/list")
     public PageResponseVo<ProjectDTO> pageProject(ProjectListQry projectListQry) {
-        final int userId = UserHolder.getUser().getUserId();
+        final int userId = 1;
         projectListQry.setUserId(userId);
         final PageResponse<ProjectDTO> pageResponse = projectService.pageProject(projectListQry);
         return PageResponseVo.buildFromPageResponse(pageResponse);
