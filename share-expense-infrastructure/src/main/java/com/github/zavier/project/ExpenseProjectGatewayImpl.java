@@ -44,9 +44,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         expenseProject.listMember().forEach(projectMember -> {
             final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
             expenseProjectMemberDO.setProjectId(expenseProject.getId());
+            expenseProjectMemberDO.setIsVirtual(projectMember.getIsVirtual());
             expenseProjectMemberDO.setUserId(projectMember.getUserId());
             expenseProjectMemberDO.setUserName(projectMember.getUserName());
-            expenseProjectMemberDO.setWeight(projectMember.getWeight());
             expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
         });
     }

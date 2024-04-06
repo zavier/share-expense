@@ -15,6 +15,7 @@ import java.util.Map;
 public class ExpenseRecord {
 
     private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
+    private Map<Integer, String> consumerIdMap = new HashMap<>();
 
     @Getter
     @Setter
@@ -25,10 +26,10 @@ public class ExpenseRecord {
 
     @Getter
     @Setter
-    private Integer costUserId;
+    private Integer payUserId;
     @Getter
     @Setter
-    private String costUserName;
+    private String payUserName;
     @Getter
     @Setter
     private BigDecimal amount;
@@ -60,6 +61,26 @@ public class ExpenseRecord {
     @Setter
     private Boolean needSharding = false;
 
+    public void addConsumer(Integer consumerId, String consumerName) {
+        checkConsumerNameExist(consumerName);
+
+        final String old = consumerIdMap.put(consumerId, consumerName);
+        Assert.isTrue(old == null, "消费人已存在");
+    }
+
+    private void checkConsumerNameExist(String consumerName) {
+        if (consumerIdMap.isEmpty()) {
+            return;
+        }
+        final boolean hasSame = consumerIdMap.values().stream().anyMatch(it -> it.equals(consumerName));
+        Assert.isFalse(hasSame, "消费人名称重复");
+    }
+
+    public Map<Integer, String> getConsumerIdMap() {
+        return Collections.unmodifiableMap(consumerIdMap);
+    }
+
+    // TODO 权重废弃？
     public void addUserSharing(Integer userId, String userName, Integer weight) {
         Assert.notNull(userId, "用户ID不能为空");
         Assert.notNull(userName, "用户名称不能为空");
@@ -67,26 +88,6 @@ public class ExpenseRecord {
 
         Assert.isFalse(userIdSharingMap.containsKey(userId), "用户ID重复");
         userIdSharingMap.put(userId, new ExpenseSharing(userId, userName, weight));
-
-        calcSharingAmount();
-    }
-
-
-    public void updateUserWeight(Integer userId, Integer weight) {
-        Assert.notNull(userId, "用户ID不能为空");
-        Assert.notNull(weight, "权重不能为空");
-
-        Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
-        userIdSharingMap.get(userId).setWeight(weight);
-
-        calcSharingAmount();
-    }
-
-    public void removeUserSharing(Integer userId) {
-        Assert.notNull(userId, "用户ID不能为空");
-
-        Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
-        userIdSharingMap.remove(userId);
 
         calcSharingAmount();
     }

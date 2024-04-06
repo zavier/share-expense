@@ -32,7 +32,8 @@ public class ProjectSharingQryExe {
 
         expenseRecords.forEach(expenseRecord -> {
             expenseProject.listMember().forEach(projectMember -> {
-                expenseRecord.addUserSharing(projectMember.getUserId(), projectMember.getUserName(), projectMember.getWeight());
+                // TODO
+                expenseRecord.addUserSharing(projectMember.getUserId(), projectMember.getUserName(), 0);
             });
         });
 

@@ -12,7 +12,7 @@ import com.github.zavier.dto.data.UserSharingDTO;
 import java.util.List;
 
 public interface ProjectService {
-    Response createProject(ProjectAddCmd projectAddCmd);
+    SingleResponse<Integer> createProject(ProjectAddCmd projectAddCmd);
 
     Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd);
 
@@ -26,7 +26,6 @@ public interface ProjectService {
 
     SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry expenseRecordQry);
 
-    Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd);
 
     SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry);
 }

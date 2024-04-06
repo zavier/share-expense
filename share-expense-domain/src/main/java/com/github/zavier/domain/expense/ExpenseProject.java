@@ -6,7 +6,6 @@ import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public class ExpenseProject {
@@ -60,17 +59,40 @@ public class ExpenseProject {
     @Setter
     private ChangingStatus changingStatus = ChangingStatus.NEW;
 
+    private Integer maxVirtualUserId = -1;
+
     public List<ExpenseProjectMember> listMember() {
         return Collections.unmodifiableList(new ArrayList<>(userIdMap.values()));
     }
 
-    public void addMember(Integer userId, String userName, Integer weight) {
+    public void addMember(Integer userId, String userName, boolean isVirtual) {
+        Assert.isFalse(existMember(userName), "用户已存在");
+        if (isVirtual) {
+            addVirtualMember(userName);
+        } else {
+            addActualMember(userId, userName);
+        }
+    }
+
+    public void addActualMember(Integer userId, String userName) {
         final ExpenseProjectMember projectMember = new ExpenseProjectMember()
                 .setProjectId(this.getId())
                 .setUserId(userId)
                 .setUserName(userName)
-                .setWeight(weight);
+                .setIsVirtual(false);
         final ExpenseProjectMember previous = userIdMap.putIfAbsent(userId, projectMember);
+        if (previous != null) {
+            throw new BizException("用户已存在");
+        }
+    }
+
+    public void addVirtualMember(String userName) {
+        final ExpenseProjectMember projectMember = new ExpenseProjectMember()
+                .setProjectId(this.getId())
+                .setUserId(maxVirtualUserId--)
+                .setUserName(userName)
+                .setIsVirtual(true);
+        final ExpenseProjectMember previous = userIdMap.putIfAbsent(projectMember.getUserId(), projectMember);
         if (previous != null) {
             throw new BizException("用户已存在");
         }
@@ -80,29 +102,28 @@ public class ExpenseProject {
         return userIdMap.containsKey(userId);
     }
 
+    public Optional<ExpenseProjectMember> getMember(Integer userId) {
+        return Optional.ofNullable(userIdMap.get(userId));
+    }
+
+    public boolean existMember(String userName) {
+        if (userIdMap.isEmpty()) {
+            return false;
+        }
+        return userIdMap.values().stream()
+                .map(ExpenseProjectMember::getUserName)
+                .anyMatch(it -> it.equals(userName));
+    }
+
 
     public void checkUserIdExist() {
         Assert.notNull(userId, "创建人不能为空");
     }
+
 
     public void checkProjectNameValid() {
         Assert.notNull(name, "项目名称不能为空");
         Assert.isTrue(name.length() < 100, "项目名称长度不能超过100字");
     }
 
-    public void addExpenseRecord(ExpenseRecord expenseRecord) {
-        expenseRecordList.add(expenseRecord);
-    }
-
-    public void cala() {
-        // TODO
-        final BigDecimal totalAmount = expenseRecordList.stream().map(ExpenseRecord::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        final Integer totalWeight = this.listMember().stream().map(ExpenseProjectMember::getWeight)
-                .reduce(0, Integer::sum);
-
-//        userIdSharingMap.values().forEach(expenseSharing ->
-//                expenseSharing.setAmount(amount.multiply(new BigDecimal(expenseSharing.getWeight())).divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP)));
-    }
 }

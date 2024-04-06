@@ -1,25 +1,19 @@
 package com.github.zavier.converter;
 
 import com.github.zavier.domain.expense.ExpenseRecord;
-import com.github.zavier.domain.expense.ExpenseSharing;
 import com.github.zavier.expense.ExpenseRecordDO;
-import com.github.zavier.expense.ExpenseSharingDO;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ExpenseRecordDoConverter {
 
     public static ExpenseRecordDO toInsertExpenseRecordDO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDO expenseRecordDO = new ExpenseRecordDO();
-        expenseRecordDO.setCostUserId(expenseRecord.getCostUserId());
-        expenseRecordDO.setCostUserName(expenseRecord.getCostUserName());
+        expenseRecordDO.setPayUserId(expenseRecord.getPayUserId());
+        expenseRecordDO.setPayUserName(expenseRecord.getPayUserName());
         expenseRecordDO.setProjectId(expenseRecord.getProjectId());
         expenseRecordDO.setAmount(expenseRecord.getAmount());
-        expenseRecordDO.setDate(expenseRecord.getDate());
+        expenseRecordDO.setPayDate(expenseRecord.getDate());
         expenseRecordDO.setExpenseType(expenseRecord.getExpenseType());
         expenseRecordDO.setRemark(expenseRecord.getRemark());
         final Date now = new Date();
@@ -29,31 +23,16 @@ public class ExpenseRecordDoConverter {
         return expenseRecordDO;
     }
 
-    public static List<ExpenseSharingDO> toExpenseSharingDOList(ExpenseRecord expenseRecord) {
-        if (!expenseRecord.hasSharing()) {
-            return Collections.emptyList();
-        }
 
-        final Map<Integer, ExpenseSharing> userIdSharingMap = expenseRecord.getUserIdSharingMap();
-        return userIdSharingMap.values().stream().map(expenseSharing -> {
-            final ExpenseSharingDO expenseSharingDO = new ExpenseSharingDO();
-            expenseSharingDO.setRecordId(expenseRecord.getId());
-            expenseSharingDO.setUserId(expenseSharing.getUserId());
-            expenseSharingDO.setUserName(expenseSharing.getUserName());
-            expenseSharingDO.setWeight(expenseSharing.getWeight());
-            expenseSharingDO.setAmount(expenseSharing.getAmount());
-            return expenseSharingDO;
-        }).collect(Collectors.toList());
-    }
 
     public static ExpenseRecordDO toUpdateExpenseRecordDO(ExpenseRecord expenseRecord) {
         final ExpenseRecordDO expenseRecordDO = new ExpenseRecordDO();
         expenseRecordDO.setId(expenseRecord.getId());
-        expenseRecordDO.setCostUserId(expenseRecord.getCostUserId());
-        expenseRecordDO.setCostUserName(expenseRecord.getCostUserName());
+        expenseRecordDO.setPayUserId(expenseRecord.getPayUserId());
+        expenseRecordDO.setPayUserName(expenseRecord.getPayUserName());
         expenseRecordDO.setProjectId(expenseRecord.getProjectId());
         expenseRecordDO.setAmount(expenseRecord.getAmount());
-        expenseRecordDO.setDate(expenseRecord.getDate());
+        expenseRecordDO.setPayDate(expenseRecord.getDate());
         expenseRecordDO.setExpenseType(expenseRecord.getExpenseType());
         expenseRecordDO.setRemark(expenseRecord.getRemark());
         final Date now = new Date();
@@ -66,10 +45,10 @@ public class ExpenseRecordDoConverter {
         final ExpenseRecord expenseRecord = new ExpenseRecord();
         expenseRecord.setId(expenseRecordDO.getId());
         expenseRecord.setProjectId(expenseRecordDO.getProjectId());
-        expenseRecord.setCostUserId(expenseRecordDO.getCostUserId());
-        expenseRecord.setCostUserName(expenseRecordDO.getCostUserName());
+        expenseRecord.setPayUserId(expenseRecordDO.getPayUserId());
+        expenseRecord.setPayUserName(expenseRecordDO.getPayUserName());
         expenseRecord.setAmount(expenseRecordDO.getAmount());
-        expenseRecord.setDate(expenseRecordDO.getDate());
+        expenseRecord.setDate(expenseRecordDO.getPayDate());
         expenseRecord.setExpenseType(expenseRecordDO.getExpenseType());
         expenseRecord.setRemark(expenseRecordDO.getRemark());
         expenseRecord.setVersion(expenseRecordDO.getVersion());

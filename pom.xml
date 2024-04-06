@@ -27,6 +27,7 @@
         <commons.collection.version>4.4</commons.collection.version>
         <pagehelper.version>5.3.2</pagehelper.version>
         <jjwt.version>0.12.2</jjwt.version>
+        <guava.version>33.1.0-jre</guava.version>
     </properties>
 
     <modules>
@@ -112,20 +113,6 @@
                 <version>${mybatis.mapper.version}</version>
             </dependency>
 
-            <!--Validation API-->
-            <!--
-                - javax.validation:javax.validation
-                - org.hibernate.validator:hibernate-validator
-                - org.glassfish:jakarta.el
-                are declared in spring-boot-dependencies
-            -->
-            <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>javax.el-api</artifactId>
-                <version>${javax.el-api.version}</version>
-            </dependency>
-            <!--Validation API End -->
-
             <!-- Misc -->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -145,6 +132,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons.collection.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
@@ -175,10 +167,6 @@
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>3.2.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                      <artifactId>maven-deploy-plugin</artifactId>

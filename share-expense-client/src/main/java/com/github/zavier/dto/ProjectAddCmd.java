@@ -12,4 +12,9 @@ public class ProjectAddCmd {
      */
     private Integer userId;
     private String userName;
+
+    /**
+     * 其他成员名称(多个名称以逗号分隔)
+     */
+    private String members;
 }

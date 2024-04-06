@@ -43,20 +43,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Resource
     private ExpenseRecordAddCmdExe expenseRecordAddCmdExe;
     @Resource
-    private ExpenseRecordSharingAddCmdExe expenseRecordSharingAddCmdExe;
-    @Resource
     private ExpenseRecordListQryExe expenseRecordListQryExe;
     @Resource
     private ProjectSharingQryExe projectSharingQryExe;
 
     @Override
-    public Response createProject(ProjectAddCmd projectAddCmd) {
+    public SingleResponse<Integer> createProject(ProjectAddCmd projectAddCmd) {
         return projectAddCmdExe.execute(projectAddCmd);
     }
 
     @Override
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
-        return projectMemberAddCmdExe.addProjectMember(projectMemberAddCmd);
+        return projectMemberAddCmdExe.addProjectVirtualMember(projectMemberAddCmd);
     }
 
     @Override
@@ -104,12 +102,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
-    @Override
-    public Response addExpenseRecordSharing(ExpenseRecordSharingAddCmd sharingAddCmd) {
-        expenseRecordSharingAddCmdExe.execute(sharingAddCmd);
-        return Response.buildSuccess();
-    }
-
 
     @Override
     public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
@@ -127,11 +119,11 @@ public class ProjectServiceImpl implements ProjectService {
             });
 
             // 减去自己花费的
-            final Integer costUserId = expenseRecord.getCostUserId();
+            final Integer payUserId = expenseRecord.getPayUserId();
             final BigDecimal amount = expenseRecord.getAmount();
-            final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(costUserId, new UserSharingDTO(costUserId, expenseRecord.getCostUserName()));
+            final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(payUserId, new UserSharingDTO(payUserId, expenseRecord.getPayUserName()));
             orDefault.setPaidAmount(orDefault.getPaidAmount().add(amount));
-            sharingDTOMap.put(costUserId, orDefault);
+            sharingDTOMap.put(payUserId, orDefault);
         });
 
         return SingleResponse.of(new ArrayList<>(sharingDTOMap.values()));

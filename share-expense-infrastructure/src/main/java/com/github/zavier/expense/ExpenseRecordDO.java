@@ -11,16 +11,16 @@ import java.util.Date;
 public class ExpenseRecordDO {
     @Entity.Column(value = "id", remark = "费用记录ID", id = true)
     private Integer id;
-    @Entity.Column(value = "cost_user_id", remark = "花费的用户ID")
-    private Integer costUserId;
-    @Entity.Column(value = "cost_user_name", remark = "花费的用户名称")
-    private String costUserName;
+    @Entity.Column(value = "pay_user_id", remark = "花费的用户ID")
+    private Integer payUserId;
+    @Entity.Column(value = "pay_user_name", remark = "花费的用户名称")
+    private String payUserName;
     @Entity.Column(value = "project_id", remark = "费用项目ID")
     private Integer projectId;
     @Entity.Column(value = "amount", remark = "费用金额")
     private BigDecimal amount;
-    @Entity.Column(value = "date", remark = "费用日期")
-    private Date date;
+    @Entity.Column(value = "pay_date", remark = "费用日期")
+    private Date payDate;
     @Entity.Column(value = "expense_type", remark = "费用类型")
     private String expenseType;
     @Entity.Column(value = "remark", remark = "备注")

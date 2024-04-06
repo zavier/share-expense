@@ -29,15 +29,22 @@ public class ExpenseRecordValidator {
     public void valid(ExpenseRecordAddCmd expenseRecordAddCmd) {
         // 基础数据校验
         recordAddBaseCheck(expenseRecordAddCmd);
-        // 用户ID存在
-        userIsExist(expenseRecordAddCmd.getUserId());
         // 项目存在校验
-        projectIsExist(expenseRecordAddCmd.getProjectId());
+        final ExpenseProject expenseProject = projectIsExist(expenseRecordAddCmd.getProjectId());
+        // 用户在项目组中
+        userInProject(expenseRecordAddCmd, expenseProject);
+    }
+
+    private static void userInProject(ExpenseRecordAddCmd expenseRecordAddCmd, ExpenseProject expenseProject) {
+        Assert.isTrue(expenseProject.existMember(expenseRecordAddCmd.getPayUserId()), "用户不在项目组中:" + expenseRecordAddCmd.getPayUserId());
+        expenseRecordAddCmd.listConsumerIds()
+                .forEach(it -> Assert.isTrue(expenseProject.existMember(it), "用户不在项目组中:" + it));
     }
 
     private static void recordAddBaseCheck(ExpenseRecordAddCmd expenseRecordAddCmd) {
         Assert.notNull(expenseRecordAddCmd.getProjectId(), "项目ID不能为空");
-        Assert.notNull(expenseRecordAddCmd.getUserId(), "花费人ID不能为空");
+        Assert.notNull(expenseRecordAddCmd.getPayUserId(), "花费人ID不能为空");
+        Assert.notEmpty(expenseRecordAddCmd.listConsumerIds(), "消费用户信息不能为空");
         Assert.notNull(expenseRecordAddCmd.getAmount(), "金额不能为空");
         Assert.notNull(expenseRecordAddCmd.getExpenseType(), "费用类型不能为空");
 
@@ -64,9 +71,10 @@ public class ExpenseRecordValidator {
         Assert.isTrue(expenseRecordSharingAddCmd.getWeight() > 0, "权重必须大于0");
     }
 
-    private void projectIsExist(@NotNull Integer projectId) {
+    private ExpenseProject projectIsExist(@NotNull Integer projectId) {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
+        return projectOpt.get();
     }
 
     private void recordIsExist(@NotNull Integer recordId) {

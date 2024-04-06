@@ -112,6 +112,15 @@ var dataJson =
                             "name": "projectDesc",
                             "label": "项目描述",
                             "required": false
+                        },
+                        {
+                          "label": "成员",
+                          "type": "select",
+                          "name": "members",
+                          "checkAll": true,
+                          "creatable": true,
+                          "multiple": true,
+                          "options": []
                         }
                     ]
                 }
@@ -160,23 +169,12 @@ var dataJson =
                                         {
                                             "label": "成员",
                                             "type": "select",
-                                            "name": "userId",
-                                            "source": "/user/list?page=1&size=1000",
-                                            "labelField": "userName",
-                                            "valueField": "userId",
+                                            "name": "userNames",
+                                            "checkAll": true,
+                                            "creatable": true,
+                                            "multiple": true,
                                             "required": true,
-                                        },
-                                        {
-                                            "type": "input-number",
-                                            "name": "weight",
-                                            "label": "项目分摊权重",
-                                            "required": true,
-                                            "displayMode": "enhance",
-                                            "min": 1,
-                                            "precision": 0,
-                                            "value": 1
-
-                                        },
+                                        }
                                     ]
                                 }
                             }
@@ -198,10 +196,6 @@ var dataJson =
                                             {
                                                 "name": "userName",
                                                 "label": "用户姓名"
-                                            },
-                                            {
-                                                "name": "weight",
-                                                "label": "分摊权重(人份)"
                                             }
                                         ]
 
@@ -230,10 +224,21 @@ var dataJson =
                                         {
                                             "label": "花费人",
                                             "type": "select",
-                                            "name": "userId",
+                                            "name": "payUserId",
                                             "source": "/expense/project/listMember?projectId=${projectId}",
                                             "labelField": "userName",
                                             "valueField": "userId",
+                                            "required": true,
+                                        },
+                                        {
+                                            "label": "使用人",
+                                            "type": "select",
+                                            "name": "consumerIds",
+                                            "labelField": "userName",
+                                            "valueField": "userId",
+                                            "checkAll": true,
+                                            "multiple": true,
+                                            "source": "/expense/project/listMember?projectId=${projectId}",
                                             "required": true,
                                         },
                                         {
@@ -265,6 +270,14 @@ var dataJson =
                                                 {
                                                     "label": "娱乐",
                                                     "value": "娱乐"
+                                                },
+                                                {
+                                                    "label": "住宿",
+                                                    "value": "住宿"
+                                                },
+                                                {
+                                                    "label": "出行",
+                                                    "value": "出行"
                                                 }
                                             ]
                                         },

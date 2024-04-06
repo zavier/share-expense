@@ -7,7 +7,5 @@ import lombok.Data;
 public class ProjectMemberAddCmd  {
     private Integer projectId;
 
-    private Integer userId;
-
-    private Integer weight;
+    private String userNames;
 }

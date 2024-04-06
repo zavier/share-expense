@@ -23,7 +23,7 @@ public class ExpenseProjectMember {
 
 
     /**
-     * 均摊人份
+     * 是否是虚拟成员
      */
-    private Integer weight;
+    private Boolean isVirtual;
 }

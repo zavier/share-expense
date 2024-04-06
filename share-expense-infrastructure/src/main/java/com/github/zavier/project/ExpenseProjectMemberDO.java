@@ -16,8 +16,8 @@ public class ExpenseProjectMemberDO {
     private Integer userId;
     @Entity.Column(value = "user_name", remark = "用户名称")
     private String userName;
-    @Entity.Column(value = "weight", remark = "均摊权重(人份)")
-    private Integer weight;
+    @Entity.Column(value = "is_virtual", remark = "是否虚拟成员")
+    private Boolean isVirtual;
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
     @Entity.Column(value = "updated_at", remark = "更新时间")
