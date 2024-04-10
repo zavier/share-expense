@@ -323,7 +323,7 @@ var dataJson =
                                         {
                                             "label": "成员",
                                             "type": "select",
-                                            "name": "userNames",
+                                            "name": "members",
                                             "joinValues": false,
                                             "extractValue": true,
                                             "checkAll": true,
