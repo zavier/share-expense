@@ -3,35 +3,27 @@ package com.github.zavier.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 public class ExpenseRecordAddCmd {
     private Integer projectId;
     private BigDecimal amount;
-    private Date date;
+    // 秒 时间戳
+    private Long date;
     private String expenseType;
     private String remark;
 
     /**
-     * 消费用户ID集合，逗号分隔
+     * 消费用户集合
      */
-    private String consumerIds;
+    private List<String> consumerMembers = new ArrayList<>();
 
     /**
      * 付款用户ID
      */
-    private Integer payUserId;
+    private String payMember;
 
-    public List<Integer> listConsumerIds() {
-        if (consumerIds == null || consumerIds.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(consumerIds.trim().split(","))
-                .map(Integer::parseInt).collect(Collectors.toList());
-    }
+
 }

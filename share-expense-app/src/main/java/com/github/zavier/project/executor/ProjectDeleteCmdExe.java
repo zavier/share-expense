@@ -21,7 +21,7 @@ public class ProjectDeleteCmdExe {
 
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
-        Assert.isTrue(Objects.equals(projectOpt.get().getUserId(), operatorId), "无权限");
+        Assert.isTrue(Objects.equals(projectOpt.get().getCreateUserId(), operatorId), "无权限");
 
         expenseProjectGateway.delete(projectId);
 

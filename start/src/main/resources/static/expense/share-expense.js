@@ -120,6 +120,8 @@ var dataJson =
                           "checkAll": true,
                           "creatable": true,
                           "multiple": true,
+                          "joinValues": false,
+                          "extractValue": true,
                           "options": []
                         }
                     ]
@@ -148,62 +150,6 @@ var dataJson =
                     "label": "操作",
                     "buttons": [
                         {
-                            "label": "添加成员",
-                            "type": "button",
-                            "level": "link",
-                            "actionType": "dialog",
-                            "dialog": {
-                                "title": "添加成员",
-                                "body": {
-                                    "type": "form",
-                                    "api": "post:/expense/project/addMember",
-                                    "body": [
-                                        {
-                                            "type": "input-number",
-                                            "name": "projectId",
-                                            "label": "项目ID",
-                                            "required": true,
-                                            "readOnly": true,
-                                            "visible": false
-                                        },
-                                        {
-                                            "label": "成员",
-                                            "type": "select",
-                                            "name": "userNames",
-                                            "checkAll": true,
-                                            "creatable": true,
-                                            "multiple": true,
-                                            "required": true,
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "label": "项目成员",
-                            "type": "button",
-                            "level": "link",
-                            "actionType": "dialog",
-                            "dialog": {
-                                "title": "项目成员",
-                                "body": {
-                                    "type": "service",
-                                    "api": "/expense/project/pageMember?projectId=${projectId}",
-                                    "body": {
-                                        "type": "table",
-                                        "source": "$rows",
-                                        "columns": [
-                                            {
-                                                "name": "userName",
-                                                "label": "用户姓名"
-                                            }
-                                        ]
-
-                                    }
-                                }
-                            }
-                        },
-                        {
                             "label": "新增费用",
                             "type": "button",
                             "level": "link",
@@ -215,31 +161,40 @@ var dataJson =
                                     "api": "post:/expense/project/addRecord",
                                     "body": [
                                         {
-                                            "type": "input-number",
+                                            "type": "hidden",
                                             "name": "projectId",
                                             "label": "项目ID",
                                             "required": true,
                                             "readOnly": true
                                         },
                                         {
-                                            "label": "花费人",
+                                            "type": "input-text",
+                                            "name": "projectName",
+                                            "label": "项目",
+                                            "required": true,
+                                            "readOnly": true
+                                        },
+                                        {
+                                            "label": "支付人",
                                             "type": "select",
-                                            "name": "payUserId",
+                                            "name": "payMember",
                                             "source": "/expense/project/listMember?projectId=${projectId}",
-                                            "labelField": "userName",
-                                            "valueField": "userId",
+                                            "labelField": "member",
+                                            "valueField": "member",
                                             "required": true,
                                         },
                                         {
                                             "label": "使用人",
                                             "type": "select",
-                                            "name": "consumerIds",
-                                            "labelField": "userName",
-                                            "valueField": "userId",
+                                            "name": "consumerMembers",
+                                            "labelField": "member",
+                                            "valueField": "member",
                                             "checkAll": true,
                                             "multiple": true,
                                             "source": "/expense/project/listMember?projectId=${projectId}",
                                             "required": true,
+                                            "joinValues": false,
+                                            "extractValue": true,
                                         },
                                         {
                                             "type": "input-number",
@@ -278,12 +233,16 @@ var dataJson =
                                                 {
                                                     "label": "出行",
                                                     "value": "出行"
+                                                },
+                                                {
+                                                    "label": "其他",
+                                                    "value": "其他"
                                                 }
                                             ]
                                         },
                                         {
                                             "type": "input-text",
-                                            "name": "reamrk",
+                                            "name": "remark",
                                             "label": "备注"
                                         }
                                     ]
@@ -307,28 +266,96 @@ var dataJson =
                                             "source": "$rows",
                                             "columns": [
                                                 {
-                                                    "name": "userId",
-                                                    "label": "用户ID"
-                                                },
-                                                {
-                                                    "name": "userName",
-                                                    "label": "用户姓名"
-                                                },
-                                                {
-                                                    "name": "expenseType",
-                                                    "label": "费用类型"
+                                                    "name": "date",
+                                                    "label": "消费日期",
+                                                    "type": "date"
                                                 },
                                                 {
                                                     "name": "amount",
                                                     "label": "金额"
                                                 },
                                                 {
+                                                    "name": "payMember",
+                                                    "label": "付款人"
+                                                },
+                                                {
+                                                    "name": "expenseType",
+                                                    "label": "费用类型"
+                                                },
+                                                {
                                                     "name": "remark",
                                                     "label": "备注"
+                                                },
+                                                {
+                                                  "name": "consumeMembers",
+                                                  "label": "消费人",
+                                                  "type": "list",
+                                                  "placeholder": "-",
+                                                  "listItem": {
+                                                    "title": "${member}"
+                                                  }
                                                 }
                                             ]
                                         }
                                     ]
+                                }
+                            }
+                        },
+                        {
+                            "label": "添加成员",
+                            "type": "button",
+                            "level": "link",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "title": "添加成员",
+                                "body": {
+                                    "type": "form",
+                                    "api": "post:/expense/project/addMember",
+                                    "body": [
+                                        {
+                                            "type": "input-number",
+                                            "name": "projectId",
+                                            "label": "项目ID",
+                                            "required": true,
+                                            "readOnly": true,
+                                            "visible": false
+                                        },
+                                        {
+                                            "label": "成员",
+                                            "type": "select",
+                                            "name": "userNames",
+                                            "joinValues": false,
+                                            "extractValue": true,
+                                            "checkAll": true,
+                                            "creatable": true,
+                                            "multiple": true,
+                                            "required": true,
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "label": "项目成员",
+                            "type": "button",
+                            "level": "link",
+                            "actionType": "dialog",
+                            "dialog": {
+                                "title": "项目成员",
+                                "body": {
+                                    "type": "service",
+                                    "api": "/expense/project/pageMember?projectId=${projectId}",
+                                    "body": {
+                                        "type": "table",
+                                        "source": "$rows",
+                                        "columns": [
+                                            {
+                                                "name": "member",
+                                                "label": "成员"
+                                            }
+                                        ]
+
+                                    }
                                 }
                             }
                         },

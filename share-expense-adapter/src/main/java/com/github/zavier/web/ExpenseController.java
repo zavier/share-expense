@@ -44,8 +44,8 @@ public class ExpenseController {
 
     @PostMapping("/project/create")
     public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
-        projectAddCmd.setUserId(UserHolder.getUser().getUserId());
-        projectAddCmd.setUserName(UserHolder.getUser().getUserName());
+        projectAddCmd.setCreateUserId(UserHolder.getUser().getUserId());
+        projectAddCmd.setCreateUserName(UserHolder.getUser().getUserName());
         final Response response = projectService.createProject(projectAddCmd);
         return ResponseVo.buildFromResponse(response);
     }
@@ -63,12 +63,14 @@ public class ExpenseController {
         return ResponseVo.buildFromResponse(response);
     }
 
+    // 下拉列表使用
     @GetMapping("/project/listMember")
     private SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
         return SingleResponseVo.buildFromSingleResponse(listSingleResponse);
     }
 
+    // 表格组件使用
     @GetMapping("/project/pageMember")
     private SingleResponseVo pageProjectMember(ProjectMemberListQry projectMemberListQry) {
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);

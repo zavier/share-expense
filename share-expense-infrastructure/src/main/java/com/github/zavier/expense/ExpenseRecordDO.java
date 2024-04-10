@@ -11,10 +11,8 @@ import java.util.Date;
 public class ExpenseRecordDO {
     @Entity.Column(value = "id", remark = "费用记录ID", id = true)
     private Integer id;
-    @Entity.Column(value = "pay_user_id", remark = "花费的用户ID")
-    private Integer payUserId;
-    @Entity.Column(value = "pay_user_name", remark = "花费的用户名称")
-    private String payUserName;
+    @Entity.Column(value = "pay_member", remark = "付款的用户")
+    private String payMember;
     @Entity.Column(value = "project_id", remark = "费用项目ID")
     private Integer projectId;
     @Entity.Column(value = "amount", remark = "费用金额")
@@ -25,8 +23,6 @@ public class ExpenseRecordDO {
     private String expenseType;
     @Entity.Column(value = "remark", remark = "备注")
     private String remark;
-    @Entity.Column(value = "version", remark = "版本号")
-    private Integer version;
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
     @Entity.Column(value = "updated_at", remark = "更新时间")

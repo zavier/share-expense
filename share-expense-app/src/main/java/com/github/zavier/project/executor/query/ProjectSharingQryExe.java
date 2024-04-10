@@ -26,16 +26,11 @@ public class ProjectSharingQryExe {
         Assert.isTrue(projectOptional.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOptional.get();
 
-        // TODO 迁移到领域对象中 ？
+        // TODO
 
         final List<ExpenseRecord> expenseRecords = expenseRecordGateway.listRecord(expenseProject.getId());
 
-        expenseRecords.forEach(expenseRecord -> {
-            expenseProject.listMember().forEach(projectMember -> {
-                // TODO
-                expenseRecord.addUserSharing(projectMember.getUserId(), projectMember.getUserName(), 0);
-            });
-        });
+
 
         return expenseRecords;
     }

@@ -5,9 +5,7 @@ import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
-import com.github.zavier.domain.expense.ExpenseProjectMember;
 import com.github.zavier.domain.expense.ExpenseRecord;
-import com.github.zavier.domain.expense.ExpenseSharing;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
@@ -22,7 +20,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,16 +51,18 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Response addProjectMember(ProjectMemberAddCmd projectMemberAddCmd) {
-        return projectMemberAddCmdExe.addProjectVirtualMember(projectMemberAddCmd);
+        return projectMemberAddCmdExe.addProjectMember(projectMemberAddCmd);
     }
 
     @Override
     public SingleResponse<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
-        final List<ExpenseProjectMember> execute = projectMemberListQryExe.execute(projectMemberListQry);
-        final List<ExpenseProjectMemberDTO> collect = execute.stream()
-                .map(ProjectConverter::convertToDTO)
-                .collect(Collectors.toList());
-
+        final List<String> members = projectMemberListQryExe.execute(projectMemberListQry);
+        final List<ExpenseProjectMemberDTO> collect = members.stream().map(it -> {
+            final ExpenseProjectMemberDTO expenseProjectMemberDTO = new ExpenseProjectMemberDTO();
+            expenseProjectMemberDTO.setMember(it);
+            expenseProjectMemberDTO.setProjectId(projectMemberListQry.getProjectId());
+            return expenseProjectMemberDTO;
+        }).collect(Collectors.toList());
         return SingleResponse.of(collect);
     }
 
@@ -106,26 +105,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
         Map<Integer, UserSharingDTO> sharingDTOMap = new HashMap<>();
-
-        // TODO 迁移到领域对象中 ?
-        final List<ExpenseRecord> execute = projectSharingQryExe.execute(projectSharingQry);
-        execute.forEach(expenseRecord -> {
-            // 需要均摊的
-            final Map<Integer, ExpenseSharing> userIdSharingMap = expenseRecord.getUserIdSharingMap();
-            userIdSharingMap.forEach((userId, sharing) -> {
-                final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(userId, new UserSharingDTO(userId, sharing.getUserName()));
-                orDefault.setShareAmount(orDefault.getShareAmount().add(sharing.getAmount()));
-                sharingDTOMap.put(userId, orDefault);
-            });
-
-            // 减去自己花费的
-            final Integer payUserId = expenseRecord.getPayUserId();
-            final BigDecimal amount = expenseRecord.getAmount();
-            final UserSharingDTO orDefault = sharingDTOMap.getOrDefault(payUserId, new UserSharingDTO(payUserId, expenseRecord.getPayUserName()));
-            orDefault.setPaidAmount(orDefault.getPaidAmount().add(amount));
-            sharingDTOMap.put(payUserId, orDefault);
-        });
-
+        // TODO
         return SingleResponse.of(new ArrayList<>(sharingDTOMap.values()));
     }
 }

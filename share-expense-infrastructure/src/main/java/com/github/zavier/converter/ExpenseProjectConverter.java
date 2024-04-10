@@ -13,14 +13,14 @@ public class ExpenseProjectConverter {
     public static ExpenseProject toEntity(ExpenseProjectDO expenseProjectDO, List<ExpenseProjectMemberDO> memberDOList) {
         final ExpenseProject expenseProject = new ExpenseProject();
         expenseProject.setId(expenseProjectDO.getId());
-        expenseProject.setUserId(expenseProjectDO.getCreateUserId());
+        expenseProject.setCreateUserId(expenseProjectDO.getCreateUserId());
         expenseProject.setName(expenseProjectDO.getName());
         expenseProject.setDescription(expenseProjectDO.getDescription());
         expenseProject.setVersion(expenseProjectDO.getVersion());
 
         if (CollectionUtils.isNotEmpty(memberDOList)) {
             for (ExpenseProjectMemberDO memberDO : memberDOList) {
-                expenseProject.addMember(memberDO.getUserId(), memberDO.getUserName(), memberDO.getIsVirtual());
+                expenseProject.addMember(memberDO.getName());
             }
         }
         return expenseProject;
@@ -31,9 +31,10 @@ public class ExpenseProjectConverter {
         expenseProjectDO.setId(expenseProject.getId());
         expenseProjectDO.setName(expenseProject.getName());
         expenseProjectDO.setDescription(expenseProject.getDescription());
-        expenseProjectDO.setCreateUserId(expenseProject.getUserId());
+        expenseProjectDO.setCreateUserId(expenseProject.getCreateUserId());
         final Date now = new Date();
         expenseProjectDO.setVersion(0);
+        expenseProjectDO.setLocked(false);
         expenseProjectDO.setCreatedAt(now);
         expenseProjectDO.setUpdatedAt(now);
         return expenseProjectDO;
@@ -41,9 +42,10 @@ public class ExpenseProjectConverter {
 
     public static ExpenseProjectDO toUpdateDO(ExpenseProject expenseProject) {
         final ExpenseProjectDO expenseProjectDO = new ExpenseProjectDO();
-        expenseProjectDO.setCreateUserId(expenseProject.getUserId());
+        expenseProjectDO.setCreateUserId(expenseProject.getCreateUserId());
         expenseProjectDO.setName(expenseProject.getName());
         expenseProjectDO.setDescription(expenseProject.getDescription());
+        expenseProjectDO.setLocked(expenseProject.getLocked());
         expenseProjectDO.setUpdatedAt(new Date());
         expenseProjectDO.setVersion(expenseProject.getVersion() + 1);
         return expenseProjectDO;

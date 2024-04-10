@@ -14,10 +14,8 @@ public class ExpenseRecordConsumerDO {
     private Integer projectId;
     @Entity.Column(value = "record_id", remark = "费用记录ID")
     private Integer recordId;
-    @Entity.Column(value = "consumer_id", remark = "消费用户ID")
-    private Integer consumerId;
-    @Entity.Column(value = "consumer_name", remark = "消费用户名称")
-    private String consumerName;
+    @Entity.Column(value = "member", remark = "消费用户名称")
+    private String member;
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
     @Entity.Column(value = "updated_at", remark = "更新时间")

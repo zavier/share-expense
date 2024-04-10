@@ -11,7 +11,7 @@ public class UserDO {
     @Entity.Column(value = "id", remark = "用户ID", id = true)
     private Integer id;
 
-    @Entity.Column(value = "username", remark = "用户名")
+    @Entity.Column(value = "user_name", remark = "用户名")
     private String userName;
 
     @Entity.Column(value = "email", remark = "电子邮件")

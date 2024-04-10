@@ -14,6 +14,8 @@ public class ExpenseProjectDO {
     private String name;
     @Entity.Column(value = "create_user_id", remark = "创建者用户ID")
     private Integer createUserId;
+    @Entity.Column(value = "locked", remark = "是否锁定")
+    private Boolean locked;
     @Entity.Column(value = "description", remark = "项目描述")
     private String description;
     @Entity.Column(value = "version", remark = "版本号")

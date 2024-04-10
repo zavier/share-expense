@@ -15,7 +15,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -41,12 +44,10 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 .eq(ExpenseProjectMemberDO::getProjectId, expenseProject.getId())
                 .delete();
 
-        expenseProject.listMember().forEach(projectMember -> {
+        expenseProject.listAllMember().forEach(projectMember -> {
             final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
             expenseProjectMemberDO.setProjectId(expenseProject.getId());
-            expenseProjectMemberDO.setIsVirtual(projectMember.getIsVirtual());
-            expenseProjectMemberDO.setUserId(projectMember.getUserId());
-            expenseProjectMemberDO.setUserName(projectMember.getUserName());
+            expenseProjectMemberDO.setName(projectMember);
             expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
         });
     }
@@ -117,60 +118,28 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
 
     private PageResponse<ExpenseProject> pageProjectByUser(ProjectListQry projectListQry) {
-        List<ExpenseProjectDO> resultList = new ArrayList<>();
 
-        List<ExpenseProjectDO> repeatbleList = new ArrayList<>();
-        // 创建的
-        final List<ExpenseProjectDO> createdList = expenseProjectMapper.wrapper()
+        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize(), "id desc");
+
+        // 自己创建的，按照ID倒序
+        final List<ExpenseProjectDO> projectList = expenseProjectMapper.wrapper()
                 .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getUserId())
                 .list();
-        repeatbleList.addAll(createdList);
 
-        // 加入的
-        final List<ExpenseProjectMemberDO> memberDOList = expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getUserId, projectListQry.getUserId())
-                .list();
-        if (CollectionUtils.isNotEmpty(memberDOList)) {
-            final List<Integer> projectIdList = memberDOList.stream().map(ExpenseProjectMemberDO::getProjectId).distinct()
-                    .collect(Collectors.toList());
-            final List<ExpenseProjectDO> joinedList = expenseProjectMapper.wrapper()
-                    .in(ExpenseProjectDO::getId, projectIdList)
-                    .list();
-            repeatbleList.addAll(joinedList);
-        }
-
-        // 去重复
-        Set<Integer> projectIdSet = new HashSet<>();
-        repeatbleList.forEach(it -> {
-            if (projectIdSet.add(it.getId())) {
-                resultList.add(it);
-            }
-        });
-
-
-        // 排序
-        resultList.sort(Comparator.comparing(ExpenseProjectDO::getId).reversed());
-
-        if (CollectionUtils.isEmpty(resultList)) {
+        if (CollectionUtils.isEmpty(projectList)) {
             return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
         }
 
-        // 转换结果
-        int total = resultList.size();
-        int offset = (projectListQry.getPage() - 1) * projectListQry.getSize();
-        final List<ExpenseProjectDO> collect = resultList.stream()
-                .skip(offset)
-                .limit(projectListQry.getSize())
-                .collect(Collectors.toList());
+        Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) projectList;
 
         // 聚合member
-        final List<Integer> projectIdList = collect.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
+        final List<Integer> projectIdList = projectList.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
         final Map<Integer, List<ExpenseProjectMemberDO>> projectIdMap = listProjectMembers(projectIdList);
 
-        final List<ExpenseProject> projectList = collect.stream()
+        final List<ExpenseProject> expenseProjectList = projectList.stream()
                 .map(it -> ExpenseProjectConverter.toEntity(it, projectIdMap.get(it.getId()))).collect(Collectors.toList());
 
-        return PageResponse.of(projectList, total, projectListQry.getSize(), projectListQry.getPage());
+        return PageResponse.of(expenseProjectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
     }
 
     @NotNull

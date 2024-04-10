@@ -1,21 +1,18 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.Assert;
-import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ExpenseRecord {
 
-    private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
-    private Map<Integer, String> consumerIdMap = new HashMap<>();
+    /**
+     * 费用消费的成员信息
+     */
+    private final Set<String> consumeMembers = new HashSet<>();
 
     @Getter
     @Setter
@@ -26,10 +23,7 @@ public class ExpenseRecord {
 
     @Getter
     @Setter
-    private Integer payUserId;
-    @Getter
-    @Setter
-    private String payUserName;
+    private String payMember;
     @Getter
     @Setter
     private BigDecimal amount;
@@ -44,72 +38,24 @@ public class ExpenseRecord {
     private String remark;
 
     /**
-     * 版本号
-     */
-    @Getter
-    @Setter
-    private Integer version;
-
-    @Getter
-    @Setter
-    private ChangingStatus changingStatus = ChangingStatus.NEW;
-
-    /**
      * 是否需要分摊
      */
     @Getter
     @Setter
     private Boolean needSharding = false;
 
-    public void addConsumer(Integer consumerId, String consumerName) {
-        checkConsumerNameExist(consumerName);
-
-        final String old = consumerIdMap.put(consumerId, consumerName);
-        Assert.isTrue(old == null, "消费人已存在");
+    public void addConsumer(String name) {
+        final boolean add = consumeMembers.add(name);
+        Assert.isTrue(add, "消费人已存在:" + name);
     }
 
-    private void checkConsumerNameExist(String consumerName) {
-        if (consumerIdMap.isEmpty()) {
-            return;
-        }
-        final boolean hasSame = consumerIdMap.values().stream().anyMatch(it -> it.equals(consumerName));
-        Assert.isFalse(hasSame, "消费人名称重复");
+    public void addConsumers(List<String> names) {
+        Assert.notEmpty(names, "消费人不能为空");
+        names.forEach(this::addConsumer);
     }
 
-    public Map<Integer, String> getConsumerIdMap() {
-        return Collections.unmodifiableMap(consumerIdMap);
-    }
-
-    // TODO 权重废弃？
-    public void addUserSharing(Integer userId, String userName, Integer weight) {
-        Assert.notNull(userId, "用户ID不能为空");
-        Assert.notNull(userName, "用户名称不能为空");
-        Assert.notNull(weight, "权重不能为空");
-
-        Assert.isFalse(userIdSharingMap.containsKey(userId), "用户ID重复");
-        userIdSharingMap.put(userId, new ExpenseSharing(userId, userName, weight));
-
-        calcSharingAmount();
-    }
-
-    private void calcSharingAmount() {
-        if (!hasSharing()) {
-            return;
-        }
-
-        final Integer totalWeight = userIdSharingMap.values().stream()
-                .map(ExpenseSharing::getWeight)
-                .reduce(0, Integer::sum);
-        userIdSharingMap.values().forEach(expenseSharing ->
-                expenseSharing.setAmount(amount.multiply(new BigDecimal(expenseSharing.getWeight())).divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP)));
-    }
-
-    public boolean hasSharing() {
-        return !userIdSharingMap.isEmpty();
-    }
-
-    public Map<Integer, ExpenseSharing> getUserIdSharingMap() {
-        return Collections.unmodifiableMap(userIdSharingMap);
+    public Set<String> listAllConsumers() {
+        return Collections.unmodifiableSet(consumeMembers);
     }
 
 }
