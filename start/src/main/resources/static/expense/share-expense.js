@@ -114,15 +114,16 @@ var dataJson =
                             "required": false
                         },
                         {
-                          "label": "成员",
-                          "type": "select",
-                          "name": "members",
-                          "checkAll": true,
-                          "creatable": true,
-                          "multiple": true,
-                          "joinValues": false,
-                          "extractValue": true,
-                          "options": []
+                            "name": "members",
+                            "label": "成员",
+                            "mode": "horizontal",
+                            "type": "input-array",
+                            "value": [],
+                            "inline": true,
+                            "items": {
+                              "type": "input-text",
+                              "clearable": true
+                            }
                         }
                     ]
                 }
@@ -321,15 +322,16 @@ var dataJson =
                                             "visible": false
                                         },
                                         {
-                                            "label": "成员",
-                                            "type": "select",
                                             "name": "members",
-                                            "joinValues": false,
-                                            "extractValue": true,
-                                            "checkAll": true,
-                                            "creatable": true,
-                                            "multiple": true,
-                                            "required": true,
+                                            "label": "成员",
+                                            "mode": "horizontal",
+                                            "type": "input-array",
+                                            "value": [],
+                                            "inline": true,
+                                            "items": {
+                                              "type": "input-text",
+                                              "clearable": true
+                                            }
                                         }
                                     ]
                                 }
