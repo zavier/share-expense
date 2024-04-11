@@ -256,6 +256,7 @@ var dataJson =
                             "level": "link",
                             "actionType": "dialog",
                             "dialog": {
+                                "size": "full",
                                 "title": "费用明细",
                                 "body": {
                                     "type": "service",
