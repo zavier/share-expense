@@ -1,0 +1,55 @@
+{
+  "status": 0,
+  "msg": "",
+  "data": {
+    "pages": [
+      {
+        "label": "Home",
+        "url": "/",
+        "redirect": "/project/list"
+      },
+      {
+        "label": "菜单",
+        "children": [
+          {
+            "visibleOn": "${cookie:jwtToken == null}",
+            "label": "注册",
+            "url": "register",
+            "schemaApi": "get:/expense/pages/register.json" 
+          },
+          {
+            "visibleOn": "${cookie:jwtToken == null}",
+            "label": "登录",
+            "url": "login",
+            "schemaApi": "get:/expense/pages/login.json"
+          },
+          {
+            "label": "项目管理",
+            "url": "/project/list",
+            "schemaApi": "get:/expense/pages/project-list.json"
+          },
+          {
+            "label": "费用管理",
+            "url": "/expense/list",
+            "schemaApi": "get:/expense/pages/expense-list.json"
+          },
+          {
+            "label": "新增",
+            "url": "/crud/new",
+            "schemaApi": "get:/pages/crud-new.json"
+          },
+          {
+            "label": "查看",
+            "url": "/crud/:id",
+            "schemaApi": "get:/pages/crud-view.json"
+          },
+          {
+            "label": "修改",
+            "url": "/crud/:id/edit",
+            "schemaApi": "get:/pages/crud-edit.json"
+          }
+        ]
+      }
+    ]
+  }
+}

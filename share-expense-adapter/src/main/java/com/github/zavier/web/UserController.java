@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -37,7 +38,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse){
+    public ResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse) throws IOException {
         final SingleResponse<String> tokenResp = userService.login(userLoginCmd);
         if (!tokenResp.isSuccess()) {
             return ResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
@@ -47,6 +48,15 @@ public class UserController {
         final Cookie cookie = new Cookie("jwtToken", tokenResp.getData());
         cookie.setPath("/");
         cookie.setMaxAge((int) TimeUnit.DAYS.toSeconds(30));
+        httpServletResponse.addCookie(cookie);
+        return ResponseVo.buildSuccess();
+    }
+
+    @PostMapping("/logout")
+    public ResponseVo login(HttpServletResponse httpServletResponse) throws IOException {
+        final Cookie cookie = new Cookie("jwtToken", "");
+        cookie.setPath("/");
+        cookie.setMaxAge(-1);
         httpServletResponse.addCookie(cookie);
         return ResponseVo.buildSuccess();
     }
