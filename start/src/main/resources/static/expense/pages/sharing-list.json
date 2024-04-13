@@ -41,12 +41,12 @@
           "remark": "表示整体花费金额"
         },
         {
-          "name": "${consumeAmount < paidAmount ? 0 : consumeAmount - paidAmount}",
+          "name": "${IF(consumeAmount < paidAmount, 0, ROUND(consumeAmount - paidAmount))}",
           "type": "text",
           "label": "剩余应支付金额"
         },
         {
-          "name": "${consumeAmount < paidAmount ? consumeAmount - paidAmount : 0}",
+          "name": "${IF(consumeAmount < paidAmount, ROUND(consumeAmount - paidAmount), 0)}",
           "type": "text",
           "label": "剩余应收取金额"
         },
