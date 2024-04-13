@@ -2,29 +2,10 @@ package com.github.zavier.converter;
 
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.project.ExpenseProjectDO;
-import com.github.zavier.project.ExpenseProjectMemberDO;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Date;
-import java.util.List;
 
 public class ExpenseProjectConverter {
-
-    public static ExpenseProject toEntity(ExpenseProjectDO expenseProjectDO, List<ExpenseProjectMemberDO> memberDOList) {
-        final ExpenseProject expenseProject = new ExpenseProject();
-        expenseProject.setId(expenseProjectDO.getId());
-        expenseProject.setCreateUserId(expenseProjectDO.getCreateUserId());
-        expenseProject.setName(expenseProjectDO.getName());
-        expenseProject.setDescription(expenseProjectDO.getDescription());
-        expenseProject.setVersion(expenseProjectDO.getVersion());
-
-        if (CollectionUtils.isNotEmpty(memberDOList)) {
-            for (ExpenseProjectMemberDO memberDO : memberDOList) {
-                expenseProject.addMember(memberDO.getName());
-            }
-        }
-        return expenseProject;
-    }
 
     public static ExpenseProjectDO toInsertDO(ExpenseProject expenseProject) {
         final ExpenseProjectDO expenseProjectDO = new ExpenseProjectDO();

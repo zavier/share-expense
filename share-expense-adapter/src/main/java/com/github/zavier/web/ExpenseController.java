@@ -27,6 +27,14 @@ public class ExpenseController {
     @Resource
     private ProjectService projectService;
 
+    @PostMapping("/project/create")
+    public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
+        projectAddCmd.setCreateUserId(UserHolder.getUser().getUserId());
+        projectAddCmd.setCreateUserName(UserHolder.getUser().getUserName());
+        final Response response = projectService.createProject(projectAddCmd);
+        return ResponseVo.buildFromResponse(response);
+    }
+
     @PostMapping("/project/addRecord")
     public ResponseVo saveExpenseRecord(@RequestBody ExpenseRecordAddCmd expenseRecordAddCmd) {
         final Response response = projectService.addExpenseRecord(expenseRecordAddCmd);
@@ -41,14 +49,6 @@ public class ExpenseController {
         return SingleResponseVo.of(map);
     }
 
-
-    @PostMapping("/project/create")
-    public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
-        projectAddCmd.setCreateUserId(UserHolder.getUser().getUserId());
-        projectAddCmd.setCreateUserName(UserHolder.getUser().getUserName());
-        final Response response = projectService.createProject(projectAddCmd);
-        return ResponseVo.buildFromResponse(response);
-    }
 
     @PostMapping("/project/delete")
     public ResponseVo deleteProject(@RequestBody ProjectDeleteCmd projectDeleteCmd) {

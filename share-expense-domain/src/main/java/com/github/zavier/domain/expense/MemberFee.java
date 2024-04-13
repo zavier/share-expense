@@ -1,18 +1,22 @@
-package com.github.zavier.dto.data;
+package com.github.zavier.domain.expense;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 
 @Data
-public class UserSharingDTO {
+@Accessors(chain = true)
+public class MemberFee {
 
     private String member;
 
+    private Integer recordId;
+
     /**
-     * 参与的记录总金额
+     * 费用记录的总金额
      */
-    private BigDecimal totalAmount;
+    private BigDecimal recordAmount;
 
     /**
      * 本人支出金额

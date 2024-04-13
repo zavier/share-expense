@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExpenseProject {
 
@@ -66,14 +67,52 @@ public class ExpenseProject {
     @Setter
     private ChangingStatus changingStatus = ChangingStatus.NEW;
 
+    @Getter
+    @Setter
+    private ChangingStatus recordChangingStatus = ChangingStatus.UNCHANGED;
+
+    @Getter
+    @Setter
+    private ChangingStatus memberChangingStatus = ChangingStatus.UNCHANGED;
+
+
+    public ProjectMemberFee calcSharingFee() {
+        // 计算每个费用项的分摊
+        final List<MemberFee> memberFeeList = expenseRecordList.stream()
+                .map(ExpenseRecord::calcSharingFee)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        // 汇总
+        final ProjectMemberFee projectMemberFee = new ProjectMemberFee();
+        memberFeeList.forEach(projectMemberFee::addMemberFee);
+        return projectMemberFee;
+    }
+
 
     public List<String> listAllMember() {
         return Collections.unmodifiableList(new ArrayList<>(members));
     }
 
+    public List<ExpenseRecord> listAllExpenseRecord() {
+        return Collections.unmodifiableList(new ArrayList<>(expenseRecordList));
+    }
+
+    public void addExpenseRecord(ExpenseRecord expenseRecord) {
+        expenseRecordList.add(expenseRecord);
+
+        if (recordChangingStatus == ChangingStatus.UNCHANGED) {
+            recordChangingStatus = ChangingStatus.NEW;
+        }
+    }
+
     public void addMember(String name) {
         final boolean add = members.add(name);
         Assert.isTrue(add, "添加用户已存在:" + name);
+
+        if (memberChangingStatus == ChangingStatus.UNCHANGED) {
+            memberChangingStatus = ChangingStatus.NEW;
+        }
     }
 
     public void addMembers(List<String> names) {

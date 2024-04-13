@@ -1,21 +1,25 @@
 package com.github.zavier.project.executor;
 
-import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
+import com.alibaba.cola.exception.Assert;
+import com.github.zavier.domain.common.ChangingStatus;
+import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
-import com.github.zavier.domain.expense.gateway.ExpenseRecordGateway;
-import com.github.zavier.dto.ExpenseRecordAddCmd;
+import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
 import com.github.zavier.domain.expense.domainservice.ExpenseRecordValidator;
+import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
+import com.github.zavier.dto.ExpenseRecordAddCmd;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 
 @Slf4j
 @Component
 public class ExpenseRecordAddCmdExe {
 
     @Resource
-    private ExpenseRecordGateway expenseRecordGateway;
+    private ExpenseProjectGateway expenseProjectGateway;
     @Resource
     private ExpenseRecordValidator expenseRecordValidator;
     @Resource
@@ -25,7 +29,18 @@ public class ExpenseRecordAddCmdExe {
         log.info("expenseRecordAddCmd: {}", expenseRecordAddCmd);
         expenseRecordValidator.valid(expenseRecordAddCmd);
 
+        final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(expenseRecordAddCmd.getProjectId());
+        Assert.isTrue(projectOpt.isPresent(), "项目不存在");
+        final ExpenseProject expenseProject = projectOpt.get();
+
         final ExpenseRecord expenseRecord = expenseRecordConverter.toExpenseRecord(expenseRecordAddCmd);
-        expenseRecordGateway.save(expenseRecord);
+        expenseProject.addExpenseRecord(expenseRecord);
+
+        // 设置变更类型
+        expenseProject.setChangingStatus(ChangingStatus.UPDATED);
+        expenseProject.setMemberChangingStatus(ChangingStatus.UNCHANGED);
+        expenseProject.setRecordChangingStatus(ChangingStatus.UPDATED);
+
+        expenseProjectGateway.save(expenseProject);
     }
 }

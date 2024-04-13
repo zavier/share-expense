@@ -6,6 +6,7 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.domain.expense.ExpenseRecord;
+import com.github.zavier.domain.expense.ProjectMemberFee;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
@@ -13,6 +14,7 @@ import com.github.zavier.dto.data.ProjectDTO;
 import com.github.zavier.dto.data.UserSharingDTO;
 import com.github.zavier.project.executor.*;
 import com.github.zavier.project.executor.converter.ProjectConverter;
+import com.github.zavier.project.executor.converter.SharingConverter;
 import com.github.zavier.project.executor.query.ProjectListQryExe;
 import com.github.zavier.project.executor.query.ProjectMemberListQryExe;
 import com.github.zavier.project.executor.query.ProjectSharingQryExe;
@@ -104,8 +106,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
-        Map<Integer, UserSharingDTO> sharingDTOMap = new HashMap<>();
-        // TODO
-        return SingleResponse.of(new ArrayList<>(sharingDTOMap.values()));
+        final ProjectMemberFee execute = projectSharingQryExe.execute(projectSharingQry);
+
+        final List<UserSharingDTO> sharingDTOList = SharingConverter.convert(execute);
+        return SingleResponse.of(sharingDTOList);
     }
 }
