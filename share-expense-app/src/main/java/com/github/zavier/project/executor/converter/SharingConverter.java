@@ -31,7 +31,7 @@ public class SharingConverter {
         final List<UserSharingDetailDTO> collect = memberFeeDetailList.stream()
                 .map(SharingConverter::convert)
                 .collect(Collectors.toList());
-        sharingDTO.setSharingDetailList(collect);
+        sharingDTO.setChildren(collect);
 
         return sharingDTO;
     }
@@ -40,7 +40,7 @@ public class SharingConverter {
         final UserSharingDetailDTO detailDTO = new UserSharingDetailDTO();
         detailDTO.setMember(memberRecordFee.getMember());
         detailDTO.setDate(memberRecordFee.getExpenseRecord().getDate().getTime() / 1000);
-        detailDTO.setAmount(memberRecordFee.getExpenseRecord().getAmount());
+        detailDTO.setTotalAmount(memberRecordFee.getExpenseRecord().getAmount());
         detailDTO.setPayMember(memberRecordFee.getExpenseRecord().getPayMember());
         detailDTO.setExpenseType(memberRecordFee.getExpenseRecord().getExpenseType());
         detailDTO.setRemark(memberRecordFee.getExpenseRecord().getRemark());

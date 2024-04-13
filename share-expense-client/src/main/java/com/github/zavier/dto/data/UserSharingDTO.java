@@ -28,6 +28,6 @@ public class UserSharingDTO {
     /**
      * 明细
      */
-    private List<UserSharingDetailDTO> sharingDetailList = new ArrayList<>();
+    private List<UserSharingDetailDTO> children = new ArrayList<>();
 
 }

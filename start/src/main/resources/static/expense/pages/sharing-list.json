@@ -1,0 +1,77 @@
+{
+  "type": "page",
+  "title": "分摊信息",
+  "remark": null,
+  "name": "page-demo",
+  "data": {
+    "projectId": "${SPLIT(window:location.hash, '/')[2]}"
+  },
+  "toolbar": [
+    {
+      "type": "button",
+      "actionType": "link",
+      "link": "/project/list",
+      "label": "返回项目列表"
+    }
+  ],
+  "body": [
+    {
+      "type": "crud",
+      "name": "sample",
+      "api": "/expense/project/sharing?projectId=${projectId}",
+      "loadDataOnce": true,
+      "columns": [
+        {
+          "name": "member",
+          "label": "成员"
+        },
+        {
+          "name": "paidAmount",
+          "label": "已支付金额",
+          "remark": "表示个人支付的金额"
+        },
+        {
+          "name": "consumeAmount",
+          "label": "总分摊金额",
+          "remark": "表示个人需要支付的金额"
+        },
+        {
+          "name": "totalAmount",
+          "label": "参与项目金额",
+          "remark": "表示整体花费金额"
+        },
+        {
+          "name": "${consumeAmount < paidAmount ? 0 : consumeAmount - paidAmount}",
+          "type": "text",
+          "label": "剩余应支付金额"
+        },
+        {
+          "name": "${consumeAmount < paidAmount ? consumeAmount - paidAmount : 0}",
+          "type": "text",
+          "label": "剩余应收取金额"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "label": "时间",
+          "placeholder": "-"
+        },
+        {
+          "name": "remark",
+          "type": "text",
+          "label": "备注",
+          "placeholder": "-"
+        }
+      ],
+      "affixHeader": true,
+      "columnsTogglable": "auto",
+      "placeholder": "暂无数据",
+      "tableClassName": "table-db table-striped",
+      "headerClassName": "crud-table-header",
+      "footerClassName": "crud-table-footer",
+      "toolbarClassName": "crud-table-toolbar",
+      "combineNum": 0,
+      "bodyClassName": "panel-default"
+    }
+  ]
+}

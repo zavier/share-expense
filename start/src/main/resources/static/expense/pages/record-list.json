@@ -24,19 +24,23 @@
         {
           "name": "date",
           "label": "消费日期",
-          "type": "date"
+          "type": "date",
+          "sortable": true
         },
         {
           "name": "amount",
-          "label": "金额"
+          "label": "金额",
+          "sortable": true
         },
         {
           "name": "payMember",
-          "label": "付款人"
+          "label": "付款人",
+          "sortable": true
         },
         {
           "name": "expenseType",
-          "label": "费用类型"
+          "label": "费用类型",
+          "sortable": true
         },
         {
           "name": "remark",

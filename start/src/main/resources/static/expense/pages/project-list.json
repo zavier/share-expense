@@ -231,50 +231,11 @@
                             }
                         },
                         {
-                            "label": "分摊明细",
                             "type": "button",
+                            "label": "分摊明细",
                             "level": "link",
-                            "actionType": "dialog",
-                            "dialog": {
-                                "title": "分摊明细",
-                                "body": {
-                                    "type": "service",
-                                    "api": "/expense/project/sharing?projectId=${projectId}",
-                                    "body": [
-                                        {
-                                            "type": "table",
-                                            "title": "明细信息",
-                                            "source": "$rows",
-                                            "columns": [
-                                                {
-                                                    "name": "userId",
-                                                    "label": "用户ID"
-                                                },
-                                                {
-                                                    "name": "userName",
-                                                    "label": "用户姓名"
-                                                },
-                                                {
-                                                    "name": "needPaid",
-                                                    "label": "应付金额"
-                                                },
-                                                {
-                                                    "name": "needReceive",
-                                                    "label": "应收金额"
-                                                },
-                                                {
-                                                    "name": "shareAmount",
-                                                    "label": "需分摊金额"
-                                                },
-                                                {
-                                                    "name": "paidAmount",
-                                                    "label": "已花费金额"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
+                            "actionType": "link",
+                            "link": "/sharing/${projectId}/list"
                         }
                     ]
                 }

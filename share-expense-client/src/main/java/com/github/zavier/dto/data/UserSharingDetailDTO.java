@@ -17,7 +17,7 @@ public class UserSharingDetailDTO {
     /**
      * 总金额
      */
-    private BigDecimal amount;
+    private BigDecimal totalAmount;
 
     /**
      * 支付人

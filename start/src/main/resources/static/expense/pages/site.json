@@ -34,6 +34,11 @@
             "schemaApi": "get:/expense/pages/record-list.json"
           },
           {
+            "label": "分摊信息",
+            "url": "/sharing/:id/list",
+            "schemaApi": "get:/expense/pages/sharing-list.json"
+          },
+          {
             "label": "新增",
             "url": "/crud/new/:id",
             "schemaApi": "get:/pages/crud-new.json"
