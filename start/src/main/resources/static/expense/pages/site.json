@@ -39,6 +39,11 @@
             "schemaApi": "get:/expense/pages/sharing-list.json"
           },
           {
+            "label": "统计信息",
+            "url": "/statistics/:id",
+            "schemaApi": "get:/expense/pages/statistics.json"
+          },
+          {
             "label": "新增",
             "url": "/crud/new/:id",
             "schemaApi": "get:/pages/crud-new.json"

@@ -83,7 +83,6 @@ public class ExpenseProject {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-
         // 汇总
         final ProjectSharingFee projectFee = new ProjectSharingFee();
         memberFeeDetailList.forEach(projectFee::addMemberRecordFee);

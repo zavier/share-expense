@@ -236,6 +236,13 @@
                             "level": "link",
                             "actionType": "link",
                             "link": "/sharing/${projectId}/list"
+                        },
+                        {
+                            "type": "button",
+                            "label": "统计信息",
+                            "level": "link",
+                            "actionType": "link",
+                            "link": "/statistics/${projectId}"
                         }
                     ]
                 }
