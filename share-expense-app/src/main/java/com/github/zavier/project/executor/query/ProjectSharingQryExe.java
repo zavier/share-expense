@@ -2,7 +2,7 @@ package com.github.zavier.project.executor.query;
 
 import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
-import com.github.zavier.domain.expense.ProjectMemberFee;
+import com.github.zavier.domain.expense.ProjectSharingFee;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectSharingQry;
 import org.springframework.stereotype.Component;
@@ -16,13 +16,13 @@ public class ProjectSharingQryExe {
     @Resource
     private ExpenseProjectGateway expenseProjectGateway;
 
-    public ProjectMemberFee execute(ProjectSharingQry projectSharingQry) {
+    public ProjectSharingFee execute(ProjectSharingQry projectSharingQry) {
         Assert.notNull(projectSharingQry.getProjectId(), "项目ID不能为空");
         final Optional<ExpenseProject> projectOptional = expenseProjectGateway.getProjectById(projectSharingQry.getProjectId());
         Assert.isTrue(projectOptional.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOptional.get();
 
-        return expenseProject.calcSharingFee();
+        return expenseProject.calcMemberSharingFee();
     }
 
 }

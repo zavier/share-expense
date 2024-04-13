@@ -3,6 +3,8 @@ package com.github.zavier.dto.data;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class UserSharingDTO {
@@ -22,5 +24,10 @@ public class UserSharingDTO {
      * 本人消费金额
      */
     private BigDecimal consumeAmount;
+
+    /**
+     * 明细
+     */
+    private List<UserSharingDetailDTO> sharingDetailList = new ArrayList<>();
 
 }

@@ -5,18 +5,20 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 
+/**
+ * 单个费用记录，单个人的费用明细
+ *
+ */
 @Data
 @Accessors(chain = true)
-public class MemberFee {
+public class MemberRecordFee {
 
     private String member;
 
-    private Integer recordId;
-
     /**
-     * 费用记录的总金额
+     * 费用记录信息
      */
-    private BigDecimal recordAmount;
+    private ExpenseRecord expenseRecord;
 
     /**
      * 本人支出金额

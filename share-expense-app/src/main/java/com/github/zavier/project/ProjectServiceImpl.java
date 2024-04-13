@@ -6,7 +6,7 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.domain.expense.ExpenseRecord;
-import com.github.zavier.domain.expense.ProjectMemberFee;
+import com.github.zavier.domain.expense.ProjectSharingFee;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
@@ -22,7 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,7 +107,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public SingleResponse<List<UserSharingDTO>> getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
-        final ProjectMemberFee execute = projectSharingQryExe.execute(projectSharingQry);
+        final ProjectSharingFee execute = projectSharingQryExe.execute(projectSharingQry);
 
         final List<UserSharingDTO> sharingDTOList = SharingConverter.convert(execute);
         return SingleResponse.of(sharingDTOList);

@@ -76,17 +76,18 @@ public class ExpenseProject {
     private ChangingStatus memberChangingStatus = ChangingStatus.UNCHANGED;
 
 
-    public ProjectMemberFee calcSharingFee() {
-        // 计算每个费用项的分摊
-        final List<MemberFee> memberFeeList = expenseRecordList.stream()
-                .map(ExpenseRecord::calcSharingFee)
+    public ProjectSharingFee calcMemberSharingFee() {
+        // 计算每个成员的费用项的分摊
+        final List<MemberRecordFee> memberFeeDetailList = expenseRecordList.stream()
+                .map(ExpenseRecord::calcMembersFeeInRecord)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
+
         // 汇总
-        final ProjectMemberFee projectMemberFee = new ProjectMemberFee();
-        memberFeeList.forEach(projectMemberFee::addMemberFee);
-        return projectMemberFee;
+        final ProjectSharingFee projectFee = new ProjectSharingFee();
+        memberFeeDetailList.forEach(projectFee::addMemberRecordFee);
+        return projectFee;
     }
 
 

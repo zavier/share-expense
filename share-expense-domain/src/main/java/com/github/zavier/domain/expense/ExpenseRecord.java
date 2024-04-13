@@ -46,16 +46,21 @@ public class ExpenseRecord {
     @Setter
     private Boolean needSharding = false;
 
-    public List<MemberFee> calcSharingFee() {
+    /**
+     * 计算费用记录中，每个成员的费用信息
+     *
+     * @return
+     */
+    public List<MemberRecordFee> calcMembersFeeInRecord() {
         final BigDecimal perMemberPayAmount = amount.divide(BigDecimal.valueOf(consumeMembers.size()), 6, RoundingMode.HALF_DOWN);
         return consumeMembers.stream()
                 .map(member -> {
-                    final MemberFee memberFee = new MemberFee();
-                    memberFee.setMember(member);
-                    memberFee.setRecordAmount(amount);
-                    memberFee.setConsumeAmount(perMemberPayAmount);
-                    memberFee.setPaidAmount(isPaidMember(member) ? amount : BigDecimal.ZERO);
-                    return memberFee;
+                    final MemberRecordFee memberFeeDetail = new MemberRecordFee();
+                    memberFeeDetail.setMember(member);
+                    memberFeeDetail.setExpenseRecord(this);
+                    memberFeeDetail.setConsumeAmount(perMemberPayAmount);
+                    memberFeeDetail.setPaidAmount(isPaidMember(member) ? amount : BigDecimal.ZERO);
+                    return memberFeeDetail;
                 }).collect(Collectors.toList());
     }
 

@@ -1,24 +1,52 @@
 package com.github.zavier.project.executor.converter;
 
-import com.github.zavier.domain.expense.MemberFee;
-import com.github.zavier.domain.expense.ProjectMemberFee;
+import com.github.zavier.domain.expense.MemberProjectFee;
+import com.github.zavier.domain.expense.MemberRecordFee;
+import com.github.zavier.domain.expense.ProjectSharingFee;
 import com.github.zavier.dto.data.UserSharingDTO;
+import com.github.zavier.dto.data.UserSharingDetailDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SharingConverter {
 
-    public static List<UserSharingDTO> convert(ProjectMemberFee projectMemberFee) {
-        final List<MemberFee> memberFees = projectMemberFee.mergeFeeByMember();
-        return memberFees.stream()
-                .map(fee -> {
-                    final UserSharingDTO sharingDTO = new UserSharingDTO();
-                    sharingDTO.setMember(fee.getMember());
-                    sharingDTO.setTotalAmount(fee.getRecordAmount());
-                    sharingDTO.setPaidAmount(fee.getPaidAmount());
-                    sharingDTO.setConsumeAmount(fee.getConsumeAmount());
-                    return sharingDTO;
-                }).collect(Collectors.toList());
+    public static List<UserSharingDTO> convert(ProjectSharingFee projectMemberFee) {
+        final List<MemberProjectFee> memberProjectFees = projectMemberFee.listMemberProjectFee();
+
+        return memberProjectFees.stream()
+                .map(SharingConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    private static UserSharingDTO convert(MemberProjectFee memberProjectFee) {
+        final UserSharingDTO sharingDTO = new UserSharingDTO();
+        sharingDTO.setMember(memberProjectFee.getMember());
+        sharingDTO.setTotalAmount(memberProjectFee.getRecordAmount());
+        sharingDTO.setPaidAmount(memberProjectFee.getPaidAmount());
+        sharingDTO.setConsumeAmount(memberProjectFee.getConsumeAmount());
+
+        final List<MemberRecordFee> memberFeeDetailList = memberProjectFee.getMemberFeeDetailList();
+        final List<UserSharingDetailDTO> collect = memberFeeDetailList.stream()
+                .map(SharingConverter::convert)
+                .collect(Collectors.toList());
+        sharingDTO.setSharingDetailList(collect);
+
+        return sharingDTO;
+    }
+
+    private static UserSharingDetailDTO convert(MemberRecordFee memberRecordFee) {
+        final UserSharingDetailDTO detailDTO = new UserSharingDetailDTO();
+        detailDTO.setMember(memberRecordFee.getMember());
+        detailDTO.setDate(memberRecordFee.getExpenseRecord().getDate().getTime() / 1000);
+        detailDTO.setAmount(memberRecordFee.getExpenseRecord().getAmount());
+        detailDTO.setPayMember(memberRecordFee.getExpenseRecord().getPayMember());
+        detailDTO.setExpenseType(memberRecordFee.getExpenseRecord().getExpenseType());
+        detailDTO.setRemark(memberRecordFee.getExpenseRecord().getRemark());
+        detailDTO.setPaidAmount(memberRecordFee.getPaidAmount());
+        detailDTO.setConsumeAmount(memberRecordFee.getConsumeAmount());
+        detailDTO.setConsumeMembers(new ArrayList<>(memberRecordFee.getExpenseRecord().listAllConsumers()));
+        return detailDTO;
     }
 }
