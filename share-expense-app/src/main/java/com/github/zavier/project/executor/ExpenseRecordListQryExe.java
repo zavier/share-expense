@@ -5,7 +5,6 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
-import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.ExpenseRecordQry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,14 +19,12 @@ public class ExpenseRecordListQryExe {
 
     @Resource
     private ExpenseProjectGateway expenseProjectGateway;
-    @Resource
-    private UserGateway userGateway;
 
     public SingleResponse<List<ExpenseRecord>> execute(ExpenseRecordQry expenseRecordQry) {
         final Integer projectId = expenseRecordQry.getProjectId();
 
-        final Optional<ExpenseProject> projectById = expenseProjectGateway.getProjectById(projectId);
-        Assert.isTrue(projectById.isPresent(), "项目不存在");
-        return SingleResponse.of(projectById.get().listAllExpenseRecord());
+        final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectId);
+        Assert.isTrue(projectOpt.isPresent(), "项目不存在");
+        return SingleResponse.of(projectOpt.get().listAllExpenseRecord());
     }
 }

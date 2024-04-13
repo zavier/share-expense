@@ -28,6 +28,7 @@
         <pagehelper.version>5.3.2</pagehelper.version>
         <jjwt.version>0.12.2</jjwt.version>
         <guava.version>33.1.0-jre</guava.version>
+        <easyexcel.version>3.3.4</easyexcel.version>
     </properties>
 
     <modules>
@@ -153,6 +154,12 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
                 <version>${jjwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
             </dependency>
 
         </dependencies>

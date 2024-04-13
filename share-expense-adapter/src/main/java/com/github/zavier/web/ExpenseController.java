@@ -3,19 +3,29 @@ package com.github.zavier.web;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
+import com.alibaba.cola.exception.Assert;
+import com.alibaba.excel.EasyExcel;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
 import com.github.zavier.dto.data.ProjectDTO;
 import com.github.zavier.dto.data.UserSharingDTO;
+import com.github.zavier.project.executor.ExpenseRecordExportExe;
+import com.github.zavier.project.executor.bo.ExpenseRecordExcelBO;
 import com.github.zavier.vo.PageResponseVo;
 import com.github.zavier.vo.ResponseVo;
 import com.github.zavier.vo.SingleResponseVo;
 import com.github.zavier.web.filter.UserHolder;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +36,9 @@ public class ExpenseController {
 
     @Resource
     private ProjectService projectService;
+
+    @Resource
+    private ExpenseRecordExportExe expenseRecordExportExe;
 
     @PostMapping("/project/create")
     public ResponseVo createProject(@RequestBody ProjectAddCmd projectAddCmd) {
@@ -98,6 +111,30 @@ public class ExpenseController {
         Map<String, Object> map = new HashMap<>();
         map.put("rows", projectSharingDetail.getData());
         return SingleResponseVo.of(map);
+    }
+
+    @GetMapping("/project/record/export")
+    public void exportFeeRecordDetail(@RequestParam Integer projectId, HttpServletResponse response) throws Exception {
+        // TODO expenseRecordExportExe 后续看看迁移到 projectService中使用？ 同时也可以使用到注解切面
+        // 这里因为导出类使用了easyexcel的注解，所以临时这样处理吧
+        final SingleResponse<List<ExpenseRecordExcelBO>> execute = expenseRecordExportExe.execute(projectId);
+        Assert.isTrue(execute.isSuccess(), "导出异常");
+
+        final String fileName = execute.getData().get(0).getProjectName() + "-费用信息.xlsx";
+
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        final String header = ContentDisposition.attachment()
+                .filename(fileName, StandardCharsets.UTF_8)
+                .build()
+                .toString();
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, header);
+
+        final ServletOutputStream outputStream = response.getOutputStream();
+        EasyExcel.write(outputStream, ExpenseRecordExcelBO.class)
+                .sheet("费用记录")
+                .doWrite(execute::getData);
+        outputStream.flush();
+        outputStream.close();
     }
 
 }

@@ -8,6 +8,12 @@
   },
   "toolbar": [
     {
+      "label": "导出Excel",
+      "type": "action",
+      "actionType": "download",
+      "api": "/expense/project/record/export?projectId=${projectId}"
+    },
+    {
       "type": "button",
       "actionType": "link",
       "link": "/project/list",

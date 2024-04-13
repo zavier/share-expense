@@ -112,4 +112,5 @@ public class ProjectServiceImpl implements ProjectService {
         final List<UserSharingDTO> sharingDTOList = SharingConverter.convert(execute);
         return SingleResponse.of(sharingDTOList);
     }
+
 }
