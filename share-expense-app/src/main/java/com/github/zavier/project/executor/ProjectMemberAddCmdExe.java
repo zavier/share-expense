@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -27,6 +28,9 @@ public class ProjectMemberAddCmdExe {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectMemberAddCmd.getProjectId());
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
+
+        Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), projectMemberAddCmd.getOperatorId()), "无权限");
+
         userNameList.forEach(expenseProject::addMember);
         expenseProject.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(expenseProject);

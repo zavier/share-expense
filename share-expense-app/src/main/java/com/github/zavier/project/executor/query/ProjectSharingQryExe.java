@@ -8,6 +8,7 @@ import com.github.zavier.dto.ProjectSharingQry;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -21,6 +22,8 @@ public class ProjectSharingQryExe {
         final Optional<ExpenseProject> projectOptional = expenseProjectGateway.getProjectById(projectSharingQry.getProjectId());
         Assert.isTrue(projectOptional.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOptional.get();
+
+        Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), projectSharingQry.getOperatorId()), "没有权限查看");
 
         return expenseProject.calcMemberSharingFee();
     }

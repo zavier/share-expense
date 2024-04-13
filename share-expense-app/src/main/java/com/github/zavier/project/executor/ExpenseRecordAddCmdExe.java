@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -32,6 +33,8 @@ public class ExpenseRecordAddCmdExe {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(expenseRecordAddCmd.getProjectId());
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
+
+        Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), expenseRecordAddCmd.getOperatorId()), "无权限");
 
         final ExpenseRecord expenseRecord = expenseRecordConverter.toExpenseRecord(expenseRecordAddCmd);
         expenseProject.addExpenseRecord(expenseRecord);

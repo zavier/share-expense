@@ -11,4 +11,6 @@ public class ProjectMemberAddCmd  {
     private Integer projectId;
 
     private List<String> members = new ArrayList<>();
+
+    private Integer operatorId;
 }

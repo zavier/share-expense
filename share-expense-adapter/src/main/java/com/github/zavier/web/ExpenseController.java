@@ -50,12 +50,14 @@ public class ExpenseController {
 
     @PostMapping("/project/addRecord")
     public ResponseVo saveExpenseRecord(@RequestBody ExpenseRecordAddCmd expenseRecordAddCmd) {
+        expenseRecordAddCmd.setOperatorId(UserHolder.getUser().getUserId());
         final Response response = projectService.addExpenseRecord(expenseRecordAddCmd);
         return ResponseVo.buildFromResponse(response);
     }
 
     @GetMapping("/project/listRecord")
     public SingleResponseVo<Map<String, List<ExpenseRecordDTO>>> listRecord(ExpenseRecordQry expenseRecordQry) {
+        expenseRecordQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<ExpenseRecordDTO>> listSingleResponse = projectService.listRecord(expenseRecordQry);
         Map<String, List<ExpenseRecordDTO>> map = new HashMap<>();
         map.put("rows", listSingleResponse.getData());
@@ -72,6 +74,7 @@ public class ExpenseController {
 
     @PostMapping("/project/addMember")
     private ResponseVo addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
+        projectMemberAddCmd.setOperatorId(UserHolder.getUser().getUserId());
         final Response response =  projectService.addProjectMember(projectMemberAddCmd);
         return ResponseVo.buildFromResponse(response);
     }
@@ -79,6 +82,7 @@ public class ExpenseController {
     // 下拉列表使用
     @GetMapping("/project/listMember")
     private SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
+        projectMemberListQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
         return SingleResponseVo.buildFromSingleResponse(listSingleResponse);
     }
@@ -86,6 +90,7 @@ public class ExpenseController {
     // 表格组件使用
     @GetMapping("/project/pageMember")
     private SingleResponseVo pageProjectMember(ProjectMemberListQry projectMemberListQry) {
+        projectMemberListQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = projectService.listProjectMember(projectMemberListQry);
         final List<ExpenseProjectMemberDTO> data = listSingleResponse.getData();
         Map<String, Object> map = new HashMap<>();
@@ -97,13 +102,14 @@ public class ExpenseController {
     @GetMapping("/project/list")
     public PageResponseVo<ProjectDTO> pageProject(ProjectListQry projectListQry) {
         final int userId = UserHolder.getUser().getUserId();
-        projectListQry.setUserId(userId);
+        projectListQry.setOperatorId(userId);
         final PageResponse<ProjectDTO> pageResponse = projectService.pageProject(projectListQry);
         return PageResponseVo.buildFromPageResponse(pageResponse);
     }
 
     @GetMapping("/project/sharing")
     public SingleResponseVo getProjectSharingDetail(ProjectSharingQry projectSharingQry) {
+        projectSharingQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<UserSharingDTO>> projectSharingDetail = projectService.getProjectSharingDetail(projectSharingQry);
         if (!projectSharingDetail.isSuccess()) {
             return SingleResponseVo.buildFailure(projectSharingDetail.getErrCode(), projectSharingDetail.getErrMessage());
@@ -117,7 +123,7 @@ public class ExpenseController {
     public void exportFeeRecordDetail(@RequestParam Integer projectId, HttpServletResponse response) throws Exception {
         // TODO expenseRecordExportExe 后续看看迁移到 projectService中使用？ 同时也可以使用到注解切面
         // 这里因为导出类使用了easyexcel的注解，所以临时这样处理吧
-        final SingleResponse<List<ExpenseRecordExcelBO>> execute = expenseRecordExportExe.execute(projectId);
+        final SingleResponse<List<ExpenseRecordExcelBO>> execute = expenseRecordExportExe.execute(projectId, UserHolder.getUser().getUserId());
         Assert.isTrue(execute.isSuccess(), "导出异常");
 
         final String fileName = execute.getData().get(0).getProjectName() + "-费用信息.xlsx";

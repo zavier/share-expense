@@ -25,5 +25,6 @@ public class ExpenseRecordAddCmd {
      */
     private String payMember;
 
+    private Integer operatorId;
 
 }

@@ -73,6 +73,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             return Optional.empty();
         }
 
+
         final List<ExpenseProjectMemberDO> expenseProjectMemberDOS = listProjectMembers(expenseProjectId);
         final List<ExpenseRecordDO> recordDOList = listRecord(expenseProjectId);
         final List<ExpenseRecordConsumerDO> recordConsumerDOList = listRecordConsumer(expenseProjectId);
@@ -90,7 +91,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     public PageResponse<ExpenseProject> pageProject(ProjectListQry projectListQry) {
         // 查询出全部自己创建+自己加入的项目
-        if (projectListQry.getUserId() != null) {
+        if (projectListQry.getOperatorId() != null) {
             return pageProjectByUser(projectListQry);
         }
         // 分页
@@ -205,7 +206,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
         // 自己创建的，按照ID倒序
         final List<ExpenseProjectDO> projectList = expenseProjectMapper.wrapper()
-                .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getUserId())
+                .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getOperatorId())
                 .list();
 
         if (CollectionUtils.isEmpty(projectList)) {

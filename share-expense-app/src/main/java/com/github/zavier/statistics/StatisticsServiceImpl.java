@@ -26,10 +26,12 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     // 统计支出类型占比
     @Override
-    public SingleResponse<String> statisticsByExpenseType(Integer projectId) {
+    public SingleResponse<String> statisticsByExpenseType(Integer projectId, Integer operatorId) {
         final Optional<ExpenseProject> projectOpt = projectGateway.getProjectById(projectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject project = projectOpt.get();
+
+        Assert.isTrue(Objects.equals(project.getCreateUserId(), operatorId), "无权限");
 
         final List<ExpenseRecord> expenseRecords = project.listAllExpenseRecord();
 

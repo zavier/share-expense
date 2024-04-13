@@ -7,7 +7,9 @@ import com.github.zavier.dto.ProjectMemberListQry;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -21,6 +23,11 @@ public class ProjectMemberListQryExe {
         final Optional<ExpenseProject> projectById = expenseProjectGateway.getProjectById(projectMemberListQry.getProjectId());
         Assert.isTrue(projectById.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectById.get();
+
+        if (!Objects.equals(expenseProject.getCreateUserId(), projectMemberListQry.getOperatorId())) {
+            return Collections.emptyList();
+        }
+
         return expenseProject.listAllMember();
     }
 }

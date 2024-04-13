@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,10 +23,12 @@ public class ExpenseRecordExportExe {
     @Resource
     private ExpenseProjectGateway expenseProjectGateway;
 
-    public SingleResponse<List<ExpenseRecordExcelBO>> execute(Integer projectId) {
+    public SingleResponse<List<ExpenseRecordExcelBO>> execute(Integer projectId, Integer operatorId) {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
+
+        Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), operatorId), "无权限");
 
         final List<ExpenseRecord> expenseRecords = expenseProject.listAllExpenseRecord();
         final List<ExpenseRecordExcelBO> collect = expenseRecords.stream()
