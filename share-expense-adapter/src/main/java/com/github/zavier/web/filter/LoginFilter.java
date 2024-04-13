@@ -91,6 +91,7 @@ public class LoginFilter implements Filter {
                 || "/".equals(url)
                 || url.endsWith(".html")
                 || url.endsWith(".css")
+                || url.endsWith(".json")
                 || url.endsWith(".js");
     }
 }
