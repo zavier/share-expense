@@ -18,5 +18,5 @@ public class ExpenseRecordDTO {
     private String expenseType;
     private String remark;
 
-    private List<ExpenseProjectMemberDTO> consumeMembers = new ArrayList<>();
+    private List<String> consumeMembers = new ArrayList<>();
 }

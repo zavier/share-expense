@@ -30,12 +30,12 @@
           },
           {
             "label": "费用管理",
-            "url": "/expense/list",
-            "schemaApi": "get:/expense/pages/expense-list.json"
+            "url": "/expense/:id/list",
+            "schemaApi": "get:/expense/pages/record-list.json"
           },
           {
             "label": "新增",
-            "url": "/crud/new",
+            "url": "/crud/new/:id",
             "schemaApi": "get:/pages/crud-new.json"
           },
           {

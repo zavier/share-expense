@@ -1,0 +1,62 @@
+{
+  "type": "page",
+  "title": "费用列表",
+  "remark": null,
+  "name": "page-demo",
+  "data": {
+    "projectId": "${SPLIT(window:location.hash, '/')[2]}"
+  },
+  "toolbar": [
+    {
+      "type": "button",
+      "actionType": "link",
+      "link": "/project/list",
+      "label": "返回项目列表"
+    }
+  ],
+  "body": [
+    {
+      "type": "crud",
+      "name": "sample",
+      "api": "/expense/project/listRecord?projectId=${projectId}",
+      "loadDataOnce": true,
+      "columns": [
+        {
+          "name": "date",
+          "label": "消费日期",
+          "type": "date"
+        },
+        {
+          "name": "amount",
+          "label": "金额"
+        },
+        {
+          "name": "payMember",
+          "label": "付款人"
+        },
+        {
+          "name": "expenseType",
+          "label": "费用类型"
+        },
+        {
+          "name": "remark",
+          "label": "备注"
+        },
+        {
+          "name": "${JOIN(consumeMembers, ',')}",
+          "type": "text",
+          "label": "消费人"
+        }
+      ],
+      "affixHeader": true,
+      "columnsTogglable": "auto",
+      "placeholder": "暂无数据",
+      "tableClassName": "table-db table-striped",
+      "headerClassName": "crud-table-header",
+      "footerClassName": "crud-table-footer",
+      "toolbarClassName": "crud-table-toolbar",
+      "combineNum": 0,
+      "bodyClassName": "panel-default"
+    }
+  ]
+}

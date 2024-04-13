@@ -4,11 +4,9 @@ import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.dto.ProjectAddCmd;
-import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 public class ProjectConverter {
 
@@ -21,14 +19,7 @@ public class ProjectConverter {
         expenseRecordDTO.setDate(expenseRecord.getDate().getTime() / 1000);
         expenseRecordDTO.setExpenseType(expenseRecord.getExpenseType());
         expenseRecordDTO.setRemark(expenseRecord.getRemark());
-
-        final List<ExpenseProjectMemberDTO> collect = expenseRecord.listAllConsumers().stream()
-                .map(it -> {
-                    final ExpenseProjectMemberDTO memberDTO = new ExpenseProjectMemberDTO();
-                    memberDTO.setMember(it);
-                    return memberDTO;
-                }).collect(Collectors.toList());
-        expenseRecordDTO.setConsumeMembers(collect);
+        expenseRecordDTO.setConsumeMembers(new ArrayList<>(expenseRecord.listAllConsumers()));
         return expenseRecordDTO;
     }
 

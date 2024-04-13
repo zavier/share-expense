@@ -166,57 +166,11 @@
                             }
                         },
                         {
-                            "label": "费用明细",
                             "type": "button",
+                            "label": "费用明细",
                             "level": "link",
-                            "actionType": "dialog",
-                            "dialog": {
-                                "size": "full",
-                                "title": "费用明细",
-                                "body": {
-                                    "type": "service",
-                                    "api": "/expense/project/listRecord?projectId=${projectId}",
-                                    "body": [
-                                        {
-                                            "type": "table",
-                                            "title": "明细信息",
-                                            "source": "$rows",
-                                            "columns": [
-                                                {
-                                                    "name": "date",
-                                                    "label": "消费日期",
-                                                    "type": "date"
-                                                },
-                                                {
-                                                    "name": "amount",
-                                                    "label": "金额"
-                                                },
-                                                {
-                                                    "name": "payMember",
-                                                    "label": "付款人"
-                                                },
-                                                {
-                                                    "name": "expenseType",
-                                                    "label": "费用类型"
-                                                },
-                                                {
-                                                    "name": "remark",
-                                                    "label": "备注"
-                                                },
-                                                {
-                                                    "name": "consumeMembers",
-                                                    "label": "消费人",
-                                                    "type": "list",
-                                                    "placeholder": "-",
-                                                    "listItem": {
-                                                        "title": "${member}"
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
+                            "actionType": "link",
+                            "link": "/expense/${projectId}/list"
                         },
                         {
                             "label": "添加成员",

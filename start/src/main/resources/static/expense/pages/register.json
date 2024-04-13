@@ -1,7 +1,7 @@
 {
     "type": "form",
     "api": "post:/expense/user/add",
-    "redirect": "/expense/index.html",
+    "redirect": "/login",
     "body": [
         {
             "type": "input-text",
