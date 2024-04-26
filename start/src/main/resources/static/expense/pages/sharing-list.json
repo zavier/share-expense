@@ -31,7 +31,7 @@
           "remark": "表示个人支付的金额"
         },
         {
-          "name": "consumeAmount",
+          "name": "${ROUND(consumeAmount)}",
           "label": "总分摊金额",
           "remark": "表示个人需要支付的金额"
         },
