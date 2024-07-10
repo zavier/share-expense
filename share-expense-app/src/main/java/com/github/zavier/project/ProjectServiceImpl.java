@@ -19,6 +19,8 @@ import com.github.zavier.project.executor.query.ProjectListQryExe;
 import com.github.zavier.project.executor.query.ProjectMemberListQryExe;
 import com.github.zavier.project.executor.query.ProjectSharingQryExe;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @CatchAndLog
 public class ProjectServiceImpl implements ProjectService {
 
+    private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
     @Resource
     private ProjectAddCmdExe projectAddCmdExe;
     @Resource
@@ -42,6 +45,8 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectMemberListQryExe projectMemberListQryExe;
     @Resource
     private ExpenseRecordAddCmdExe expenseRecordAddCmdExe;
+    @Resource
+    private ExpenseRecordDeleteCmdExe expenseRecordDeleteCmdExe;
     @Resource
     private ExpenseRecordListQryExe expenseRecordListQryExe;
     @Resource
@@ -71,6 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Response deleteProject(ProjectDeleteCmd projectDeleteCmd) {
+        log.info("deleteProject cmd:{}", projectDeleteCmd);
         return projectDeleteCmdExe.execute(projectDeleteCmd.getProjectId(), projectDeleteCmd.getOperatorId());
     }
 
@@ -84,6 +90,13 @@ public class ProjectServiceImpl implements ProjectService {
         expenseRecordAddCmdExe.execute(expenseRecordAddCmd);
         return Response.buildSuccess();
     }
+
+    @Override
+    public Response deleteExpenseRecord(ExpenseRecordDeleteCmd expenseRecordDeleteCmd) {
+        expenseRecordDeleteCmdExe.execute(expenseRecordDeleteCmd);
+        return Response.buildSuccess();
+    }
+
 
     @Override
     public SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry expenseRecordQry) {

@@ -55,6 +55,13 @@ public class ExpenseController {
         return ResponseVo.buildFromResponse(response);
     }
 
+    @PostMapping("/project/deleteRecord")
+    public ResponseVo deleteExpenseRecord(@RequestBody ExpenseRecordDeleteCmd expenseRecordDeleteCmd) {
+        expenseRecordDeleteCmd.setOperatorId(UserHolder.getUser().getUserId());
+        final Response response = projectService.deleteExpenseRecord(expenseRecordDeleteCmd);
+        return ResponseVo.buildFromResponse(response);
+    }
+
     @GetMapping("/project/listRecord")
     public SingleResponseVo<Map<String, List<ExpenseRecordDTO>>> listRecord(ExpenseRecordQry expenseRecordQry) {
         expenseRecordQry.setOperatorId(UserHolder.getUser().getUserId());

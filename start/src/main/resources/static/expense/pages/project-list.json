@@ -250,6 +250,21 @@
                                     }
                                 }
                             }
+                        },
+                        {
+                            "label": "删除项目",
+                            "level": "link",
+                            "type": "button",
+                            "actionType": "ajax",
+                            "confirmText": "确认删除此项目？",
+                            "confirmTitle": "确认",
+                            "api": {
+                                "method": "post",
+                                "url": "/expense/project/delete",
+                                "data": {
+                                    "projectId": "${projectId}"
+                                }
+                            }
                         }
                     ]
                 }

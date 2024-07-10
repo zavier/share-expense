@@ -106,6 +106,13 @@ public class ExpenseProject {
         }
     }
 
+    public void removeRecord(Integer recordId) {
+        final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
+        Assert.isTrue(removed, "费用明细不存在:" + recordId);
+        recordChangingStatus = ChangingStatus.DELETED;
+        changingStatus = ChangingStatus.UPDATED;
+    }
+
     public void addMember(String name) {
         final boolean add = members.add(name);
         Assert.isTrue(add, "添加用户已存在:" + name);
