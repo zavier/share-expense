@@ -4,10 +4,10 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
+import jakarta.annotation.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 

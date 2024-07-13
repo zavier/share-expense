@@ -10,11 +10,11 @@ import com.github.zavier.dto.UserLoginCmd;
 import com.github.zavier.dto.data.UserDTO;
 import com.github.zavier.vo.PageResponseVo;
 import com.github.zavier.vo.ResponseVo;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 

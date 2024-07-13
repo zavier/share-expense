@@ -7,10 +7,10 @@ import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.project.executor.bo.ExpenseRecordExcelBO;
 import com.github.zavier.project.executor.converter.ExpenseRecordConverter;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

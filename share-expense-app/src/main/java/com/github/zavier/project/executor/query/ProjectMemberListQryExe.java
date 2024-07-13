@@ -4,9 +4,9 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectMemberListQry;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

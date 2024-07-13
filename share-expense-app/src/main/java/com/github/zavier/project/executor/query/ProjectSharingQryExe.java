@@ -5,9 +5,9 @@ import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ProjectSharingFee;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectSharingQry;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 import java.util.Optional;
 

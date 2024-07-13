@@ -8,14 +8,10 @@ import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
 import com.github.zavier.domain.expense.domainservice.ExpenseRecordValidator;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
-import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
-import com.github.zavier.domain.expense.domainservice.ExpenseRecordValidator;
-import com.github.zavier.domain.expense.gateway.ExpenseRecordGateway;
-import com.github.zavier.dto.ExpenseRecordAddCmd;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 import java.util.Optional;
 
