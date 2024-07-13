@@ -1,0 +1,25 @@
+{
+    "type": "form",
+    "api": "post:/expense/user/add",
+    "redirect": "/login",
+    "body": [
+        {
+            "type": "input-text",
+            "name": "username",
+            "label": "昵称",
+            "required": true
+        },
+        {
+            "type": "input-email",
+            "name": "email",
+            "label": "邮箱",
+            "required": true
+        },
+        {
+            "type": "input-password",
+            "name": "password",
+            "label": "密码",
+            "required": true
+        }
+    ]
+}

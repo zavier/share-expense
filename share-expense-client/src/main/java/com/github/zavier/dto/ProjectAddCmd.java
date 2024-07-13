@@ -2,6 +2,9 @@ package com.github.zavier.dto;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class ProjectAddCmd {
     private String projectName;
@@ -10,6 +13,11 @@ public class ProjectAddCmd {
     /**
      * 创建人
      */
-    private Integer userId;
-    private String userName;
+    private Integer createUserId;
+    private String createUserName;
+
+    /**
+     * 成员
+     */
+    private List<String> members = new ArrayList<>();
 }

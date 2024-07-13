@@ -3,15 +3,28 @@ package com.github.zavier.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class ExpenseRecordAddCmd {
     private Integer projectId;
     private BigDecimal amount;
-    private Date date;
+    // 秒 时间戳
+    private Long date;
     private String expenseType;
     private String remark;
 
-    private Integer userId;
+    /**
+     * 消费用户集合
+     */
+    private List<String> consumerMembers = new ArrayList<>();
+
+    /**
+     * 付款用户ID
+     */
+    private String payMember;
+
+    private Integer operatorId;
+
 }

@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class ExpenseRecordQry  extends Query {
     private Integer projectId;
+    private Integer operatorId;
 }

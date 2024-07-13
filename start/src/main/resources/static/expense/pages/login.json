@@ -1,0 +1,19 @@
+{
+    "type": "form",
+    "api": "post:/expense/user/login",
+    "redirect": "/project/list",
+    "body": [
+        {
+            "type": "input-text",
+            "name": "username",
+            "label": "昵称",
+            "required": true
+        },
+        {
+            "type": "input-password",
+            "name": "password",
+            "label": "密码",
+            "required": true
+        }
+    ]
+}

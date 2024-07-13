@@ -1,20 +1,20 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.Assert;
-import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExpenseRecord {
 
-    private Map<Integer, ExpenseSharing> userIdSharingMap = new HashMap<>();
+    /**
+     * 费用消费的成员信息
+     */
+    private final Set<String> consumeMembers = new HashSet<>();
 
     @Getter
     @Setter
@@ -25,10 +25,7 @@ public class ExpenseRecord {
 
     @Getter
     @Setter
-    private Integer costUserId;
-    @Getter
-    @Setter
-    private String costUserName;
+    private String payMember;
     @Getter
     @Setter
     private BigDecimal amount;
@@ -43,72 +40,46 @@ public class ExpenseRecord {
     private String remark;
 
     /**
-     * 版本号
-     */
-    @Getter
-    @Setter
-    private Integer version;
-
-    @Getter
-    @Setter
-    private ChangingStatus changingStatus = ChangingStatus.NEW;
-
-    /**
      * 是否需要分摊
      */
     @Getter
     @Setter
     private Boolean needSharding = false;
 
-    public void addUserSharing(Integer userId, String userName, Integer weight) {
-        Assert.notNull(userId, "用户ID不能为空");
-        Assert.notNull(userName, "用户名称不能为空");
-        Assert.notNull(weight, "权重不能为空");
-
-        Assert.isFalse(userIdSharingMap.containsKey(userId), "用户ID重复");
-        userIdSharingMap.put(userId, new ExpenseSharing(userId, userName, weight));
-
-        calcSharingAmount();
+    /**
+     * 计算费用记录中，每个成员的费用信息
+     *
+     * @return
+     */
+    public List<MemberRecordFee> calcMembersFeeInRecord() {
+        final BigDecimal perMemberPayAmount = amount.divide(BigDecimal.valueOf(consumeMembers.size()), 6, RoundingMode.HALF_DOWN);
+        return consumeMembers.stream()
+                .map(member -> {
+                    final MemberRecordFee memberFeeDetail = new MemberRecordFee();
+                    memberFeeDetail.setMember(member);
+                    memberFeeDetail.setExpenseRecord(this);
+                    memberFeeDetail.setConsumeAmount(perMemberPayAmount);
+                    memberFeeDetail.setPaidAmount(isPaidMember(member) ? amount : BigDecimal.ZERO);
+                    return memberFeeDetail;
+                }).collect(Collectors.toList());
     }
 
-
-    public void updateUserWeight(Integer userId, Integer weight) {
-        Assert.notNull(userId, "用户ID不能为空");
-        Assert.notNull(weight, "权重不能为空");
-
-        Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
-        userIdSharingMap.get(userId).setWeight(weight);
-
-        calcSharingAmount();
+    private boolean isPaidMember(String member) {
+        return Objects.equals(payMember, member);
     }
 
-    public void removeUserSharing(Integer userId) {
-        Assert.notNull(userId, "用户ID不能为空");
-
-        Assert.isTrue(userIdSharingMap.containsKey(userId), "用户权重不存在");
-        userIdSharingMap.remove(userId);
-
-        calcSharingAmount();
+    public void addConsumer(String name) {
+        final boolean add = consumeMembers.add(name);
+        Assert.isTrue(add, "消费人已存在:" + name);
     }
 
-    private void calcSharingAmount() {
-        if (!hasSharing()) {
-            return;
-        }
-
-        final Integer totalWeight = userIdSharingMap.values().stream()
-                .map(ExpenseSharing::getWeight)
-                .reduce(0, Integer::sum);
-        userIdSharingMap.values().forEach(expenseSharing ->
-                expenseSharing.setAmount(amount.multiply(new BigDecimal(expenseSharing.getWeight())).divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP)));
+    public void addConsumers(List<String> names) {
+        Assert.notEmpty(names, "消费人不能为空");
+        names.forEach(this::addConsumer);
     }
 
-    public boolean hasSharing() {
-        return !userIdSharingMap.isEmpty();
-    }
-
-    public Map<Integer, ExpenseSharing> getUserIdSharingMap() {
-        return Collections.unmodifiableMap(userIdSharingMap);
+    public Set<String> listAllConsumers() {
+        return Collections.unmodifiableSet(consumeMembers);
     }
 
 }

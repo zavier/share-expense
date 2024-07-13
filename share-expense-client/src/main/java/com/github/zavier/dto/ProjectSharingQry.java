@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class ProjectSharingQry {
     private Integer projectId;
+    private Integer operatorId;
 }

@@ -1,20 +1,20 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.Assert;
-import com.alibaba.cola.exception.BizException;
 import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExpenseProject {
 
     /**
-     * 项目成员ID
+     * 项目成员
      */
-    private final Map<Integer, ExpenseProjectMember> userIdMap = new HashMap<>();
+    private final Set<String> members = new HashSet<>();
 
     /**
      * 费用记录
@@ -33,7 +33,7 @@ public class ExpenseProject {
      */
     @Getter
     @Setter
-    private Integer userId;
+    private Integer createUserId;
 
     /**
      * 项目名称
@@ -56,53 +56,93 @@ public class ExpenseProject {
     @Setter
     private Integer version;
 
+    /**
+     * 版本号
+     */
+    @Getter
+    @Setter
+    private Boolean locked;
+
     @Getter
     @Setter
     private ChangingStatus changingStatus = ChangingStatus.NEW;
 
-    public List<ExpenseProjectMember> listMember() {
-        return Collections.unmodifiableList(new ArrayList<>(userIdMap.values()));
+    @Getter
+    @Setter
+    private ChangingStatus recordChangingStatus = ChangingStatus.UNCHANGED;
+
+    @Getter
+    @Setter
+    private ChangingStatus memberChangingStatus = ChangingStatus.UNCHANGED;
+
+
+    public ProjectSharingFee calcMemberSharingFee() {
+        // 计算每个成员的费用项的分摊
+        final List<MemberRecordFee> memberFeeDetailList = expenseRecordList.stream()
+                .map(ExpenseRecord::calcMembersFeeInRecord)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        // 汇总
+        final ProjectSharingFee projectFee = new ProjectSharingFee();
+        memberFeeDetailList.forEach(projectFee::addMemberRecordFee);
+        return projectFee;
     }
 
-    public void addMember(Integer userId, String userName, Integer weight) {
-        final ExpenseProjectMember projectMember = new ExpenseProjectMember()
-                .setProjectId(this.getId())
-                .setUserId(userId)
-                .setUserName(userName)
-                .setWeight(weight);
-        final ExpenseProjectMember previous = userIdMap.putIfAbsent(userId, projectMember);
-        if (previous != null) {
-            throw new BizException("用户已存在");
-        }
+
+    public List<String> listAllMember() {
+        return Collections.unmodifiableList(new ArrayList<>(members));
     }
 
-    public boolean existMember(Integer userId) {
-        return userIdMap.containsKey(userId);
-    }
-
-
-    public void checkUserIdExist() {
-        Assert.notNull(userId, "创建人不能为空");
-    }
-
-    public void checkProjectNameValid() {
-        Assert.notNull(name, "项目名称不能为空");
-        Assert.isTrue(name.length() < 100, "项目名称长度不能超过100字");
+    public List<ExpenseRecord> listAllExpenseRecord() {
+        return Collections.unmodifiableList(new ArrayList<>(expenseRecordList));
     }
 
     public void addExpenseRecord(ExpenseRecord expenseRecord) {
         expenseRecordList.add(expenseRecord);
+
+        if (recordChangingStatus == ChangingStatus.UNCHANGED) {
+            recordChangingStatus = ChangingStatus.NEW;
+        }
     }
 
-    public void cala() {
-        // TODO
-        final BigDecimal totalAmount = expenseRecordList.stream().map(ExpenseRecord::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        final Integer totalWeight = this.listMember().stream().map(ExpenseProjectMember::getWeight)
-                .reduce(0, Integer::sum);
-
-//        userIdSharingMap.values().forEach(expenseSharing ->
-//                expenseSharing.setAmount(amount.multiply(new BigDecimal(expenseSharing.getWeight())).divide(new BigDecimal(totalWeight), 2, RoundingMode.HALF_UP)));
+    public void removeRecord(Integer recordId) {
+        final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
+        Assert.isTrue(removed, "费用明细不存在:" + recordId);
+        recordChangingStatus = ChangingStatus.DELETED;
+        changingStatus = ChangingStatus.UPDATED;
     }
+
+    public void addMember(String name) {
+        final boolean add = members.add(name);
+        Assert.isTrue(add, "添加用户已存在:" + name);
+
+        if (memberChangingStatus == ChangingStatus.UNCHANGED) {
+            memberChangingStatus = ChangingStatus.NEW;
+        }
+    }
+
+    public void addMembers(List<String> names) {
+        if (names == null) {
+            return;
+        }
+        names.forEach(this::addMember);
+    }
+
+
+    public boolean containsMember(String name) {
+        return members.contains(name);
+    }
+
+
+    public void checkUserIdExist() {
+        Assert.notNull(createUserId, "创建人不能为空");
+    }
+
+
+    public void checkProjectNameValid() {
+        Assert.isTrue(StringUtils.isNotBlank(name), "项目名称不能为空");
+        Assert.isTrue(name.length() < 100, "项目名称长度不能超过100字");
+    }
+
 }

@@ -12,12 +12,8 @@ public class ExpenseProjectMemberDO {
     private Integer id;
     @Entity.Column(value = "project_id", remark = "所属费用项目ID")
     private Integer projectId;
-    @Entity.Column(value = "user_id", remark = "用户ID")
-    private Integer userId;
-    @Entity.Column(value = "user_name", remark = "用户名称")
-    private String userName;
-    @Entity.Column(value = "weight", remark = "均摊权重(人份)")
-    private Integer weight;
+    @Entity.Column(value = "name", remark = "用户名称")
+    private String name;
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
     @Entity.Column(value = "updated_at", remark = "更新时间")

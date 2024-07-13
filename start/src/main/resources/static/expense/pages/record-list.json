@@ -1,0 +1,93 @@
+{
+  "type": "page",
+  "title": "费用列表",
+  "remark": null,
+  "name": "page-demo",
+  "data": {
+    "projectId": "${SPLIT(window:location.hash, '/')[2]}"
+  },
+  "toolbar": [
+    {
+      "label": "导出Excel",
+      "type": "action",
+      "actionType": "download",
+      "api": "/expense/project/record/export?projectId=${projectId}"
+    },
+    {
+      "type": "button",
+      "actionType": "link",
+      "link": "/project/list",
+      "label": "返回项目列表"
+    }
+  ],
+  "body": [
+    {
+      "type": "crud",
+      "name": "projectList",
+      "api": "/expense/project/listRecord?projectId=${projectId}",
+      "loadDataOnce": true,
+      "columns": [
+        {
+          "type": "hidden",
+          "name": "recordId",
+          "label": "费用ID"
+        },
+        {
+          "name": "date",
+          "label": "消费日期",
+          "type": "date",
+          "sortable": true
+        },
+        {
+          "name": "amount",
+          "label": "金额",
+          "sortable": true
+        },
+        {
+          "name": "payMember",
+          "label": "付款人",
+          "sortable": true
+        },
+        {
+          "name": "expenseType",
+          "label": "费用类型",
+          "sortable": true
+        },
+        {
+          "name": "remark",
+          "label": "备注"
+        },
+        {
+          "name": "${JOIN(consumeMembers, ',')}",
+          "type": "text",
+          "label": "消费人"
+        },
+        {
+          "label": "删除费用",
+          "level": "link",
+          "type": "button",
+          "actionType": "ajax",
+          "confirmText": "确认删除此费用？",
+          "confirmTitle": "确认",
+          "api": {
+            "method": "post",
+            "url": "/expense/project/deleteRecord",
+            "data": {
+              "recordId": "${recordId}",
+              "projectId": "${projectId}"
+            }
+          }
+        }
+      ],
+      "affixHeader": true,
+      "columnsTogglable": "auto",
+      "placeholder": "暂无数据",
+      "tableClassName": "table-db table-striped",
+      "headerClassName": "crud-table-header",
+      "footerClassName": "crud-table-footer",
+      "toolbarClassName": "crud-table-toolbar",
+      "combineNum": 0,
+      "bodyClassName": "panel-default"
+    }
+  ]
+}

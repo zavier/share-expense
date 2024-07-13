@@ -1,0 +1,21 @@
+{
+    "type": "page",
+    "title": "统计信息",
+    "remark": null,
+    "name": "page-demo",
+    "data": {
+        "projectId": "${SPLIT(window:location.hash, '/')[2]}"
+    },
+    "toolbar": [
+        {
+            "type": "button",
+            "actionType": "link",
+            "link": "/project/list",
+            "label": "返回项目列表"
+        }
+    ],
+    "body": {
+        "type": "chart",
+        "api": "/expense/project/statistics/expenseType?projectId=${projectId}"
+    }
+}

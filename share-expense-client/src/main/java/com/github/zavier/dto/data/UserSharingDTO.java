@@ -3,32 +3,31 @@ package com.github.zavier.dto.data;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class UserSharingDTO {
-    private Integer userId;
-    private String userName;
 
-    public UserSharingDTO(Integer userId, String userName) {
-        this.userId = userId;
-        this.userName = userName;
-    }
+    private String member;
 
-    private BigDecimal shareAmount = BigDecimal.ZERO;
+    /**
+     * 参与的记录总金额
+     */
+    private BigDecimal totalAmount;
 
-    private BigDecimal paidAmount = BigDecimal.ZERO;
+    /**
+     * 本人支出金额
+     */
+    private BigDecimal paidAmount;
+    /**
+     * 本人消费金额
+     */
+    private BigDecimal consumeAmount;
 
+    /**
+     * 明细
+     */
+    private List<UserSharingDetailDTO> children = new ArrayList<>();
 
-    // 可能为负数
-    public BigDecimal getAmount() {
-        return shareAmount.subtract(paidAmount);
-    }
-
-    public BigDecimal getNeedPaid() {
-        return shareAmount.compareTo(paidAmount) > 0 ? shareAmount.subtract(paidAmount) : BigDecimal.ZERO;
-    }
-
-    public BigDecimal getNeedReceive() {
-        return paidAmount.compareTo(shareAmount) > 0 ? paidAmount.subtract(shareAmount) : BigDecimal.ZERO;
-    }
 }

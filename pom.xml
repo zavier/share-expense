@@ -27,6 +27,8 @@
         <commons.collection.version>4.4</commons.collection.version>
         <pagehelper.version>5.3.2</pagehelper.version>
         <jjwt.version>0.12.2</jjwt.version>
+        <guava.version>33.1.0-jre</guava.version>
+        <easyexcel.version>3.3.4</easyexcel.version>
     </properties>
 
     <modules>
@@ -47,11 +49,17 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
+            <version>24.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -110,18 +118,6 @@
                 <artifactId>mybatis-mapper</artifactId>
                 <version>${mybatis.mapper.version}</version>
             </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>8.0.31</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>javax.el-api</artifactId>
-                <version>${javax.el-api.version}</version>
-            </dependency>
-            <!--Validation API End -->
 
             <!-- Misc -->
             <dependency>
@@ -144,6 +140,11 @@
                 <version>${commons.collection.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.pagehelper</groupId>
                 <artifactId>pagehelper</artifactId>
                 <version>${pagehelper.version}</version>
@@ -161,12 +162,39 @@
                 <version>24.0.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.10.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
