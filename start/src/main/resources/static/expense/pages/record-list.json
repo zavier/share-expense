@@ -28,7 +28,6 @@
       "loadDataOnce": true,
       "columns": [
         {
-          "type": "hidden",
           "name": "recordId",
           "label": "费用ID"
         },
