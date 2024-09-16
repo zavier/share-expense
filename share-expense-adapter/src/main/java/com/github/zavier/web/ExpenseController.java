@@ -62,6 +62,13 @@ public class ExpenseController {
         return ResponseVo.buildFromResponse(response);
     }
 
+    @PostMapping("/project/updateRecord")
+    public ResponseVo updateExpenseRecord(@RequestBody ExpenseRecordUpdateCmd expenseRecordUpdateCmd) {
+        expenseRecordUpdateCmd.setOperatorId(UserHolder.getUser().getUserId());
+        final Response response = projectService.updateExpenseRecord(expenseRecordUpdateCmd);
+        return ResponseVo.buildFromResponse(response);
+    }
+
     @GetMapping("/project/listRecord")
     public SingleResponseVo<Map<String, List<ExpenseRecordDTO>>> listRecord(ExpenseRecordQry expenseRecordQry) {
         expenseRecordQry.setOperatorId(UserHolder.getUser().getUserId());

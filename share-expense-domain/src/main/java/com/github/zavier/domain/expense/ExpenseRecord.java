@@ -14,7 +14,7 @@ public class ExpenseRecord {
     /**
      * 费用消费的成员信息
      */
-    private final Set<String> consumeMembers = new HashSet<>();
+    private Set<String> consumeMembers = new HashSet<>();
 
     @Getter
     @Setter
@@ -80,6 +80,39 @@ public class ExpenseRecord {
 
     public Set<String> listAllConsumers() {
         return Collections.unmodifiableSet(consumeMembers);
+    }
+
+    public boolean updateInfo(ExpenseRecord updateRecord) {
+        Assert.notNull(updateRecord, "更新记录不能为空");
+        Assert.isTrue(Objects.equals(projectId, updateRecord.getProjectId()), "所属项目不允许修改");
+        Assert.isTrue(Objects.equals(id, updateRecord.getId()), "记录ID不一致");
+
+        boolean update = false;
+        if (!consumeMembers.equals(updateRecord.listAllConsumers())) {
+            this.consumeMembers = updateRecord.listAllConsumers();
+            update = true;
+        }
+        if (!Objects.equals(payMember, updateRecord.getPayMember())) {
+            this.payMember = updateRecord.payMember;
+            update = true;
+        }
+        if (!Objects.equals(amount, updateRecord.getAmount())) {
+            this.amount = updateRecord.getAmount();
+            update = true;
+        }
+        if (!Objects.equals(date, updateRecord.getDate())) {
+            this.date = updateRecord.getDate();
+            update = true;
+        }
+        if (!Objects.equals(expenseType, updateRecord.getExpenseType())) {
+            this.expenseType = updateRecord.getExpenseType();
+            update = true;
+        }
+        if (!Objects.equals(remark, updateRecord.getRemark())) {
+            this.remark = updateRecord.getRemark();
+            update = true;
+        }
+        return update;
     }
 
 }

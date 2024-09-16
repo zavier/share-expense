@@ -26,6 +26,8 @@ public interface ProjectService {
 
     Response deleteExpenseRecord(ExpenseRecordDeleteCmd expenseRecordDeleteCmd);
 
+    Response updateExpenseRecord(ExpenseRecordUpdateCmd expenseRecordUpdateCmd);
+
     SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry expenseRecordQry);
 
 

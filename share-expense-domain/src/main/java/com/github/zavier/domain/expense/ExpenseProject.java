@@ -106,6 +106,21 @@ public class ExpenseProject {
         }
     }
 
+    public boolean updateExpenseRecord(ExpenseRecord updateRecord) {
+        final List<ExpenseRecord> findRecordList = expenseRecordList.stream().filter(record -> Objects.equals(record.getId(), updateRecord.getId()))
+                .collect(Collectors.toList());
+        Assert.isTrue(findRecordList.size() == 1, "费用明细不存在或存在多条:" + updateRecord.getId());
+        final ExpenseRecord expenseRecord = findRecordList.get(0);
+
+        final boolean update = expenseRecord.updateInfo(updateRecord);
+
+        if (update && recordChangingStatus == ChangingStatus.UNCHANGED) {
+            recordChangingStatus = ChangingStatus.UPDATED;
+        }
+
+        return update;
+    }
+
     public void removeRecord(Integer recordId) {
         final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
         Assert.isTrue(removed, "费用明细不存在:" + recordId);
@@ -143,6 +158,14 @@ public class ExpenseProject {
     public void checkProjectNameValid() {
         Assert.isTrue(StringUtils.isNotBlank(name), "项目名称不能为空");
         Assert.isTrue(name.length() < 100, "项目名称长度不能超过100字");
+    }
+
+    public boolean containsRecord(Integer recordId) {
+        final Set<Integer> existRecordIdSet = expenseRecordList.stream()
+                .map(ExpenseRecord::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        return existRecordIdSet.contains(recordId);
     }
 
 }

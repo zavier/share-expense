@@ -62,20 +62,127 @@
           "label": "消费人"
         },
         {
-          "label": "删除费用",
-          "level": "link",
-          "type": "button",
-          "actionType": "ajax",
-          "confirmText": "确认删除此费用？",
-          "confirmTitle": "确认",
-          "api": {
-            "method": "post",
-            "url": "/expense/project/deleteRecord",
-            "data": {
-              "recordId": "${recordId}",
-              "projectId": "${projectId}"
+          "type": "operation",
+          "label": "操作",
+          "buttons": [
+            {
+              "label": "修改费用",
+              "type": "button",
+              "level": "link",
+              "actionType": "dialog",
+              "dialog": {
+                "title": "费用信息",
+                "body": {
+                  "type": "form",
+                  "api": "post:/expense/project/updateRecord",
+                  "body": [
+                    {
+                      "type": "hidden",
+                      "name": "projectId",
+                      "label": "项目ID",
+                      "required": true,
+                      "readOnly": true
+                    },
+                    {
+                      "type": "hidden",
+                      "name": "recordId",
+                      "label": "费用ID",
+                      "required": true,
+                      "readOnly": true
+                    },
+                    {
+                      "label": "支付人",
+                      "type": "select",
+                      "name": "payMember",
+                      "source": "/expense/project/listMember?projectId=${projectId}",
+                      "labelField": "member",
+                      "valueField": "member",
+                      "required": true
+                    },
+                    {
+                      "label": "使用人",
+                      "type": "select",
+                      "name": "consumerMembers",
+                      "labelField": "member",
+                      "valueField": "member",
+                      "value": "${consumeMembers}",
+                      "checkAll": true,
+                      "multiple": true,
+                      "source": "/expense/project/listMember?projectId=${projectId}",
+                      "required": true,
+                      "joinValues": false,
+                      "extractValue": true
+                    },
+                    {
+                      "type": "input-number",
+                      "name": "amount",
+                      "label": "金额",
+                      "precision": 2,
+                      "min": 0,
+                      "required": true
+                    },
+                    {
+                      "type": "input-date",
+                      "name": "date",
+                      "label": "日期",
+                      "required": true,
+                      "value": "today"
+                    },
+                    {
+                      "label": "费用类型",
+                      "type": "select",
+                      "name": "expenseType",
+                      "required": true,
+                      "creatable": true,
+                      "options": [
+                        {
+                          "label": "饮食",
+                          "value": "饮食"
+                        },
+                        {
+                          "label": "娱乐",
+                          "value": "娱乐"
+                        },
+                        {
+                          "label": "住宿",
+                          "value": "住宿"
+                        },
+                        {
+                          "label": "出行",
+                          "value": "出行"
+                        },
+                        {
+                          "label": "其他",
+                          "value": "其他"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "input-text",
+                      "name": "remark",
+                      "label": "备注"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "label": "删除费用",
+              "level": "link",
+              "type": "button",
+              "actionType": "ajax",
+              "confirmText": "确认删除此费用？",
+              "confirmTitle": "确认",
+              "api": {
+                "method": "post",
+                "url": "/expense/project/deleteRecord",
+                "data": {
+                  "recordId": "${recordId}",
+                  "projectId": "${projectId}"
+                }
+              }
             }
-          }
+          ]
         }
       ],
       "affixHeader": true,

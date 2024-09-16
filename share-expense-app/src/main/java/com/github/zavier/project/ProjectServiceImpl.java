@@ -48,6 +48,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Resource
     private ExpenseRecordDeleteCmdExe expenseRecordDeleteCmdExe;
     @Resource
+    private ExpenseRecordUpdateCmdExe expenseRecordUpdateCmdExe;
+    @Resource
     private ExpenseRecordListQryExe expenseRecordListQryExe;
     @Resource
     private ProjectSharingQryExe projectSharingQryExe;
@@ -94,6 +96,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Response deleteExpenseRecord(ExpenseRecordDeleteCmd expenseRecordDeleteCmd) {
         expenseRecordDeleteCmdExe.execute(expenseRecordDeleteCmd);
+        return Response.buildSuccess();
+    }
+
+    @Override
+    public Response updateExpenseRecord(ExpenseRecordUpdateCmd expenseRecordUpdateCmd) {
+        expenseRecordUpdateCmdExe.execute(expenseRecordUpdateCmd);
         return Response.buildSuccess();
     }
 

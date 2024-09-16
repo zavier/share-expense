@@ -4,6 +4,7 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
+import com.github.zavier.dto.ExpenseRecordUpdateCmd;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,18 @@ public class ExpenseRecordValidator {
         final ExpenseProject expenseProject = projectIsExist(expenseRecordAddCmd.getProjectId());
         // 用户在项目组中
         userInProject(expenseRecordAddCmd, expenseProject);
+    }
+
+    public void valid(ExpenseRecordUpdateCmd expenseRecordUpdateCmd) {
+        // 基础数据校验
+        recordAddBaseCheck(expenseRecordUpdateCmd);
+        Assert.notNull(expenseRecordUpdateCmd.getRecordId(), "修改的记录id不能为空");
+
+        // 项目id及记录id校验（不能修改）
+        final ExpenseProject expenseProject = projectIsExist(expenseRecordUpdateCmd.getProjectId());
+        Assert.isTrue(expenseProject.containsRecord(expenseRecordUpdateCmd.getRecordId()), "该记录不存在");
+
+        userInProject(expenseRecordUpdateCmd, expenseProject);
     }
 
     private static void userInProject(ExpenseRecordAddCmd expenseRecordAddCmd, ExpenseProject expenseProject) {
