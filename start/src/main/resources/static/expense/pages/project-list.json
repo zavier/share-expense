@@ -121,7 +121,7 @@
                                         },
                                         {
                                             "name": "tools",
-                                            "type": "input-text",t
+                                            "type": "input-text",
                                             "placeholder": "1+4+6.5",
                                             "onEvent": {
                                                 "change": {
