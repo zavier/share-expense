@@ -120,6 +120,25 @@
                                             "extractValue": true
                                         },
                                         {
+                                            "name": "tools",
+                                            "type": "input-text",
+                                            "label": "金额累加计算",
+                                            "placeholder": "输入后会自动更新到金额中，如: 1+4+6.5",
+                                            "onEvent": {
+                                                "change": {
+                                                    "actions": [
+                                                        {
+                                                            "actionType": "setValue",
+                                                            "componentName": "amount",
+                                                            "args": {
+                                                                "value": "${SUM(SPLIT(event.data.value, '+'))}"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
                                             "type": "input-number",
                                             "name": "amount",
                                             "label": "金额",
