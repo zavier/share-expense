@@ -116,7 +116,12 @@
                     {
                       "name": "tools",
                       "type": "input-text",
-                      "label": "金额累加计算",
+                      "label": "计算器",
+                      "labelRemark": {
+                        "type": "remark",
+                        "shape": "circle",
+                        "content": "<p>输入后会自动计算设置金额</p><p>只支持+运算，如1+2+6.5</p>"
+                      },
                       "placeholder": "输入后会自动更新到金额中，如: 1+4+6.5",
                       "onEvent": {
                         "change": {

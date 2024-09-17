@@ -121,9 +121,8 @@
                                         },
                                         {
                                             "name": "tools",
-                                            "type": "input-text",
-                                            "label": "金额累加计算",
-                                            "placeholder": "输入后会自动更新到金额中，如: 1+4+6.5",
+                                            "type": "input-text",t
+                                            "placeholder": "1+4+6.5",
                                             "onEvent": {
                                                 "change": {
                                                     "actions": [
