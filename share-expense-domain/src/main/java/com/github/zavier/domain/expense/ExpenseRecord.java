@@ -53,7 +53,7 @@ public class ExpenseRecord {
      */
     public List<MemberRecordFee> calcMembersFeeInRecord() {
         final BigDecimal perMemberPayAmount = amount.divide(BigDecimal.valueOf(consumeMembers.size()), 6, RoundingMode.HALF_DOWN);
-        return consumeMembers.stream()
+        final List<MemberRecordFee> memberRecordFees = consumeMembers.stream()
                 .map(member -> {
                     final MemberRecordFee memberFeeDetail = new MemberRecordFee();
                     memberFeeDetail.setMember(member);
@@ -62,6 +62,16 @@ public class ExpenseRecord {
                     memberFeeDetail.setPaidAmount(isPaidMember(member) ? amount : BigDecimal.ZERO);
                     return memberFeeDetail;
                 }).collect(Collectors.toList());
+        // 如果支付人本身没有消费，需要单独增加一条记录
+        if (!consumeMembers.contains(payMember)) {
+            final MemberRecordFee memberFeeDetail = new MemberRecordFee();
+            memberFeeDetail.setMember(payMember);
+            memberFeeDetail.setExpenseRecord(this);
+            memberFeeDetail.setConsumeAmount(BigDecimal.ZERO);
+            memberFeeDetail.setPaidAmount(amount);
+            memberRecordFees.add(memberFeeDetail);
+        }
+        return memberRecordFees;
     }
 
     private boolean isPaidMember(String member) {
