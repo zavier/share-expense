@@ -10,6 +10,7 @@ import com.github.zavier.dto.UserLoginCmd;
 import com.github.zavier.dto.data.UserDTO;
 import com.github.zavier.vo.PageResponseVo;
 import com.github.zavier.vo.ResponseVo;
+import com.github.zavier.vo.SingleResponseVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -38,10 +39,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse) throws IOException {
+    public SingleResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse) throws IOException {
         final SingleResponse<String> tokenResp = userService.login(userLoginCmd);
         if (!tokenResp.isSuccess()) {
-            return ResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
+            return SingleResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
         }
 
         // 临时方案
@@ -49,7 +50,7 @@ public class UserController {
         cookie.setPath("/");
         cookie.setMaxAge((int) TimeUnit.DAYS.toSeconds(30));
         httpServletResponse.addCookie(cookie);
-        return ResponseVo.buildSuccess();
+        return SingleResponseVo.of(tokenResp.getData());
     }
 
     @PostMapping("/logout")
