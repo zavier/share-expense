@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -166,6 +167,14 @@ public class ExpenseProject {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         return existRecordIdSet.contains(recordId);
+    }
+
+    public int totalMember() {
+        return members.size();
+    }
+
+    public BigDecimal totalExpense() {
+        return expenseRecordList.stream().map(ExpenseRecord::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 }

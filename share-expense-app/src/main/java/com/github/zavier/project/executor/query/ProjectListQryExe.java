@@ -28,6 +28,9 @@ public class ProjectListQryExe {
             projectDTO.setProjectId(it.getId());
             projectDTO.setProjectName(it.getName());
             projectDTO.setProjectDesc(it.getDescription());
+
+            projectDTO.setTotalMember(it.totalMember());
+            projectDTO.setTotalExpense(it.totalExpense());
             return projectDTO;
         }).collect(Collectors.toList());
 
