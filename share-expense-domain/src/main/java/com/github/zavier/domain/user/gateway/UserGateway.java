@@ -15,6 +15,8 @@ public interface UserGateway {
 
     Optional<User> getByEmail(String email);
 
+    Optional<User> getByOpenId(@NotNull String openId);
+
     User save(User user);
 
     PageResponse<User> pageUser(UserListQry userListQry);

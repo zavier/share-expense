@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
     @Resource
     private UserLoginExe userLoginExe;
 
+
     @Override
     public Response addUser(UserAddCmd userAddCmd) {
         return userAddCmdExe.execute(userAddCmd);
@@ -59,5 +60,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public SingleResponse<String> login(UserLoginCmd userLoginCmd) {
         return userLoginExe.execute(userLoginCmd);
+    }
+
+    @Override
+    public SingleResponse<String> wxLogin(String code) {
+        return userLoginExe.loginByWxOrRegister(code);
     }
 }

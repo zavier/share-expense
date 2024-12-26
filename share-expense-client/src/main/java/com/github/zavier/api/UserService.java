@@ -24,4 +24,6 @@ public interface UserService {
      * @return
      */
     SingleResponse<String> login(UserLoginCmd userLoginCmd);
+
+    SingleResponse<String> wxLogin(String code);
 }

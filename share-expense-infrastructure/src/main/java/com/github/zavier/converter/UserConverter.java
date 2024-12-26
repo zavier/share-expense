@@ -11,6 +11,7 @@ public class UserConverter {
         user.setUserName(userDO.getUserName());
         user.setEmail(userDO.getEmail());
         user.setPasswordHash(userDO.getPasswordHash());
+        user.setOpenId(userDO.getOpenId());
         return user;
     }
 }

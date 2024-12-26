@@ -20,6 +20,9 @@ public class UserDO {
     @Entity.Column(value = "password_hash", remark = "密码哈希")
     private String passwordHash;
 
+    @Entity.Column(value = "open_id", remark = "微信openId")
+    private String openId;
+
     @Entity.Column(value = "created_at", remark = "创建时间")
     private Date createdAt;
 

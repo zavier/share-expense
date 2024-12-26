@@ -45,6 +45,13 @@ public class UserGateWayImpl implements UserGateway {
         return getByUserDo(userDO);
     }
 
+    @Override
+    public Optional<User> getByOpenId(@NotNull String openId) {
+        final UserDO userDO = new UserDO();
+        userDO.setOpenId(openId);
+        return getByUserDo(userDO);
+    }
+
     private Optional<User> getByUserDo(UserDO userDO) {
         final Optional<UserDO> userDOOpt = userMapper.selectOne(userDO);
         return userDOOpt.map(UserConverter::toUser);

@@ -26,6 +26,11 @@ public class User {
      */ 
     private String passwordHash;
 
+    /**
+     * 微信openId
+     */
+    private String openId;
+
 
     public String generatePasswordHash(String pwd) {
         return PasswordEncoder.encode(pwd);
