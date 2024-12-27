@@ -63,6 +63,7 @@ public class UserGateWayImpl implements UserGateway {
         userDO.setUserName(user.getUserName());
         userDO.setEmail(user.getEmail());
         userDO.setPasswordHash(user.getPasswordHash());
+        userDO.setOpenId(user.getOpenId());
         userDO.setCreatedAt(new Date());
         userDO.setUpdatedAt(new Date());
         userMapper.insertSelective(userDO);
