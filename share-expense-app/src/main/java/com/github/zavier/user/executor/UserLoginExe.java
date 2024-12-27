@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 public class UserLoginExe {
@@ -57,7 +56,8 @@ public class UserLoginExe {
 
     private User saveWxUser(String openId) {
         User user = new User();
-        user.setUserName("wx_" + UUID.randomUUID().toString().substring(10, 20));
+        final String userName = user.generateWxUserName();
+        user.setUserName(userName);
         user.setEmail("");
         user.setPasswordHash("");
         user.setOpenId(openId);

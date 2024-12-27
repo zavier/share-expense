@@ -4,6 +4,8 @@ import com.github.zavier.domain.utils.PasswordEncoder;
 import com.github.zavier.domain.utils.TokenHelper;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class User {
     /** 
@@ -42,5 +44,10 @@ public class User {
 
     public String generateToken() {
         return TokenHelper.generateToken(this);
+    }
+
+    public String generateWxUserName() {
+        final String substring = UUID.randomUUID().toString().replace("-", "").substring(6, 24);
+        return "wx_" + substring;
     }
 }
