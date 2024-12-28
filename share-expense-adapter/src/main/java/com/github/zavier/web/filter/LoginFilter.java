@@ -88,6 +88,7 @@ public class LoginFilter implements Filter {
     private boolean notNeedLogin(String url) {
         return url.contains("user/login")
                 || url.contains("user/add")
+                || url.endsWith("/share")
                 || "/".equals(url)
                 || url.endsWith(".html")
                 || url.endsWith(".css")

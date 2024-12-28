@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+/**
+ * 用户登录相关加解密工具
+ *
+ */
 public class TokenHelper {
 
     private static final String SECRET_KEY = "y=VFgqXLbQ,55v]H.kB0J=e)*1ND1q:B!,%CZ^";

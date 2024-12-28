@@ -11,5 +11,7 @@ public class ProjectListQry {
 
     private Integer size;
 
+    private Integer id;
+
     private String name;
 }

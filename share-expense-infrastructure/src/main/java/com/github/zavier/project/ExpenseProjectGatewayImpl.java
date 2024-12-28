@@ -194,6 +194,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         if (StringUtils.isNotBlank(projectListQry.getName())) {
             wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
         }
+        if (projectListQry.getId() != null) {
+            wrapper.eq(ExpenseProjectDO::getId, projectListQry.getId());
+        }
         final List<ExpenseProjectDO> list =  wrapper.list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
@@ -215,6 +218,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 .orderByDesc(ExpenseProjectDO::getId);
         if (StringUtils.isNotBlank(projectListQry.getName())) {
             wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
+        }
+        if (projectListQry.getId() != null) {
+            wrapper.eq(ExpenseProjectDO::getId, projectListQry.getId());
         }
         final List<ExpenseProjectDO> projectList = wrapper.list();
 
