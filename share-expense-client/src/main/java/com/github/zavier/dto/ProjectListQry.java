@@ -10,4 +10,6 @@ public class ProjectListQry {
     private Integer page;
 
     private Integer size;
+
+    private String name;
 }

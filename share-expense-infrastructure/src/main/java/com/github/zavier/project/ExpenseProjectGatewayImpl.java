@@ -17,8 +17,10 @@ import com.github.zavier.expense.ExpenseRecordConsumerDO;
 import com.github.zavier.expense.ExpenseRecordConsumerMapper;
 import com.github.zavier.expense.ExpenseRecordDO;
 import com.github.zavier.expense.ExpenseRecordMapper;
+import io.mybatis.mapper.example.ExampleWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,9 +189,12 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
     private PageResponse<ExpenseProject> pageAllProject(ProjectListQry projectListQry) {
         PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
-        final List<ExpenseProjectDO> list =  expenseProjectMapper.wrapper()
-                .orderByDesc(ExpenseProjectDO::getId)
-                .list();
+        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper()
+                .orderByDesc(ExpenseProjectDO::getId);
+        if (StringUtils.isNotBlank(projectListQry.getName())) {
+            wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
+        }
+        final List<ExpenseProjectDO> list =  wrapper.list();
         final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
 
         final List<Integer> projectIdList = list.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
@@ -205,9 +210,13 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize(), "id desc");
 
         // 自己创建的，按照ID倒序
-        final List<ExpenseProjectDO> projectList = expenseProjectMapper.wrapper()
+        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper()
                 .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getOperatorId())
-                .list();
+                .orderByDesc(ExpenseProjectDO::getId);
+        if (StringUtils.isNotBlank(projectListQry.getName())) {
+            wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
+        }
+        final List<ExpenseProjectDO> projectList = wrapper.list();
 
         if (CollectionUtils.isEmpty(projectList)) {
             return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
