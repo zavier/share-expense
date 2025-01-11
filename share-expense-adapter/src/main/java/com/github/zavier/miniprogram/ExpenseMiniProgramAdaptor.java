@@ -1,4 +1,4 @@
-package com.github.zavier.mobile;
+package com.github.zavier.miniprogram;
 
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.SingleResponse;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 @RestController
 @RequestMapping("/expense/wx")
-public class CustomerMobileAdaptor {
+public class ExpenseMiniProgramAdaptor {
 
 
     @Resource
@@ -46,7 +45,7 @@ public class CustomerMobileAdaptor {
     private ProjectService projectService;
 
     @GetMapping("/user/login")
-    public SingleResponseVo wxLogin(@RequestParam String code, HttpServletResponse httpServletResponse) throws IOException {
+    public SingleResponseVo wxLogin(@RequestParam String code, HttpServletResponse httpServletResponse) {
         if (StringUtils.isBlank(code)) {
             return SingleResponseVo.buildFailure("WX_LOGIN_FAILED", "微信登录失败");
         }
