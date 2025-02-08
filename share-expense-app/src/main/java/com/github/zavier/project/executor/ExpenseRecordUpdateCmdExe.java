@@ -1,7 +1,6 @@
 package com.github.zavier.project.executor;
 
 import com.alibaba.cola.exception.Assert;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
@@ -37,11 +36,7 @@ public class ExpenseRecordUpdateCmdExe {
         Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), expenseRecordUpdateCmd.getOperatorId()), "无权限");
 
         final ExpenseRecord expenseRecord = expenseRecordConverter.toExpenseRecord(expenseRecordUpdateCmd);
-        final boolean updated = expenseProject.updateExpenseRecord(expenseRecord);
-
-        // TODO 迁移到 ExpenseProject 中实现？
-        expenseProject.setChangingStatus(ChangingStatus.UPDATED);
-        expenseProject.setRecordChangingStatus(ChangingStatus.UPDATED);
+        expenseProject.updateExpenseRecord(expenseRecord);
 
         expenseProjectGateway.save(expenseProject);
     }

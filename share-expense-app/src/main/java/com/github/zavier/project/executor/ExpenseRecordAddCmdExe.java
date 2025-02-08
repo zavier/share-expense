@@ -1,7 +1,6 @@
 package com.github.zavier.project.executor;
 
 import com.alibaba.cola.exception.Assert;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter;
@@ -34,15 +33,12 @@ public class ExpenseRecordAddCmdExe {
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectOpt.get();
 
+        // 检查项目创建者
         Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), expenseRecordAddCmd.getOperatorId()), "无权限");
 
+        // 添加费用
         final ExpenseRecord expenseRecord = expenseRecordConverter.toExpenseRecord(expenseRecordAddCmd);
         expenseProject.addExpenseRecord(expenseRecord);
-
-        // 设置变更类型
-        expenseProject.setChangingStatus(ChangingStatus.UPDATED);
-        expenseProject.setMemberChangingStatus(ChangingStatus.UNCHANGED);
-        expenseProject.setRecordChangingStatus(ChangingStatus.UPDATED);
 
         expenseProjectGateway.save(expenseProject);
     }

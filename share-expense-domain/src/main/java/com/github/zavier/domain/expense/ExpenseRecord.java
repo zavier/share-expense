@@ -106,7 +106,8 @@ public class ExpenseRecord {
             this.payMember = updateRecord.payMember;
             update = true;
         }
-        if (!Objects.equals(amount, updateRecord.getAmount())) {
+
+        if (amount.compareTo(updateRecord.getAmount()) != 0) {
             this.amount = updateRecord.getAmount();
             update = true;
         }

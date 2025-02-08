@@ -45,6 +45,12 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void save(ExpenseProject expenseProject) {
+        // 将 expenseProject 中的所有changingStatus日志打印出来
+        log.info("项目changingStatus:{} recordChangingStatus:{} memberChangingStatus:{}",
+                expenseProject.getChangingStatus(),
+                expenseProject.getRecordChangingStatus(),
+                expenseProject.getMemberChangingStatus());
+
         final Integer projectId = saveProject(expenseProject);
         expenseProject.setId(projectId);
 
@@ -75,7 +81,6 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             return Optional.empty();
         }
 
-
         final List<ExpenseProjectMemberDO> expenseProjectMemberDOS = listProjectMembers(expenseProjectId);
         final List<ExpenseRecordDO> recordDOList = listRecord(expenseProjectId);
         final List<ExpenseRecordConsumerDO> recordConsumerDOList = listRecordConsumer(expenseProjectId);
@@ -86,8 +91,10 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 .setRecordDOList(recordDOList)
                 .setExpenseRecordConsumerDOList(recordConsumerDOList)
                 .build();
+        // 重置状态
+        build.resetChangeStatus();
 
-        return Optional.ofNullable(build);
+        return Optional.of(build);
     }
 
     @Override
@@ -114,6 +121,10 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                         .eq(ExpenseProjectDO::getVersion, expenseProject.getVersion())
                         .updateSelective(updateProjectDo);
                 Assert.isTrue(update == 1, "当前项目已被其他人更新，请稍后重试");
+                return expenseProject.getId();
+            case UNCHANGED:
+                Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
+                log.info("项目无变化，无需更新");
                 return expenseProject.getId();
             default:
                 throw new BizException("不支持的操作");

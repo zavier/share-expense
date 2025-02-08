@@ -66,7 +66,7 @@ public class ExpenseProject {
 
     @Getter
     @Setter
-    private ChangingStatus changingStatus = ChangingStatus.NEW;
+    private ChangingStatus changingStatus = ChangingStatus.UNCHANGED;
 
     @Getter
     @Setter
@@ -103,12 +103,15 @@ public class ExpenseProject {
         expenseRecordList.add(expenseRecord);
 
         if (recordChangingStatus == ChangingStatus.UNCHANGED) {
-            recordChangingStatus = ChangingStatus.NEW;
+            setRecordChangingStatus(ChangingStatus.NEW);
         }
+
+        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public boolean updateExpenseRecord(ExpenseRecord updateRecord) {
-        final List<ExpenseRecord> findRecordList = expenseRecordList.stream().filter(record -> Objects.equals(record.getId(), updateRecord.getId()))
+        final List<ExpenseRecord> findRecordList = expenseRecordList.stream()
+                .filter(record -> Objects.equals(record.getId(), updateRecord.getId()))
                 .collect(Collectors.toList());
         Assert.isTrue(findRecordList.size() == 1, "费用明细不存在或存在多条:" + updateRecord.getId());
         final ExpenseRecord expenseRecord = findRecordList.get(0);
@@ -116,7 +119,10 @@ public class ExpenseProject {
         final boolean update = expenseRecord.updateInfo(updateRecord);
 
         if (update && recordChangingStatus == ChangingStatus.UNCHANGED) {
-            recordChangingStatus = ChangingStatus.UPDATED;
+
+            setRecordChangingStatus(ChangingStatus.UPDATED);
+
+            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
         }
 
         return update;
@@ -125,16 +131,31 @@ public class ExpenseProject {
     public void removeRecord(Integer recordId) {
         final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
         Assert.isTrue(removed, "费用明细不存在:" + recordId);
-        recordChangingStatus = ChangingStatus.DELETED;
-        changingStatus = ChangingStatus.UPDATED;
+        setRecordChangingStatus(ChangingStatus.DELETED);
+
+        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public void addMember(String name) {
+        Assert.isTrue(StringUtils.isNotBlank(name), "用户名不能为空");
         final boolean add = members.add(name);
         Assert.isTrue(add, "添加用户已存在:" + name);
 
         if (memberChangingStatus == ChangingStatus.UNCHANGED) {
-            memberChangingStatus = ChangingStatus.NEW;
+            setMemberChangingStatus(ChangingStatus.NEW);
+            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
+        }
+    }
+
+    public void resetChangeStatus() {
+        setChangingStatus(ChangingStatus.UNCHANGED);
+        setMemberChangingStatus(ChangingStatus.UNCHANGED);
+        setRecordChangingStatus(ChangingStatus.UNCHANGED);
+    }
+
+    private void setChangingStatusIfNotChanged(ChangingStatus updateStatus) {
+        if (changingStatus == ChangingStatus.UNCHANGED) {
+            setChangingStatus(updateStatus);
         }
     }
 
