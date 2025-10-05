@@ -195,7 +195,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     private List<ExpenseRecordDO> listRecord(@NotNull Integer expenseProjectId) {
         return expenseRecordMapper.wrapper()
                 .eq(ExpenseRecordDO::getProjectId, expenseProjectId)
-                .orderByAsc(ExpenseRecordDO::getId)
+                .orderByAsc(ExpenseRecordDO::getPayDate)
                 .list();
     }
 
