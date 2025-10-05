@@ -59,7 +59,7 @@ public class UserLoginExe {
         final String userName = user.generateWxUserName();
         user.setUserName(userName);
         user.setEmail("");
-        user.setPasswordHash("");
+        user.setPasswordHash(user.generatePasswordHash(userName));
         user.setOpenId(openId);
         userGateway.save(user);
         return user;
