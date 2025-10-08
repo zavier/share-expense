@@ -1,26 +1,31 @@
 package com.github.zavier.web.filter;
 
 import com.github.zavier.domain.utils.TokenHelper;
-import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
 /**
- * 先简单实现一下登陆
+ * 登录过滤器 - 兼容Spring Boot 3.x
+ * 通过FilterRegistrationBean注册，避免Spring组件扫描问题
  * TODO 后续看是否切换到Spring Security
- *
  */
-@Component
 public class LoginFilter implements Filter {
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // 初始化方法，可以为空
+    }
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+
         final String requestURI = httpServletRequest.getRequestURI();
         if (notNeedLogin(requestURI)) {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -34,9 +39,12 @@ public class LoginFilter implements Filter {
             return;
         }
 
-
         try {
-            UserHolder.setUser(TokenHelper.getUser(getJwtToken(httpServletRequest).get()));
+            // 设置用户信息到上下文
+            Optional<String> token = getJwtToken(httpServletRequest);
+            if (token.isPresent()) {
+                UserHolder.setUser(TokenHelper.getUser(token.get()));
+            }
 
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
@@ -44,10 +52,14 @@ public class LoginFilter implements Filter {
         }
     }
 
+    @Override
+    public void destroy() {
+        // 销毁方法，可以为空
+    }
+
     private boolean verifyToken(HttpServletRequest httpServletRequest) {
         final Optional<Cookie> jwtCookie = getJwtCookie(httpServletRequest);
         return jwtCookie.filter(cookie -> TokenHelper.verifyToken(cookie.getValue())).isPresent();
-
     }
 
     private Optional<String> getJwtToken(HttpServletRequest httpServletRequest) {
@@ -94,6 +106,8 @@ public class LoginFilter implements Filter {
                 || url.endsWith(".css")
                 || url.endsWith(".png")
                 || url.endsWith(".json")
-                || url.endsWith(".js");
+                || url.endsWith(".js")
+                || url.contains("static")
+                || url.contains("favicon");
     }
 }

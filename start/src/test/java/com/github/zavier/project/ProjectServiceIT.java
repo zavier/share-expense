@@ -1,6 +1,7 @@
 package com.github.zavier.project;
 
 import com.alibaba.cola.dto.SingleResponse;
+import com.github.zavier.Application;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
@@ -12,16 +13,18 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.util.*;
+import jakarta.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Rollback
 @Transactional
-public class ProjectServiceImplTest {
+public class ProjectServiceIT {
 
     @Resource
     private ProjectService projectService;

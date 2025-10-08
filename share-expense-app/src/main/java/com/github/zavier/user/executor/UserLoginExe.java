@@ -8,7 +8,7 @@ import com.github.zavier.dto.UserLoginCmd;
 import com.github.zavier.wx.WxGateWay;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Optional;
 
 @Component
