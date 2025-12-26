@@ -8,7 +8,7 @@ import com.github.zavier.dto.ExpenseRecordUpdateCmd;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Optional;
 

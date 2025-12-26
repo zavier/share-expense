@@ -8,7 +8,7 @@ import com.github.zavier.domain.user.gateway.UserGateway;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Optional;
 import java.util.regex.Pattern;
 

@@ -10,7 +10,7 @@
     <name>share-expense</name>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -18,16 +18,16 @@
 
         <cola.components.version>4.3.2</cola.components.version>
 
-        <spring-boot.version>2.7.2</spring-boot.version>
-        <mybatis-starter.version>2.2.2</mybatis-starter.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <mybatis-starter.version>3.0.3</mybatis-starter.version>
         <mybatis.mapper.version>1.2.2</mybatis.mapper.version>
-        <javax.el-api.version>3.0.0</javax.el-api.version>
-        <fastjson.version>1.2.83</fastjson.version>
+        <jakarta.el-api.version>5.0.1</jakarta.el-api.version>
+        <fastjson2.version>2.0.49</fastjson2.version>
         <jbcrypt.version>0.4</jbcrypt.version>
         <commons.collection.version>4.4</commons.collection.version>
-        <pagehelper.version>5.3.2</pagehelper.version>
-        <jjwt.version>0.12.2</jjwt.version>
-        <guava.version>33.1.0-jre</guava.version>
+        <pagehelper.version>5.3.3</pagehelper.version>
+        <jjwt.version>0.12.5</jjwt.version>
+        <guava.version>33.3.0-jre</guava.version>
         <easyexcel.version>3.3.4</easyexcel.version>
     </properties>
 
@@ -119,11 +119,33 @@
                 <version>${mybatis.mapper.version}</version>
             </dependency>
 
+            <!-- Database -->
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>8.4.0</version>
+            </dependency>
+
+            <!-- Validation -->
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+
+            <!-- Annotation -->
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+            <!-- Database and Validation End -->
+
             <!-- Misc -->
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson.version}</version>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
             </dependency>
             <!-- Misc End -->
 
@@ -176,7 +198,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.12.1</version>
+                    <configuration>
+                        <source>21</source>
+                        <target>21</target>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

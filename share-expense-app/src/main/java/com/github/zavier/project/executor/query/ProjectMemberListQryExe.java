@@ -6,7 +6,7 @@ import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectMemberListQry;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
