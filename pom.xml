@@ -29,6 +29,7 @@
         <jjwt.version>0.12.5</jjwt.version>
         <guava.version>33.3.0-jre</guava.version>
         <easyexcel.version>3.3.4</easyexcel.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
 
     <modules>
@@ -37,6 +38,7 @@
         <module>share-expense-app</module>
         <module>share-expense-domain</module>
         <module>share-expense-infrastructure</module>
+        <module>share-expense-ai</module>
         <module>start</module>
     </modules>
 
@@ -92,6 +94,11 @@
                 <artifactId>share-expense-infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.zavier</groupId>
+                <artifactId>share-expense-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!--Project modules End-->
 
             <dependency>
@@ -105,6 +112,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -223,4 +237,15 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
