@@ -350,6 +350,169 @@ share-expense-infrastructure → share-expense-client (interfaces defined here)
 - **Session Management**: Use JWT tokens instead of WeChat sessions
 - **HTTPS Required**: All WeChat API calls must use HTTPS in production
 
+## AI Assistant Integration
+
+### Feature Overview
+
+AI Assistant allows users to interact with the expense sharing system using natural language. Users can:
+- Create expense sharing projects
+- Add project members
+- Record expense transactions
+- Query settlement status
+
+### Architecture
+
+The AI Assistant is implemented in the **share-expense-ai** module using:
+- **Spring AI 1.0.0-M4**: Framework for AI integration
+- **OpenAI GPT-4o-mini**: Language model for natural language processing
+- **Function Calling**: AI invokes backend functions through Spring AI's function calling mechanism
+- **Confirmation Pattern**: AI extracts parameters and asks for user confirmation before executing operations
+
+### Module Structure
+
+```
+share-expense-ai/
+├── src/main/java/com/github/zavier/ai/
+│   ├── AiChatController.java          # REST endpoints
+│   ├── AiChatService.java             # Service interface
+│   ├── impl/AiChatServiceImpl.java    # Service implementation
+│   ├── AiFunctionRegistry.java        # Function registration center
+│   ├── config/
+│   │   └── AiConfig.java              # Spring AI configuration
+│   ├── dto/
+│   │   ├── AiChatRequest.java
+│   │   ├── AiChatResponse.java
+│   │   ├── ChatMessage.java
+│   │   └── PendingAction.java
+│   ├── entity/
+│   │   └── ConversationEntity.java    # Conversation history entity
+│   ├── repository/
+│   │   └── ConversationRepository.java
+│   └── function/
+│       ├── AiFunction.java            # Function annotation
+│       ├── AiFunctionExecutor.java    # Function executor interface
+│       ├── FunctionContext.java       # Execution context
+│       ├── CreateProjectFunction.java
+│       ├── AddMembersFunction.java
+│       ├── AddExpenseRecordFunction.java
+│       └── GetSettlementFunction.java
+```
+
+### Available AI Functions
+
+1. **createProject**: Create a new expense sharing project
+   - Parameters: projectName, description, members (list)
+   - Example: "Create a project 'Weekend Dinner' with members Alice, Bob"
+
+2. **addMembers**: Add new members to an existing project
+   - Parameters: projectId, memberNames (list)
+   - Example: "Add members Charlie and David to project 5"
+
+3. **addExpenseRecord**: Record an expense transaction
+   - Parameters: projectId, payer, amount, expenseType, payDate, consumers (list), remark
+   - Example: "Record today's lunch, Alice paid 50 yuan, shared by 3 people"
+
+4. **getSettlement**: Query project settlement status
+   - Parameters: projectId
+   - Example: "Check settlement status for project 5"
+
+### Configuration
+
+#### Environment Variables
+
+Set the following environment variable before running the application:
+
+```bash
+export OPENAI_API_KEY=your-api-key-here
+```
+
+#### Application Properties
+
+Configuration in `start/src/main/resources/application-ai.properties`:
+
+```properties
+# Spring AI Configuration
+spring.ai.openai.api-key=${OPENAI_API_KEY:your-api-key-here}
+spring.ai.openai.base-url=${OPENAI_BASE_URL:https://api.openai.com}
+spring.ai.openai.chat.options.model=gpt-4o-mini
+spring.ai.openai.chat.options.temperature=0.7
+
+# AI Feature Configuration
+app.ai.chat.enabled=true
+app.ai.chat.max-history-rounds=10
+```
+
+### API Endpoints
+
+- **POST /api/ai/chat**: Send a message to AI assistant
+  - Request body: `{"message": "用户消息", "conversationId": "会话ID（可选）"}`
+  - Response: `{"conversationId": "...", "reply": "AI回复", "pendingAction": {...}}`
+
+- **POST /api/ai/confirm**: Confirm a pending action
+  - Request body: `{"conversationId": "...", "actionId": "..."}`
+  - Response: `{"conversationId": "...", "reply": "执行结果"}`
+
+- **POST /api/ai/cancel**: Cancel a pending action
+  - Request body: `{"conversationId": "..."}`
+  - Response: `{"conversationId": "...", "reply": "操作已取消"}`
+
+### User Flow
+
+1. User opens AI assistant page at `/ai-assistant`
+2. User types a natural language request (e.g., "创建项目'周末聚餐'，成员有小明、小红")
+3. AI parses the intent and extracts parameters
+4. AI responds with confirmation dialog showing extracted parameters
+5. User confirms or cancels the action
+6. If confirmed, the backend function executes and returns result
+7. Conversation history is saved for context maintenance
+
+### Database Schema
+
+#### AI Conversation Table (ai_conversation)
+
+- **Purpose**: Stores conversation history and pending actions
+- **Key fields**:
+  - conversation_id: Unique conversation identifier
+  - user_id: User who owns the conversation
+  - role: Message role (user/assistant/system)
+  - content: Message content
+  - pending_action: JSON encoded pending action
+  - created_at: Message timestamp
+- **Indexes**: conversation_id, user_id, created_at
+
+### Testing
+
+Run AI module tests:
+
+```bash
+# Run all AI module tests
+mvn test -pl share-expense-ai
+
+# Run integration test
+mvn test -pl share-expense-ai -Dtest=AiChatIntegrationTest
+```
+
+### Security Considerations
+
+- **API Key**: Never commit OpenAI API key to version control
+- **User Context**: All functions execute with authenticated user's context
+- **Parameter Validation**: Functions validate parameters before execution
+- **Conversation Isolation**: Users can only access their own conversations
+
+### Limitations and Future Enhancements
+
+**Current Limitations:**
+- Consumer ID mapping in AddExpenseRecordFunction requires member name to ID resolution
+- Pending actions stored in memory (should use Redis in production)
+- Limited to four core functions
+
+**Future Enhancements:**
+- Voice input support
+- Function calling result caching
+- Additional operation types (update/delete records, project locking)
+- Enhanced error handling and user prompts
+- Multi-language support
+
 ## Business Logic Overview
 
 ### Expense Settlement Calculation
