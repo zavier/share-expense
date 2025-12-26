@@ -29,6 +29,10 @@
             <groupId>com.github.zavier</groupId>
             <artifactId>share-expense-app</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.zavier</groupId>
+            <artifactId>share-expense-adapter</artifactId>
+        </dependency>
 
         <!-- Spring Boot -->
         <dependency>
