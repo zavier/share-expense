@@ -1,5 +1,6 @@
 package com.github.zavier.ai.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zavier.ai.*;
 import com.github.zavier.ai.dto.*;
 import com.github.zavier.ai.entity.ConversationEntity;
@@ -13,11 +14,13 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Service
 public class AiChatServiceImpl implements AiChatService {
@@ -30,6 +33,11 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Resource
     private ConversationRepository conversationRepository;
+
+    @Resource
+    private ApplicationContext applicationContext;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // 存储待确认的操作（临时存储，生产环境应使用 Redis）
     private final Map<String, PendingAction> pendingActions = new ConcurrentHashMap<>();
@@ -62,6 +70,9 @@ public class AiChatServiceImpl implements AiChatService {
         List<Message> messages = buildMessages(conversationId);
 
         // 调用 AI
+        // 注意: Spring AI 1.0.0 中的 function calling API 与文档有差异
+        // functions() 方法在当前版本中不可用，需要升级到更新版本或使用不同的 API
+        // TODO: 实现 function calling 集成
         String response = chatClient.prompt()
             .messages(messages)
             .call()
@@ -155,9 +166,23 @@ public class AiChatServiceImpl implements AiChatService {
             .userId(getCurrentUserId())
             .build();
 
-        // TODO: 将 params 转换为相应的 Request 对象
-        // 暂时返回一个占位符
-        return "操作执行成功：" + action.getDescription();
+        // 将 params 转换为相应的 Request 对象
+        Class<?> requestType = functionRegistry.getRequestType(action.getActionType());
+        Object request = convertParamsToRequest(action.getParams(), requestType);
+
+        // 执行函数并返回结果
+        return executor.execute(request, context);
+    }
+
+    /**
+     * 使用 Jackson ObjectMapper 将 Map 转换为指定的 Request 类型
+     */
+    private Object convertParamsToRequest(Map<String, Object> params, Class<?> requestType) {
+        try {
+            return objectMapper.convertValue(params, requestType);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("参数转换失败: " + e.getMessage(), e);
+        }
     }
 
     private Integer getCurrentUserId() {
