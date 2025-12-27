@@ -1,11 +1,12 @@
 package com.github.zavier.ai.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zavier.ai.*;
 import com.github.zavier.ai.dto.*;
 import com.github.zavier.ai.entity.ConversationEntity;
-import com.github.zavier.ai.function.AiFunctionExecutor;
-import com.github.zavier.ai.function.FunctionContext;
+import com.github.zavier.ai.function.AddExpenseRecordFunction;
+import com.github.zavier.ai.function.AddMembersFunction;
+import com.github.zavier.ai.function.CreateProjectFunction;
+import com.github.zavier.ai.function.GetSettlementFunction;
 import com.github.zavier.ai.repository.ConversationRepository;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
@@ -14,14 +15,15 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
+/**
+ * AI 聊天服务实现
+ * 使用 Spring AI 的 Tool Calling 功能实现与业务逻辑的对接
+ */
 @Service
 public class AiChatServiceImpl implements AiChatService {
 
@@ -29,21 +31,20 @@ public class AiChatServiceImpl implements AiChatService {
     private ChatClient chatClient;
 
     @Resource
-    private AiFunctionRegistry functionRegistry;
-
-    @Resource
     private ConversationRepository conversationRepository;
 
+    // 注入所有工具类
     @Resource
-    private ApplicationContext applicationContext;
+    private CreateProjectFunction createProjectFunction;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Resource
+    private AddMembersFunction addMembersFunction;
 
-    // 存储待确认的操作（临时存储，生产环境应使用 Redis）
-    private final Map<String, PendingAction> pendingActions = new ConcurrentHashMap<>();
+    @Resource
+    private AddExpenseRecordFunction addExpenseRecordFunction;
 
-    // 存储操作与会话的映射
-    private final Map<String, String> actionToConversationMap = new ConcurrentHashMap<>();
+    @Resource
+    private GetSettlementFunction getSettlementFunction;
 
     private static final String SYSTEM_PROMPT = """
         你是一个费用分摊记账助手。你可以帮助用户：
@@ -69,12 +70,16 @@ public class AiChatServiceImpl implements AiChatService {
         // 获取对话历史
         List<Message> messages = buildMessages(conversationId);
 
-        // 调用 AI
-        // 注意: Spring AI 1.0.0 中的 function calling API 与文档有差异
-        // functions() 方法在当前版本中不可用，需要升级到更新版本或使用不同的 API
-        // TODO: 实现 function calling 集成
+        // 调用 AI，使用 tools() 方法注册工具
+        // Spring AI 会自动处理工具调用、执行和结果返回
         String response = chatClient.prompt()
             .messages(messages)
+            .tools(
+                createProjectFunction,
+                addMembersFunction,
+                addExpenseRecordFunction,
+                getSettlementFunction
+            )
             .call()
             .content();
 
@@ -89,45 +94,24 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public AiChatResponse confirm(String conversationId, String actionId) {
-        PendingAction action = pendingActions.get(actionId);
-        if (action == null) {
-            throw new RuntimeException("操作已过期或不存在");
-        }
-
-        // 执行实际业务逻辑
-        String result = executeAction(action);
-
-        // 清除待确认操作
-        pendingActions.remove(actionId);
-        actionToConversationMap.remove(actionId);
-
-        // 保存执行结果
-        saveMessage(conversationId, "assistant", result);
-
+        // Spring AI 自动处理工具调用，无需手动确认
         return AiChatResponse.builder()
             .conversationId(conversationId)
-            .reply(result)
+            .reply("操作已自动执行，无需确认")
             .build();
     }
 
     @Override
     public AiChatResponse cancel(String conversationId) {
-        // 清除该会话的所有待确认操作
-        Iterator<Map.Entry<String, String>> iterator = actionToConversationMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            if (conversationId.equals(entry.getValue())) {
-                pendingActions.remove(entry.getKey());
-                iterator.remove();
-            }
-        }
-
         return AiChatResponse.builder()
             .conversationId(conversationId)
             .reply("操作已取消")
             .build();
     }
 
+    /**
+     * 构建对话消息列表
+     */
     private List<Message> buildMessages(String conversationId) {
         List<Message> messages = new ArrayList<>();
         messages.add(new SystemMessage(SYSTEM_PROMPT));
@@ -144,6 +128,9 @@ public class AiChatServiceImpl implements AiChatService {
         return messages;
     }
 
+    /**
+     * 保存消息到数据库
+     */
     private void saveMessage(String conversationId, String role, String content) {
         ConversationEntity entity = ConversationEntity.builder()
             .conversationId(conversationId)
@@ -156,35 +143,9 @@ public class AiChatServiceImpl implements AiChatService {
         conversationRepository.save(entity);
     }
 
-    private String executeAction(PendingAction action) {
-        AiFunctionExecutor executor = functionRegistry.getFunction(action.getActionType());
-        if (executor == null) {
-            throw new RuntimeException("未知的操作类型: " + action.getActionType());
-        }
-
-        FunctionContext context = FunctionContext.builder()
-            .userId(getCurrentUserId())
-            .build();
-
-        // 将 params 转换为相应的 Request 对象
-        Class<?> requestType = functionRegistry.getRequestType(action.getActionType());
-        Object request = convertParamsToRequest(action.getParams(), requestType);
-
-        // 执行函数并返回结果
-        return executor.execute(request, context);
-    }
-
     /**
-     * 使用 Jackson ObjectMapper 将 Map 转换为指定的 Request 类型
+     * 获取当前用户 ID
      */
-    private Object convertParamsToRequest(Map<String, Object> params, Class<?> requestType) {
-        try {
-            return objectMapper.convertValue(params, requestType);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("参数转换失败: " + e.getMessage(), e);
-        }
-    }
-
     private Integer getCurrentUserId() {
         return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
     }

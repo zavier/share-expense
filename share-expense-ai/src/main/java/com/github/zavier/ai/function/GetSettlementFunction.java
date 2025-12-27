@@ -4,36 +4,40 @@ import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.api.ProjectService;
 import com.github.zavier.dto.ProjectSharingQry;
 import com.github.zavier.dto.data.UserSharingDTO;
+import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * 查询项目结算情况的工具方法
+ */
 @Component
-@AiFunction(
-    name = "getSettlement",
-    description = "查询项目的费用结算情况，显示每个人应付或应收的金额。需要提供项目ID。"
-)
-public class GetSettlementFunction implements AiFunctionExecutor {
+public class GetSettlementFunction {
 
     @Resource
     private ProjectService projectService;
 
-    public record Request(
-        Integer projectId
-    ) {}
-
-    @Override
-    public String execute(Object request, FunctionContext context) {
-        Request req = (Request) request;
+    /**
+     * 查询项目的费用结算情况
+     *
+     * @param projectId 项目ID
+     * @return 结算情况详情
+     */
+    @Tool(description = "查询项目的费用结算情况，显示每个人应付或应收的金额。需要提供项目ID。")
+    public String getSettlement(@ToolParam(description = "项目ID") Integer projectId) {
         ProjectSharingQry qry = new ProjectSharingQry();
-        qry.setProjectId(req.projectId());
-        qry.setOperatorId(context.getUserId());
+        qry.setProjectId(projectId);
+        qry.setOperatorId(getCurrentUserId());
 
         SingleResponse<List<UserSharingDTO>> response = projectService.getProjectSharingDetail(qry);
 
         if (!response.isSuccess()) {
-            throw new RuntimeException("查询结算失败: " + response.getErrMessage());
+            return "查询结算失败: " + response.getErrMessage();
         }
 
         List<UserSharingDTO> settlements = response.getData();
@@ -42,12 +46,12 @@ public class GetSettlementFunction implements AiFunctionExecutor {
 
         for (UserSharingDTO settlement : settlements) {
             // 计算结算金额: 已付 - 已消费
-            java.math.BigDecimal settlementAmount = settlement.getPaidAmount().subtract(settlement.getConsumeAmount());
+            BigDecimal settlementAmount = settlement.getPaidAmount().subtract(settlement.getConsumeAmount());
 
-            if (settlementAmount.compareTo(java.math.BigDecimal.ZERO) > 0) {
+            if (settlementAmount.compareTo(BigDecimal.ZERO) > 0) {
                 sb.append(String.format("- %s 应收 %.2f 元（已付%.2f，消费%.2f）\n",
                     settlement.getMember(), settlementAmount, settlement.getPaidAmount(), settlement.getConsumeAmount()));
-            } else if (settlementAmount.compareTo(java.math.BigDecimal.ZERO) < 0) {
+            } else if (settlementAmount.compareTo(BigDecimal.ZERO) < 0) {
                 sb.append(String.format("- %s 应付 %.2f 元（已付%.2f，消费%.2f）\n",
                     settlement.getMember(), settlementAmount.abs(), settlement.getPaidAmount(), settlement.getConsumeAmount()));
             } else {
@@ -59,8 +63,7 @@ public class GetSettlementFunction implements AiFunctionExecutor {
         return sb.toString();
     }
 
-    @Override
-    public Class<Request> getRequestType() {
-        return Request.class;
+    private Integer getCurrentUserId() {
+        return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
     }
 }
