@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(grep:*)",
+      "Skill(superpowers:writing-plans)",
+      "Bash(mvn clean compile:*)",
+      "WebSearch",
+      "Bash(java -version)",
+      "Bash(git commit:*)",
+      "Bash(mvn:*)",
+      "Bash(git add:*)",
+      "Bash(javac:*)",
+      "Bash(echo:*)",
+      "Bash(/usr/libexec/java_home:*)",
+      "Bash(export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home)",
+      "Bash(find:*)",
+      "Bash(xargs:*)",
+      "Bash(git show:*)",
+      "mcp__web-reader__webReader",
+      "mcp__fetch-server__fetch",
+      "Bash(unzip:*)",
+      "Bash(jar:*)",
+      "mcp__web-search-prime__webSearchPrime",
+      "Bash($JAVA_HOME/bin/java:*)"
+    ]
+  }
+}
