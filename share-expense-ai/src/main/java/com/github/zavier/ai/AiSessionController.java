@@ -47,7 +47,7 @@ public class AiSessionController {
      * 删除会话
      */
     @DeleteMapping("/{conversationId}")
-    public SingleResponse<Void> deleteSession(@PathVariable String conversationId) {
+    public SingleResponse<Void> deleteSession(@PathVariable("conversationId") String conversationId) {
         aiSessionService.deleteSession(conversationId);
         return SingleResponse.buildSuccess();
     }
@@ -57,7 +57,7 @@ public class AiSessionController {
      */
     @PutMapping("/{conversationId}/rename")
     public SingleResponse<Void> renameSession(
-            @PathVariable String conversationId,
+            @PathVariable("conversationId") String conversationId,
             @Valid @RequestBody RenameSessionRequest request) {
         aiSessionService.renameSession(conversationId, request.title());
         return SingleResponse.buildSuccess();
@@ -67,7 +67,7 @@ public class AiSessionController {
      * 获取会话历史消息
      */
     @GetMapping("/{conversationId}/messages")
-    public SingleResponse<SessionMessagesResponse> getSessionMessages(@PathVariable String conversationId) {
+    public SingleResponse<SessionMessagesResponse> getSessionMessages(@PathVariable("conversationId") String conversationId) {
         List<MessageDto> messages = aiSessionService.getSessionMessages(conversationId);
         return SingleResponse.of(new SessionMessagesResponse(messages));
     }
