@@ -70,7 +70,6 @@ CREATE TABLE IF NOT EXISTS ai_conversation (
     user_id INT NOT NULL COMMENT '用户ID',
     role VARCHAR(20) NOT NULL COMMENT '角色: user/assistant/system',
     content TEXT NOT NULL COMMENT '消息内容',
-    pending_action JSON COMMENT '待确认的操作',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     INDEX idx_conversation (conversation_id),
     INDEX idx_user (user_id),

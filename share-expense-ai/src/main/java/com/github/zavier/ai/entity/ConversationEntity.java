@@ -32,9 +32,6 @@ public class ConversationEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "pending_action", columnDefinition = "JSON")
-    private String pendingAction;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

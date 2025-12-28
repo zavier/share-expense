@@ -446,37 +446,26 @@ app.ai.chat.max-history-rounds=10
 
 - **POST /api/ai/chat**: Send a message to AI assistant
   - Request body: `{"message": "用户消息", "conversationId": "会话ID（可选）"}`
-  - Response: `{"conversationId": "...", "reply": "AI回复", "pendingAction": {...}}`
-
-- **POST /api/ai/confirm**: Confirm a pending action
-  - Request body: `{"conversationId": "...", "actionId": "..."}`
-  - Response: `{"conversationId": "...", "reply": "执行结果"}`
-
-- **POST /api/ai/cancel**: Cancel a pending action
-  - Request body: `{"conversationId": "..."}`
-  - Response: `{"conversationId": "...", "reply": "操作已取消"}`
+  - Response: `{"conversationId": "...", "reply": "AI回复"}`
 
 ### User Flow
 
-1. User opens AI assistant page at `/ai-assistant`
+1. User opens AI assistant page
 2. User types a natural language request (e.g., "创建项目'周末聚餐'，成员有小明、小红")
-3. AI parses the intent and extracts parameters
-4. AI responds with confirmation dialog showing extracted parameters
-5. User confirms or cancels the action
-6. If confirmed, the backend function executes and returns result
-7. Conversation history is saved for context maintenance
+3. AI parses the intent, extracts parameters, and executes the corresponding function
+4. AI returns the execution result
+5. Conversation history is saved for context maintenance
 
 ### Database Schema
 
 #### AI Conversation Table (ai_conversation)
 
-- **Purpose**: Stores conversation history and pending actions
+- **Purpose**: Stores conversation history
 - **Key fields**:
   - conversation_id: Unique conversation identifier
   - user_id: User who owns the conversation
   - role: Message role (user/assistant/system)
   - content: Message content
-  - pending_action: JSON encoded pending action
   - created_at: Message timestamp
 - **Indexes**: conversation_id, user_id, created_at
 
