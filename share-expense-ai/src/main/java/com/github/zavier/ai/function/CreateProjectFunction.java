@@ -5,6 +5,7 @@ import com.github.zavier.api.ProjectService;
 import com.github.zavier.dto.ProjectAddCmd;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * 创建费用分摊项目的工具方法
  */
+@Slf4j
 @Component
 public class CreateProjectFunction {
 
@@ -34,6 +36,9 @@ public class CreateProjectFunction {
             @ToolParam(description = "项目描述", required = false) String description,
             @ToolParam(description = "成员名称列表") List<String> members) {
 
+        log.info("[AI工具] 开始执行 createProject, 参数: projectName={}, description={}, members={}, userId={}",
+            projectName, description, members, getCurrentUserId());
+
         ProjectAddCmd cmd = new ProjectAddCmd();
         cmd.setProjectName(projectName);
         cmd.setProjectDesc(description);
@@ -44,11 +49,14 @@ public class CreateProjectFunction {
         SingleResponse<Integer> response = projectService.createProject(cmd);
 
         if (!response.isSuccess()) {
+            log.error("[AI工具] createProject 执行失败: {}", response.getErrMessage());
             return "创建项目失败: " + response.getErrMessage();
         }
 
         Integer projectId = response.getData();
-        return String.format("项目创建成功！项目名称：%s，项目ID：%d", projectName, projectId);
+        String result = String.format("项目创建成功！项目名称：%s，项目ID：%d", projectName, projectId);
+        log.info("[AI工具] createProject 执行成功: {}", result);
+        return result;
     }
 
     private Integer getCurrentUserId() {

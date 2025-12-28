@@ -491,93 +491,6 @@
             30% { transform: translateY(-8px); }
         }
 
-        /* Action Card */
-        .action-card {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.08));
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            border-radius: var(--radius-lg);
-            padding: 18px;
-            margin-top: 12px;
-        }
-
-        .action-card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .action-card-header svg {
-            width: 20px;
-            height: 20px;
-            color: var(--primary);
-            flex-shrink: 0;
-        }
-
-        .action-card-header h4 {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .action-card-body {
-            margin-bottom: 14px;
-        }
-
-        .action-card-body p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .action-card-body strong {
-            color: var(--text-primary);
-        }
-
-        .action-card-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            font-family: inherit;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
         /* Welcome Screen */
         .welcome-screen {
             flex: 1;
@@ -912,19 +825,6 @@
                 height: 48px;
                 font-size: 20px;
             }
-
-            .action-card {
-                padding: 14px;
-            }
-
-            .action-card-buttons {
-                flex-direction: column;
-            }
-
-            .action-card-buttons .btn {
-                flex: 1;
-                justify-content: center;
-            }
         }
 
         @media (max-width: 480px) {
@@ -1028,15 +928,20 @@
                             <h4>记录费用</h4>
                             <p>快速记录一笔支出</p>
                         </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('给项目5添加成员：小王')">
+                        <div class="suggestion-card" onclick="sendSuggestion('给「周末聚餐」项目添加成员：小王')">
                             <div class="suggestion-icon">👥</div>
                             <h4>添加成员</h4>
                             <p>向项目添加新成员</p>
                         </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('查询项目123的结算情况')">
+                        <div class="suggestion-card" onclick="sendSuggestion('查询「周末聚餐」的结算情况')">
                             <div class="suggestion-icon">📊</div>
                             <h4>查询结算</h4>
                             <p>查看费用分摊情况</p>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('查看我的所有项目')">
+                            <div class="suggestion-icon">📁</div>
+                            <h4>项目列表</h4>
+                            <p>查看所有费用项目</p>
                         </div>
                     </div>
                 </div>
@@ -1047,7 +952,8 @@
                 <div class="quick-chips">
                     <button class="chip" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红')">创建项目</button>
                     <button class="chip" onclick="sendSuggestion('今天午饭AA，80元4个人分')">记录费用</button>
-                    <button class="chip" onclick="sendSuggestion('查看结算情况')">查询结算</button>
+                    <button class="chip" onclick="sendSuggestion('查询「周末聚餐」结算')">查询结算</button>
+                    <button class="chip" onclick="sendSuggestion('查看我的项目')">项目列表</button>
                 </div>
                 <div class="input-container">
                     <div class="input-wrapper">
@@ -1172,46 +1078,6 @@
             }
         }
 
-        function showPendingAction(data, actionId) {
-            const messagesArea = document.getElementById('messagesArea');
-            const actionCard = document.createElement('div');
-            actionCard.className = 'action-card';
-            actionCard.id = 'actionCard';
-
-            let paramsHtml = '<div class="action-card-body">';
-            if (data.params) {
-                paramsHtml += `<p><strong>操作类型：</strong>${escapeHtml(data.actionType)}</p>`;
-                for (const [key, value] of Object.entries(data.params)) {
-                    paramsHtml += `<p><strong>${escapeHtml(key)}：</strong>${escapeHtml(String(value))}</p>`;
-                }
-            }
-            paramsHtml += '</div>';
-
-            actionCard.innerHTML = `
-                <div class="action-card-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                    <h4>请确认操作</h4>
-                </div>
-                ${paramsHtml}
-                <div class="action-card-buttons">
-                    <button class="btn btn-success" onclick="confirmAction('${escapeHtml(actionId)}')">✓ 确认执行</button>
-                    <button class="btn btn-danger" onclick="cancelAction()">✗ 取消</button>
-                </div>
-            `;
-
-            messagesArea.appendChild(actionCard);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
-        function removeActionCard() {
-            const actionCard = document.getElementById('actionCard');
-            if (actionCard) {
-                actionCard.remove();
-            }
-        }
-
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -1243,10 +1109,6 @@
                 if (result.success && result.data) {
                     conversationId = result.data.conversationId;
                     addMessage(result.data.reply, false);
-
-                    if (result.data.pendingAction) {
-                        showPendingAction(result.data.pendingAction, result.data.conversationId);
-                    }
                 } else {
                     addMessage('抱歉，发生了错误，请稍后重试。', false);
                 }
@@ -1257,56 +1119,6 @@
             } finally {
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('sending');
-            }
-        }
-
-        async function confirmAction(actionId) {
-            removeActionCard();
-            showTypingIndicator();
-
-            try {
-                const response = await fetch(`${API_BASE}/confirm`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        conversationId: conversationId,
-                        actionId: actionId
-                    })
-                });
-
-                const result = await response.json();
-                hideTypingIndicator();
-
-                if (result.success && result.data) {
-                    addMessage(result.data.reply, false);
-                } else {
-                    addMessage('操作执行失败，请重试。', false);
-                }
-            } catch (error) {
-                hideTypingIndicator();
-                addMessage('网络错误，请检查连接后重试。', false);
-                console.error('Error:', error);
-            }
-        }
-
-        async function cancelAction() {
-            removeActionCard();
-
-            try {
-                const response = await fetch(`${API_BASE}/cancel`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        conversationId: conversationId
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success && result.data) {
-                    addMessage(result.data.reply, false);
-                }
-            } catch (error) {
-                console.error('Error:', error);
             }
         }
 

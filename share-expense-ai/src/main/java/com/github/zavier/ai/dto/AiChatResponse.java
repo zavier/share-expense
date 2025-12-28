@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class AiChatResponse {
     private String conversationId;
     private String reply;
-    private PendingAction pendingAction;
 }
