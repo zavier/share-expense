@@ -497,9 +497,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 40px 24px;
             text-align: center;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         .welcome-avatar {
@@ -577,14 +579,14 @@
             margin-bottom: 12px;
         }
 
-        .suggestion-card h4 {
+        .suggestion-card-content h4 {
             font-size: 15px;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 4px;
         }
 
-        .suggestion-card p {
+        .suggestion-card-content p {
             font-size: 13px;
             color: var(--text-secondary);
             margin: 0;
@@ -776,28 +778,68 @@
                 font-size: 12px;
             }
 
+            /* Welcome screen adjustments for mobile */
+            .welcome-screen {
+                padding: 16px 12px;
+                justify-content: flex-start;
+                overflow-y: auto;
+                min-height: 0;
+            }
+
+            .welcome-avatar {
+                width: 56px;
+                height: 56px;
+                font-size: 30px;
+                margin-bottom: 12px;
+            }
+
+            .welcome-screen h2 {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .welcome-screen p {
+                font-size: 14px;
+                margin-bottom: 16px;
+            }
+
             .suggestions {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 10px;
+                width: 100%;
             }
 
             .suggestion-card {
-                padding: 16px;
+                padding: 14px;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                text-align: left;
             }
 
             .suggestion-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-                margin-bottom: 10px;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .suggestion-card-content {
+                flex: 1;
+                min-width: 0;
             }
 
             .suggestion-card h4 {
                 font-size: 14px;
+                margin: 0 0 2px 0;
+                line-height: 1.3;
             }
 
             .suggestion-card p {
                 font-size: 12px;
+                margin: 0;
+                line-height: 1.4;
             }
 
             .input-area {
@@ -836,21 +878,56 @@
                 max-width: 90%;
             }
 
+            .welcome-screen {
+                padding: 12px 8px;
+            }
+
             .welcome-avatar {
-                width: 70px;
-                height: 70px;
-                font-size: 36px;
+                width: 48px;
+                height: 48px;
+                font-size: 26px;
+                margin-bottom: 10px;
             }
 
             .welcome-screen h2 {
-                font-size: 22px;
+                font-size: 18px;
             }
 
             .welcome-screen p {
-                font-size: 14px;
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+
+            .suggestion-card {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .suggestion-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .suggestion-card-content h4 {
+                font-size: 13px;
+                margin-bottom: 1px;
+                line-height: 1.3;
+            }
+
+            .suggestion-card-content p {
+                font-size: 11px;
+                line-height: 1.4;
             }
 
             .quick-chips {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .quick-chips::-webkit-scrollbar {
                 display: none;
             }
         }
@@ -894,21 +971,6 @@
     </div>
 
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="avatar-ring">
-                <div class="avatar">🤖</div>
-            </div>
-            <div class="header-content">
-                <div class="header-title">AI 记账助手</div>
-                <div class="header-subtitle">智能记账 · 轻松分摊</div>
-            </div>
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                在线
-            </div>
-        </div>
-
         <!-- Chat Container -->
         <div class="chat-wrapper">
             <div class="messages-area" id="messagesArea">
@@ -920,28 +982,38 @@
                     <div class="suggestions">
                         <div class="suggestion-card" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红、小李')">
                             <div class="suggestion-icon">📋</div>
-                            <h4>创建项目</h4>
-                            <p>创建新的费用分摊项目</p>
+                            <div class="suggestion-card-content">
+                                <h4>创建项目</h4>
+                                <p>创建新的费用分摊项目</p>
+                            </div>
                         </div>
                         <div class="suggestion-card" onclick="sendSuggestion('今天午饭张三付了80元，我们四个人平摊')">
                             <div class="suggestion-icon">💳</div>
-                            <h4>记录费用</h4>
-                            <p>快速记录一笔支出</p>
+                            <div class="suggestion-card-content">
+                                <h4>记录费用</h4>
+                                <p>快速记录一笔支出</p>
+                            </div>
                         </div>
                         <div class="suggestion-card" onclick="sendSuggestion('给「周末聚餐」项目添加成员：小王')">
                             <div class="suggestion-icon">👥</div>
-                            <h4>添加成员</h4>
-                            <p>向项目添加新成员</p>
+                            <div class="suggestion-card-content">
+                                <h4>添加成员</h4>
+                                <p>向项目添加新成员</p>
+                            </div>
                         </div>
                         <div class="suggestion-card" onclick="sendSuggestion('查询「周末聚餐」的结算情况')">
                             <div class="suggestion-icon">📊</div>
-                            <h4>查询结算</h4>
-                            <p>查看费用分摊情况</p>
+                            <div class="suggestion-card-content">
+                                <h4>查询结算</h4>
+                                <p>查看费用分摊情况</p>
+                            </div>
                         </div>
                         <div class="suggestion-card" onclick="sendSuggestion('查看我的所有项目')">
                             <div class="suggestion-icon">📁</div>
-                            <h4>项目列表</h4>
-                            <p>查看所有费用项目</p>
+                            <div class="suggestion-card-content">
+                                <h4>项目列表</h4>
+                                <p>查看所有费用项目</p>
+                            </div>
                         </div>
                     </div>
                 </div>
