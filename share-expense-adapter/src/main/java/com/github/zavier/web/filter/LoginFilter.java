@@ -101,6 +101,8 @@ public class LoginFilter implements Filter {
         return url.contains("user/login")
                 || url.contains("user/add")
                 || url.endsWith("/share")
+                || url.contains("/api/ai/")
+                || url.contains("ai-chat.html")
                 || "/".equals(url)
                 || url.endsWith(".html")
                 || url.endsWith(".css")

@@ -33,6 +33,8 @@
     <logger name="com.github.zavier" level="DEBUG"/>
 <!--    <logger name="com.alibaba.cola" level="DEBUG"/>-->
 
+<!--    <logger name="org.springframework.ai" level="DEBUG"/>-->
+
     <!--rootLogger是默认的logger-->
     <root level="INFO">
         <!--定义了两个appender，日志会通过往这两个appender里面写-->

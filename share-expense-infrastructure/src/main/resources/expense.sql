@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS `expense_project`;
 DROP TABLE IF EXISTS `expense_project_member`;
 DROP TABLE IF EXISTS `expense_record`;
 DROP TABLE IF EXISTS `expense_record_consumer`;
+DROP TABLE IF EXISTS `ai_conversation`;
 
 -- 用户表 (user)
 CREATE TABLE user (
@@ -60,3 +61,17 @@ CREATE TABLE expense_record_consumer (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) COMMENT='费用消费人员信息表';
+
+-- AI 对话历史表
+CREATE TABLE IF NOT EXISTS ai_conversation (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    conversation_id VARCHAR(64) NOT NULL COMMENT '会话ID',
+    user_id INT NOT NULL COMMENT '用户ID',
+    role VARCHAR(20) NOT NULL COMMENT '角色: user/assistant/system',
+    content TEXT NOT NULL COMMENT '消息内容',
+    pending_action JSON COMMENT '待确认的操作',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    INDEX idx_conversation (conversation_id),
+    INDEX idx_user (user_id),
+    INDEX idx_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI对话历史';
