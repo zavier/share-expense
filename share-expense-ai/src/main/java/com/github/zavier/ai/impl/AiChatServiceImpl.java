@@ -7,6 +7,7 @@ import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.function.AddExpenseRecordFunction;
 import com.github.zavier.ai.function.AddMembersFunction;
 import com.github.zavier.ai.function.CreateProjectFunction;
+import com.github.zavier.ai.function.GetProjectDetailsFunction;
 import com.github.zavier.ai.function.GetSettlementFunction;
 import com.github.zavier.ai.function.ListProjectsFunction;
 import com.github.zavier.ai.repository.ConversationRepository;
@@ -61,6 +62,9 @@ public class AiChatServiceImpl implements AiChatService {
     @Resource
     private ListProjectsFunction listProjectsFunction;
 
+    @Resource
+    private GetProjectDetailsFunction getProjectDetailsFunction;
+
     @PostConstruct
     public void init() {
         chatClient = ChatClient.builder(chatModel)
@@ -71,7 +75,8 @@ public class AiChatServiceImpl implements AiChatService {
                         addMembersFunction,
                         addExpenseRecordFunction,
                         getSettlementFunction,
-                        listProjectsFunction
+                        listProjectsFunction,
+                        getProjectDetailsFunction
                 )
                 .build();
 
@@ -86,12 +91,14 @@ public class AiChatServiceImpl implements AiChatService {
         2. 向项目添加成员
         3. 记录费用支出
         4. 查询项目列表
-        5. 查询结算情况
+        5. 查询项目详情
+        6. 查询结算情况
 
         **重要提示：**
         - 查询结算时，优先使用项目名称（getSettlementByName），而不是项目ID
         - 如果用户提到项目名称但工具需要项目ID，先调用 listProjects 查找项目
         - 只有当用户明确知道项目ID时，才使用 getSettlement
+        - 当需要添加费用记录或添加成员时，如果不确定项目的成员信息，先调用 getProjectDetails 获取项目详情
 
         请用友好、简洁的中文回复。
         如果信息不完整，对于非关键字段如费用类型等先主动猜测一下，可以不打扰用户。
@@ -208,7 +215,8 @@ public class AiChatServiceImpl implements AiChatService {
      */
     private String buildSuggestionPrompt(String contextSummary, boolean isNewUser) {
         String basePrompt = """
-            你是一个费用分摊记账助手。请根据以下对话上下文，为用户生成 3-4 个智能建议。
+            你是一个费用分摊记账助手。请根据以下对话上下文，判断用户后续可能要进行的操作
+            为用户生成 3-4 个智能建议，便于用户快捷使用
 
             %s
 

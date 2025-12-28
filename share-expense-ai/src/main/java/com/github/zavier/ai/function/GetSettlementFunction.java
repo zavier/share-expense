@@ -78,7 +78,7 @@ public class GetSettlementFunction {
 
         List<UserSharingDTO> settlements = response.getData();
         StringBuilder sb = new StringBuilder();
-        sb.append("项目结算情况：\n");
+        sb.append("项目id: ").append(projectId).append(" 的结算情况：\n");
 
         for (UserSharingDTO settlement : settlements) {
             // 计算结算金额: 已付 - 已消费
