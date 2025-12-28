@@ -10,6 +10,7 @@ import com.github.zavier.ai.function.CreateProjectFunction;
 import com.github.zavier.ai.function.GetProjectDetailsFunction;
 import com.github.zavier.ai.function.GetSettlementFunction;
 import com.github.zavier.ai.function.ListProjectsFunction;
+import com.github.zavier.ai.impl.AiSessionServiceImpl;
 import com.github.zavier.ai.repository.ConversationRepository;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.PostConstruct;
@@ -45,6 +46,9 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Resource
     private ConversationRepository conversationRepository;
+
+    @Resource
+    private AiSessionServiceImpl aiSessionService;
 
     // 注入所有工具类
     @Resource
@@ -108,8 +112,11 @@ public class AiChatServiceImpl implements AiChatService {
     @Override
     public AiChatResponse chat(AiChatRequest request) {
         String conversationId = request.conversationId();
+        boolean isNewConversation = false;
+
         if (conversationId == null || conversationId.isBlank()) {
             conversationId = UUID.randomUUID().toString();
+            isNewConversation = true;
         }
 
         log.info("[AI聊天] 收到用户消息, conversationId={}, userId={}, message={}",
@@ -117,6 +124,11 @@ public class AiChatServiceImpl implements AiChatService {
 
         // 保存用户消息
         saveMessage(conversationId, "user", request.message());
+
+        // 如果是新会话，确保会话记录存在
+        if (isNewConversation) {
+            aiSessionService.ensureSessionExists(conversationId, request.message());
+        }
 
         // 获取对话历史
         List<Message> messages = buildMessages(conversationId);
@@ -133,6 +145,9 @@ public class AiChatServiceImpl implements AiChatService {
 
         // 保存 AI 回复
         saveMessage(conversationId, "assistant", response);
+
+        // 更新会话时间戳
+        aiSessionService.updateSessionTimestamp(conversationId);
 
         return AiChatResponse.builder()
             .conversationId(conversationId)

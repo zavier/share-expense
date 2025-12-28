@@ -37,6 +37,7 @@
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 24px;
+            --sidebar-width: 280px;
         }
 
         body {
@@ -106,15 +107,192 @@
             }
         }
 
+        /* Main Container */
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1000px;
-            margin: 0 auto;
+            display: flex;
             height: 100vh;
+            max-width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            margin-left: calc(var(--sidebar-width) * -1);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .new-chat-btn:active {
+            transform: scale(0.98);
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .session-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .session-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .session-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .session-item {
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .session-item:hover {
+            background: var(--border);
+        }
+
+        .session-item.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid var(--primary-light);
+        }
+
+        .session-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .session-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .session-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .session-title-input {
+            width: 100%;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            outline: none;
+            background: white;
+        }
+
+        .session-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        .session-actions {
+            display: none;
+            gap: 4px;
+        }
+
+        .session-item:hover .session-actions {
+            display: flex;
+        }
+
+        .session-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .session-action-btn:hover {
+            background: var(--border);
+        }
+
+        .session-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Main Chat Area */
+        .main-area {
+            flex: 1;
             display: flex;
             flex-direction: column;
             padding: 24px;
+            min-width: 0;
         }
 
         /* Header */
@@ -129,6 +307,19 @@
             display: flex;
             align-items: center;
             gap: 16px;
+        }
+
+        .menu-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 20px;
+            align-items: center;
+            justify-content: center;
         }
 
         .avatar-ring {
@@ -154,18 +345,6 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-
-        @keyframes highlight {
-            0% {
-                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
-            }
         }
 
         .avatar {
@@ -438,35 +617,6 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        .markdown hr {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 12px 0;
-        }
-
-        .markdown table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .markdown table th,
-        .markdown table td {
-            border: 1px solid var(--border);
-            padding: 8px 12px;
-            text-align: left;
-        }
-
-        .markdown table th {
-            background: rgba(0, 0, 0, 0.03);
-            font-weight: 600;
-        }
-
-        .message.user .markdown table th {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
         /* Typing Indicator */
         .typing-indicator {
             display: flex;
@@ -702,9 +852,42 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 12px;
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
                 height: 100vh;
+                z-index: 100;
+                transform: translateX(-100%);
+                box-shadow: var(--shadow-xl);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                margin-left: 0;
+            }
+
+            .menu-btn {
+                display: flex;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .main-area {
+                padding: 12px;
             }
 
             .header {
@@ -761,7 +944,6 @@
                 font-size: 14px;
             }
 
-            /* Adjust markdown font sizes on mobile */
             .markdown h1 { font-size: 18px; }
             .markdown h2 { font-size: 16px; }
             .markdown h3 { font-size: 15px; }
@@ -778,7 +960,6 @@
                 font-size: 12px;
             }
 
-            /* Welcome screen adjustments for mobile */
             .welcome-screen {
                 padding: 16px 12px;
                 justify-content: flex-start;
@@ -955,10 +1136,73 @@
 
         /* Dark mode support for messages */
         @media (prefers-color-scheme: dark) {
-            /* Only affect message bubbles for better contrast */
             .message.user .message-bubble {
                 background: linear-gradient(135deg, #8b5cf6, #7c3aed);
             }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-sub {
+            font-size: 14px;
         }
     </style>
 </head>
@@ -971,75 +1215,118 @@
     </div>
 
     <div class="container">
-        <!-- Chat Container -->
-        <div class="chat-wrapper">
-            <div class="messages-area" id="messagesArea">
-                <!-- Welcome Screen -->
-                <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-avatar">✨</div>
-                    <h2>嗨！我是你的 AI 记账助手</h2>
-                    <p>我可以帮你管理账单、记录支出、计算分摊</p>
-                    <div class="suggestions">
-                        <div class="suggestion-card" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红、小李')">
-                            <div class="suggestion-icon">📋</div>
-                            <div class="suggestion-card-content">
-                                <h4>创建项目</h4>
-                                <p>创建新的费用分摊项目</p>
-                            </div>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('今天午饭张三付了80元，我们四个人平摊')">
-                            <div class="suggestion-icon">💳</div>
-                            <div class="suggestion-card-content">
-                                <h4>记录费用</h4>
-                                <p>快速记录一笔支出</p>
-                            </div>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('给「周末聚餐」项目添加成员：小王')">
-                            <div class="suggestion-icon">👥</div>
-                            <div class="suggestion-card-content">
-                                <h4>添加成员</h4>
-                                <p>向项目添加新成员</p>
-                            </div>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('查询「周末聚餐」的结算情况')">
-                            <div class="suggestion-icon">📊</div>
-                            <div class="suggestion-card-content">
-                                <h4>查询结算</h4>
-                                <p>查看费用分摊情况</p>
-                            </div>
-                        </div>
-                        <div class="suggestion-card" onclick="sendSuggestion('查看我的所有项目')">
-                            <div class="suggestion-icon">📁</div>
-                            <div class="suggestion-card-content">
-                                <h4>项目列表</h4>
-                                <p>查看所有费用项目</p>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Sidebar Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">对话历史</span>
+            </div>
+            <button class="new-chat-btn" onclick="createNewSession()">
+                <span>+</span>
+                <span>新建对话</span>
+            </button>
+            <div class="session-list" id="sessionList">
+                <!-- Sessions will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-area">
+            <!-- Header -->
+            <div class="header">
+                <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()">☰</button>
+                <div class="avatar-ring">
+                    <div class="avatar">✨</div>
+                </div>
+                <div class="header-content">
+                    <div class="header-title">AI 记账助手</div>
+                    <div class="header-subtitle">我可以帮你管理账单、记录支出、计算分摊</div>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>在线</span>
                 </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="input-area">
-                <div class="quick-chips" id="quickChips">
-                    <button class="chip" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红')">创建项目</button>
-                    <button class="chip" onclick="sendSuggestion('今天午饭AA，80元4个人分')">记录费用</button>
-                    <button class="chip" onclick="sendSuggestion('查询「周末聚餐」结算')">查询结算</button>
-                    <button class="chip" onclick="sendSuggestion('查看我的项目')">项目列表</button>
-                </div>
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <textarea class="input-field" id="messageInput" placeholder="输入消息...（Enter 发送，Shift+Enter 换行）" rows="1"></textarea>
+            <!-- Chat Container -->
+            <div class="chat-wrapper">
+                <div class="messages-area" id="messagesArea">
+                    <!-- Welcome Screen -->
+                    <div class="welcome-screen" id="welcomeScreen">
+                        <div class="welcome-avatar">✨</div>
+                        <h2>嗨！我是你的 AI 记账助手</h2>
+                        <p>我可以帮你管理账单、记录支出、计算分摊</p>
+                        <div class="suggestions">
+                            <div class="suggestion-card" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红、小李')">
+                                <div class="suggestion-icon">📋</div>
+                                <div class="suggestion-card-content">
+                                    <h4>创建项目</h4>
+                                    <p>创建新的费用分摊项目</p>
+                                </div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('今天午饭张三付了80元，我们四个人平摊')">
+                                <div class="suggestion-icon">💳</div>
+                                <div class="suggestion-card-content">
+                                    <h4>记录费用</h4>
+                                    <p>快速记录一笔支出</p>
+                                </div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('给「周末聚餐」项目添加成员：小王')">
+                                <div class="suggestion-icon">👥</div>
+                                <div class="suggestion-card-content">
+                                    <h4>添加成员</h4>
+                                    <p>向项目添加新成员</p>
+                                </div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('查询「周末聚餐」的结算情况')">
+                                <div class="suggestion-icon">📊</div>
+                                <div class="suggestion-card-content">
+                                    <h4>查询结算</h4>
+                                    <p>查看费用分摊情况</p>
+                                </div>
+                            </div>
+                            <div class="suggestion-card" onclick="sendSuggestion('查看我的所有项目')">
+                                <div class="suggestion-icon">📁</div>
+                                <div class="suggestion-card-content">
+                                    <h4>项目列表</h4>
+                                    <p>查看所有费用项目</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button class="send-button" id="sendBtn" onclick="sendMessage()">➤</button>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div class="quick-chips" id="quickChips">
+                        <button class="chip" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红')">创建项目</button>
+                        <button class="chip" onclick="sendSuggestion('今天午饭AA，80元4个人分')">记录费用</button>
+                        <button class="chip" onclick="sendSuggestion('查询「周末聚餐」结算')">查询结算</button>
+                        <button class="chip" onclick="sendSuggestion('查看我的项目')">项目列表</button>
+                    </div>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <textarea class="input-field" id="messageInput" placeholder="输入消息...（Enter 发送，Shift+Enter 换行）" rows="1"></textarea>
+                        </div>
+                        <button class="send-button" id="sendBtn" onclick="sendMessage()">➤</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <span id="toastMessage"></span>
+    </div>
+
     <script>
         const API_BASE = '/api/ai';
-        let conversationId = null;
+        const SESSIONS_API = '/api/ai/sessions';
+        let currentConversationId = null;
+        let sessions = [];
 
         // Configure marked
         if (typeof marked !== 'undefined') {
@@ -1049,34 +1336,275 @@
             });
         }
 
-        // Load suggestions on page load
-        loadSuggestions();
-
-        // Auto-resize textarea
-        const inputField = document.getElementById('messageInput');
-        inputField.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessions();
+            restoreCurrentSession();
+            loadSuggestions();
+            setupInputHandlers();
         });
 
-        // Enter to send, Shift+Enter for new line
-        inputField.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+        function setupInputHandlers() {
+            const inputField = document.getElementById('messageInput');
+
+            // Auto-resize textarea
+            inputField.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+
+            // Enter to send, Shift+Enter for new line
+            inputField.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Touch handling for better mobile experience
+            if ('ontouchstart' in window) {
+                document.body.style.touchAction = 'manipulation';
             }
-        });
-
-        // Touch handling for better mobile experience
-        if ('ontouchstart' in window) {
-            document.body.style.touchAction = 'manipulation';
         }
+
+        // ===== Session Management =====
+
+        async function loadSessions() {
+            try {
+                const response = await fetch(SESSIONS_API);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    sessions = result.data.sessions || [];
+                    renderSessionList();
+                }
+            } catch (error) {
+                console.error('Failed to load sessions:', error);
+            }
+        }
+
+        function renderSessionList() {
+            const sessionList = document.getElementById('sessionList');
+
+            if (sessions.length === 0) {
+                sessionList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <div class="empty-state-text">暂无对话记录</div>
+                        <div class="empty-state-sub">点击上方按钮开始新对话</div>
+                    </div>
+                `;
+                return;
+            }
+
+            sessionList.innerHTML = sessions.map(session => `
+                <div class="session-item ${session.conversationId === currentConversationId ? 'active' : ''}"
+                     onclick="switchSession('${session.conversationId}')"
+                     data-conversation-id="${session.conversationId}">
+                    <span class="session-icon">💬</span>
+                    <div class="session-info">
+                        <div class="session-title" id="title-${session.conversationId}">${escapeHtml(session.title)}</div>
+                        <div class="session-time">${formatTime(session.updatedAt || session.createdAt)}</div>
+                    </div>
+                    <div class="session-actions">
+                        <button class="session-action-btn" onclick="event.stopPropagation(); editSessionTitle('${session.conversationId}')" title="重命名">✏️</button>
+                        <button class="session-action-btn delete" onclick="event.stopPropagation(); confirmDeleteSession('${session.conversationId}')" title="删除">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewSession() {
+            currentConversationId = null;
+            saveCurrentSession();
+            clearMessages();
+            showWelcomeScreen();
+            closeSidebar();
+            document.getElementById('messageInput').focus();
+        }
+
+        async function switchSession(conversationId) {
+            if (conversationId === currentConversationId) {
+                closeSidebar();
+                return;
+            }
+
+            currentConversationId = conversationId;
+            saveCurrentSession();
+
+            // Update active state
+            document.querySelectorAll('.session-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.conversationId === conversationId);
+            });
+
+            // Load messages
+            await loadSessionMessages(conversationId);
+            closeSidebar();
+        }
+
+        async function loadSessionMessages(conversationId) {
+            try {
+                const response = await fetch(`${SESSIONS_API}/${conversationId}/messages`);
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    clearMessages();
+                    const messages = result.data.messages || [];
+
+                    if (messages.length === 0) {
+                        showWelcomeScreen();
+                        return;
+                    }
+
+                    hideWelcomeScreen();
+                    messages.forEach(msg => {
+                        addMessageToUI(msg.content, msg.role === 'user', msg.createdAt);
+                    });
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('Failed to load messages:', error);
+                showToast('加载消息失败', 'error');
+            }
+        }
+
+        async function confirmDeleteSession(conversationId) {
+            if (!confirm('确定要删除这个对话吗？此操作不可恢复。')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SESSIONS_API}/${conversationId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    sessions = sessions.filter(s => s.conversationId !== conversationId);
+                    renderSessionList();
+
+                    // If deleted current session, create new one
+                    if (conversationId === currentConversationId) {
+                        createNewSession();
+                    }
+
+                    showToast('对话已删除', 'success');
+                } else {
+                    showToast('删除失败', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to delete session:', error);
+                showToast('删除失败', 'error');
+            }
+        }
+
+        function editSessionTitle(conversationId) {
+            const titleElement = document.getElementById(`title-${conversationId}`);
+            const currentTitle = titleElement.textContent;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentTitle;
+            input.className = 'session-title-input';
+            input.maxLength = 200;
+
+            titleElement.innerHTML = '';
+            titleElement.appendChild(input);
+            input.focus();
+            input.select();
+
+            const saveTitle = async () => {
+                const newTitle = input.value.trim() || currentTitle;
+
+                try {
+                    const response = await fetch(`${SESSIONS_API}/${conversationId}/rename`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: newTitle })
+                    });
+
+                    if (response.ok) {
+                        // Update local sessions
+                        const session = sessions.find(s => s.conversationId === conversationId);
+                        if (session) {
+                            session.title = newTitle;
+                        }
+                        renderSessionList();
+                        showToast('标题已更新', 'success');
+                    } else {
+                        renderSessionList();
+                        showToast('更新失败', 'error');
+                    }
+                } catch (error) {
+                    console.error('Failed to rename session:', error);
+                    renderSessionList();
+                    showToast('更新失败', 'error');
+                }
+            };
+
+            input.addEventListener('blur', saveTitle);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                } else if (e.key === 'Escape') {
+                    renderSessionList();
+                }
+            });
+        }
+
+        function saveCurrentSession() {
+            localStorage.setItem('ai_current_conversation', currentConversationId || '');
+        }
+
+        function restoreCurrentSession() {
+            const saved = localStorage.getItem('ai_current_conversation');
+            if (saved && saved !== '') {
+                // Find session in loaded sessions
+                const session = sessions.find(s => s.conversationId === saved);
+                if (session) {
+                    currentConversationId = saved;
+                    loadSessionMessages(saved);
+                }
+            }
+        }
+
+        // ===== Sidebar Toggle =====
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        // ===== Message Handling =====
 
         function hideWelcomeScreen() {
             const welcomeScreen = document.getElementById('welcomeScreen');
             if (welcomeScreen) {
                 welcomeScreen.style.display = 'none';
             }
+        }
+
+        function showWelcomeScreen() {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'flex';
+            }
+        }
+
+        function clearMessages() {
+            const messagesArea = document.getElementById('messagesArea');
+            // Keep welcome screen, remove messages
+            const messages = messagesArea.querySelectorAll('.message');
+            messages.forEach(msg => msg.remove());
+            showWelcomeScreen();
         }
 
         function escapeHtml(text) {
@@ -1102,10 +1630,12 @@
                 .replace(/`(.*?)`/g, '<code>$1</code>');
         }
 
-        function addMessage(content, isUser) {
+        function addMessageToUI(content, isUser, createdAt) {
             hideWelcomeScreen();
             const messagesArea = document.getElementById('messagesArea');
-            const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+            const time = createdAt ? new Date(createdAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+                                   : new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
@@ -1121,6 +1651,11 @@
             `;
 
             messagesArea.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const messagesArea = document.getElementById('messagesArea');
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
@@ -1143,7 +1678,7 @@
                 </div>
             `;
             messagesArea.appendChild(typingDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
+            scrollToBottom();
         }
 
         function hideTypingIndicator() {
@@ -1158,7 +1693,7 @@
             const message = input.value.trim();
             if (!message) return;
 
-            addMessage(message, true);
+            addMessageToUI(message, true, null);
             input.value = '';
             input.style.height = 'auto';
 
@@ -1174,7 +1709,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: message,
-                        conversationId: conversationId
+                        conversationId: currentConversationId
                     })
                 });
 
@@ -1182,16 +1717,21 @@
                 hideTypingIndicator();
 
                 if (result.success && result.data) {
-                    conversationId = result.data.conversationId;
-                    addMessage(result.data.reply, false);
+                    currentConversationId = result.data.conversationId;
+                    saveCurrentSession();
+                    addMessageToUI(result.data.reply, false, null);
+
+                    // Reload sessions to update list
+                    await loadSessions();
+
                     // Refresh suggestions after each message
                     loadSuggestions();
                 } else {
-                    addMessage('抱歉，发生了错误，请稍后重试。', false);
+                    showToast('抱歉，发生了错误，请稍后重试。', 'error');
                 }
             } catch (error) {
                 hideTypingIndicator();
-                addMessage('网络错误，请检查连接后重试。', false);
+                showToast('网络错误，请检查连接后重试。', 'error');
                 console.error('Error:', error);
             } finally {
                 sendBtn.disabled = false;
@@ -1201,7 +1741,7 @@
 
         async function loadSuggestions() {
             try {
-                const url = `${API_BASE}/suggestions${conversationId ? '?conversationId=' + encodeURIComponent(conversationId) : ''}`;
+                const url = `${API_BASE}/suggestions${currentConversationId ? '?conversationId=' + encodeURIComponent(currentConversationId) : ''}`;
                 const response = await fetch(url);
                 const result = await response.json();
 
@@ -1239,11 +1779,47 @@
             // Auto-resize textarea to fit content
             input.style.height = 'auto';
             input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+        }
 
-            // Add highlight effect
-            input.style.animation = 'none';
-            input.offsetHeight; // Trigger reflow
-            input.style.animation = 'highlight 0.5s ease';
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = `toast ${type} show`;
+            toastMessage.textContent = message;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            // Less than 1 minute
+            if (diff < 60000) {
+                return '刚刚';
+            }
+
+            // Less than 1 hour
+            if (diff < 3600000) {
+                return Math.floor(diff / 60000) + '分钟前';
+            }
+
+            // Less than 1 day
+            if (diff < 86400000) {
+                return Math.floor(diff / 3600000) + '小时前';
+            }
+
+            // Less than 7 days
+            if (diff < 604800000) {
+                return Math.floor(diff / 86400000) + '天前';
+            }
+
+            // Format as date
+            return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
         }
     </script>
 </body>
