@@ -13,11 +13,10 @@ class AiChatServiceTest {
 
     @Test
     void testChatRequest() {
-        AiChatRequest request = new AiChatRequest();
-        request.setMessage("创建一个测试项目");
+        AiChatRequest request = new AiChatRequest("创建一个测试项目");
 
-        assertNotNull(request.getMessage());
-        assertEquals("创建一个测试项目", request.getMessage());
+        assertNotNull(request.message());
+        assertEquals("创建一个测试项目", request.message());
     }
 
     @Test
@@ -27,32 +26,28 @@ class AiChatServiceTest {
             .reply("好的,我来帮您创建项目")
             .build();
 
-        assertEquals("test-conv-123", response.getConversationId());
-        assertEquals("好的,我来帮您创建项目", response.getReply());
+        assertEquals("test-conv-123", response.conversationId());
+        assertEquals("好的,我来帮您创建项目", response.reply());
     }
 
     @Test
     void testChatRequestWithConversationId() {
-        AiChatRequest request = new AiChatRequest();
-        request.setMessage("添加成员");
-        request.setConversationId("existing-conv-456");
+        AiChatRequest request = new AiChatRequest("添加成员", "existing-conv-456");
 
-        assertNotNull(request.getMessage());
-        assertNotNull(request.getConversationId());
-        assertEquals("添加成员", request.getMessage());
-        assertEquals("existing-conv-456", request.getConversationId());
+        assertNotNull(request.message());
+        assertNotNull(request.conversationId());
+        assertEquals("添加成员", request.message());
+        assertEquals("existing-conv-456", request.conversationId());
     }
 
     @Test
-    void testChatResponseWithPendingAction() {
+    void testChatResponseBasic() {
         AiChatResponse response = AiChatResponse.builder()
             .conversationId("test-conv-789")
             .reply("即将创建项目,请确认")
-            .pendingAction(null)
             .build();
 
-        assertEquals("test-conv-789", response.getConversationId());
-        assertEquals("即将创建项目,请确认", response.getReply());
-        assertNull(response.getPendingAction());
+        assertEquals("test-conv-789", response.conversationId());
+        assertEquals("即将创建项目,请确认", response.reply());
     }
 }

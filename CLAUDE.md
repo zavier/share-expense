@@ -9,7 +9,7 @@ This is an expense sharing application (记账分摊软件) built with Java 21 a
 The application consists of multiple modules:
 - Web frontend built with amis
 - WeChat mini-program
-- Java backend using COLA architecture
+- Java backend using COLA architecture（DDD Architecture）
 
 ## Architecture
 

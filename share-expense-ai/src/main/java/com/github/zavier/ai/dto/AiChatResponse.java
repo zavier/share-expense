@@ -1,15 +1,13 @@
 package com.github.zavier.ai.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
+/**
+ * AI 聊天响应
+ */
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AiChatResponse {
-    private String conversationId;
-    private String reply;
+public record AiChatResponse(
+        String conversationId,
+        String reply
+) {
 }

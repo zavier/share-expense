@@ -17,13 +17,11 @@ class AiChatIntegrationTest {
 
     @Test
     void testAiChatRequest() {
-        AiChatRequest request = new AiChatRequest();
-        request.setMessage("创建一个测试项目");
-        request.setConversationId("test-conv-123");
+        AiChatRequest request = new AiChatRequest("创建一个测试项目", "test-conv-123");
 
-        assertNotNull(request.getMessage());
-        assertEquals("创建一个测试项目", request.getMessage());
-        assertEquals("test-conv-123", request.getConversationId());
+        assertNotNull(request.message());
+        assertEquals("创建一个测试项目", request.message());
+        assertEquals("test-conv-123", request.conversationId());
     }
 
     @Test
@@ -33,21 +31,17 @@ class AiChatIntegrationTest {
             .reply("好的，我来帮您创建项目")
             .build();
 
-        assertNotNull(response.getConversationId());
-        assertEquals("test-conv-123", response.getConversationId());
-        assertEquals("好的，我来帮您创建项目", response.getReply());
-        assertNull(response.getPendingAction());
+        assertNotNull(response.conversationId());
+        assertEquals("test-conv-123", response.conversationId());
+        assertEquals("好的，我来帮您创建项目", response.reply());
     }
 
     @Test
-    void testAiChatResponseWithPendingAction() {
-        AiChatResponse response = AiChatResponse.builder()
-            .conversationId("test-conv-456")
-            .reply("请确认以下操作")
-            .pendingAction(new com.github.zavier.ai.dto.PendingAction())
-            .build();
+    void testAiChatRequestWithoutConversationId() {
+        AiChatRequest request = new AiChatRequest("添加成员");
 
-        assertNotNull(response.getConversationId());
-        assertNotNull(response.getPendingAction());
+        assertNotNull(request.message());
+        assertNull(request.conversationId());
+        assertEquals("添加成员", request.message());
     }
 }

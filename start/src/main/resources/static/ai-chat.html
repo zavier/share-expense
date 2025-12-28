@@ -949,7 +949,7 @@
 
             <!-- Input Area -->
             <div class="input-area">
-                <div class="quick-chips">
+                <div class="quick-chips" id="quickChips">
                     <button class="chip" onclick="sendSuggestion('创建项目「周末聚餐」，成员有小明、小红')">创建项目</button>
                     <button class="chip" onclick="sendSuggestion('今天午饭AA，80元4个人分')">记录费用</button>
                     <button class="chip" onclick="sendSuggestion('查询「周末聚餐」结算')">查询结算</button>
@@ -976,6 +976,9 @@
                 gfm: true,
             });
         }
+
+        // Load suggestions on page load
+        loadSuggestions();
 
         // Auto-resize textarea
         const inputField = document.getElementById('messageInput');
@@ -1109,6 +1112,8 @@
                 if (result.success && result.data) {
                     conversationId = result.data.conversationId;
                     addMessage(result.data.reply, false);
+                    // Refresh suggestions after each message
+                    loadSuggestions();
                 } else {
                     addMessage('抱歉，发生了错误，请稍后重试。', false);
                 }
@@ -1120,6 +1125,38 @@
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('sending');
             }
+        }
+
+        async function loadSuggestions() {
+            try {
+                const url = `${API_BASE}/suggestions${conversationId ? '?conversationId=' + encodeURIComponent(conversationId) : ''}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.suggestions) {
+                    updateQuickChips(result.data.suggestions);
+                }
+            } catch (error) {
+                console.error('Failed to load suggestions:', error);
+                // Keep default suggestions on error
+            }
+        }
+
+        function updateQuickChips(suggestions) {
+            const quickChips = document.getElementById('quickChips');
+            if (!quickChips) return;
+
+            // Clear existing chips
+            quickChips.innerHTML = '';
+
+            // Add new chips from suggestions
+            suggestions.forEach(suggestion => {
+                const chip = document.createElement('button');
+                chip.className = 'chip';
+                chip.textContent = suggestion.text;
+                chip.onclick = () => sendSuggestion(suggestion.text);
+                quickChips.appendChild(chip);
+            });
         }
 
         function sendSuggestion(text) {
