@@ -8,9 +8,9 @@ import com.github.zavier.ai.function.AddExpenseRecordFunction;
 import com.github.zavier.ai.function.AddMembersFunction;
 import com.github.zavier.ai.function.CreateProjectFunction;
 import com.github.zavier.ai.function.GetProjectDetailsFunction;
+import com.github.zavier.ai.function.GetExpenseDetailsFunction;
 import com.github.zavier.ai.function.GetSettlementFunction;
 import com.github.zavier.ai.function.ListProjectsFunction;
-import com.github.zavier.ai.impl.AiSessionServiceImpl;
 import com.github.zavier.ai.repository.ConversationRepository;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.PostConstruct;
@@ -69,6 +69,9 @@ public class AiChatServiceImpl implements AiChatService {
     @Resource
     private GetProjectDetailsFunction getProjectDetailsFunction;
 
+    @Resource
+    private GetExpenseDetailsFunction getExpenseDetailsFunction;
+
     @PostConstruct
     public void init() {
         chatClient = ChatClient.builder(chatModel)
@@ -80,7 +83,8 @@ public class AiChatServiceImpl implements AiChatService {
                         addExpenseRecordFunction,
                         getSettlementFunction,
                         listProjectsFunction,
-                        getProjectDetailsFunction
+                        getProjectDetailsFunction,
+                        getExpenseDetailsFunction
                 )
                 .build();
 
@@ -97,12 +101,21 @@ public class AiChatServiceImpl implements AiChatService {
         4. 查询项目列表
         5. 查询项目详情
         6. 查询结算情况
+        7. 查询费用明细与分析
 
         **重要提示：**
         - 查询结算时，优先使用项目名称（getSettlementByName），而不是项目ID
+        - 查询费用明细时，优先使用项目名称（getExpenseDetailsByName），而不是项目ID
         - 如果用户提到项目名称但工具需要项目ID，先调用 listProjects 查找项目
-        - 只有当用户明确知道项目ID时，才使用 getSettlement
+        - 只有当用户明确知道项目ID时，才使用 getSettlement 或 getExpenseDetails
         - 当需要添加费用记录或添加成员时，如果不确定项目的成员信息，先调用 getProjectDetails 获取项目详情
+
+        **费用明细报告格式：**
+        当用户要求查看费用明细时，请生成 Markdown 格式的报告，包含：
+        - 总览统计（总支出、笔数、成员数、时间范围）
+        - 按类型分类统计（各类型的金额、占比、笔数）
+        - 按成员汇总统计（各成员的付款、消费、净收支、参与次数）
+        - 费用明细表格（日期、付款人、金额、类型、备注、消费人员）
 
         请用友好、简洁的中文回复。
         如果信息不完整，对于非关键字段如费用类型等先主动猜测一下，可以不打扰用户。
@@ -246,11 +259,13 @@ public class AiChatServiceImpl implements AiChatService {
             - 记录费用：addExpenseRecord
             - 查询项目列表：listProjects
             - 查询结算：getSettlementByName
+            - 查询费用明细：getExpenseDetailsByName
 
             示例建议：
             创建项目「周末聚餐」，成员有张三、李四、王五
             记录今天午饭AA，80元4个人分，张三付的钱
             查询「周末聚餐」的结算情况
+            查看「周末聚餐」的费用明细
             """;
 
         if (isNewUser) {
@@ -283,9 +298,9 @@ public class AiChatServiceImpl implements AiChatService {
                 .description("查看所有费用项目")
                 .build());
             suggestions.add(Suggestion.builder()
-                .text("查询「周末聚餐」的结算情况")
-                .type("query_settlement")
-                .description("查看费用分摊情况")
+                .text("查询「周末聚餐」的费用明细")
+                .type("query_expense_details")
+                .description("查看费用详细分析")
                 .build());
         } else {
             suggestions.add(Suggestion.builder()
@@ -299,9 +314,9 @@ public class AiChatServiceImpl implements AiChatService {
                 .description("记录支出")
                 .build());
             suggestions.add(Suggestion.builder()
-                .text("查询结算情况")
-                .type("query_settlement")
-                .description("查看分摊")
+                .text("查看费用明细")
+                .type("query_expense_details")
+                .description("查看费用详细分析")
                 .build());
             suggestions.add(Suggestion.builder()
                 .text("创建新项目")
