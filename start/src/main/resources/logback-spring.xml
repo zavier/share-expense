@@ -33,7 +33,7 @@
     <logger name="com.github.zavier" level="DEBUG"/>
 <!--    <logger name="com.alibaba.cola" level="DEBUG"/>-->
 
-<!--    <logger name="org.springframework.ai" level="DEBUG"/>-->
+    <logger name="org.springframework.ai" level="DEBUG"/>
 
     <!--rootLogger是默认的logger-->
     <root level="INFO">
