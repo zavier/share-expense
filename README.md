@@ -8,6 +8,8 @@
 
 WEB端可以访问：https://zhengw-tech.com/expense/index.html 体验
 
+AI方式可访问：https://zhengw-tech.com/expense/ai-chat.html
+
 小程序可以扫描下面的二维码体验（目前还未上架，可以随时申请体验权限）
 
 ![小程序二维码](https://zhengw-tech.com/images/expense/share_expense_qrcode.jpg)
