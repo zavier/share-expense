@@ -75,6 +75,9 @@ public class AiChatServiceImpl implements AiChatService {
     @Resource
     private IntentValidationService intentValidationService;
 
+    @Resource
+    private RateLimitService rateLimitService;
+
     @PostConstruct
     public void init() {
         chatClient = ChatClient.builder(chatModel)
@@ -144,6 +147,21 @@ public class AiChatServiceImpl implements AiChatService {
 
         log.info("[AI聊天] 收到用户消息, conversationId={}, userId={}, message={}",
             conversationId, getCurrentUserId(), request.message());
+
+        Integer currentUserId = getCurrentUserId();
+
+        // 速率限制：检查用户是否超过请求限制
+        if (!rateLimitService.allowRequest(currentUserId)) {
+            log.warn("[AI聊天] 速率限制触发，拒绝请求, conversationId={}, userId={}",
+                conversationId, currentUserId);
+
+            long secondsUntilReset = rateLimitService.getSecondsUntilReset(currentUserId);
+
+            return AiChatResponse.builder()
+                .conversationId(conversationId)
+                .reply(buildRateLimitExceededMessage(secondsUntilReset))
+                .build();
+        }
 
         // 意图验证：检查用户输入是否与费用相关
         if (!intentValidationService.isExpenseRelated(request.message())) {
@@ -393,5 +411,17 @@ public class AiChatServiceImpl implements AiChatService {
      */
     private Integer getCurrentUserId() {
         return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
+    }
+
+    /**
+     * 构建速率限制超出消息
+     */
+    private String buildRateLimitExceededMessage(long secondsUntilReset) {
+        if (secondsUntilReset < 60) {
+            return String.format("请求过于频繁，请在 %d 秒后重试。", secondsUntilReset);
+        } else {
+            long minutes = secondsUntilReset / 60;
+            return String.format("请求过于频繁，请在 %d 分钟后重试。", minutes);
+        }
     }
 }
