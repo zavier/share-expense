@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AI 记账助手</title>
     <!-- 本地资源，无需网络 -->
-    <script src="/lib/marked.min.js"></script>
+    <script src="/expense/lib/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -745,6 +745,7 @@
         /* Input Area */
         .input-area {
             padding: 20px 24px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
             border-top: 1px solid var(--border);
             background: rgba(255, 255, 255, 0.5);
         }
@@ -1025,6 +1026,7 @@
 
             .input-area {
                 padding: 16px;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
             }
 
             .quick-chips {
@@ -1138,6 +1140,20 @@
         @media (prefers-color-scheme: dark) {
             .message.user .message-bubble {
                 background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            }
+        }
+
+        /* Safe area inset fallback for browsers that don't support env() */
+        @supports not (padding-bottom: env(safe-area-inset-bottom)) {
+            .input-area {
+                padding-bottom: 20px;
+            }
+        }
+
+        /* Mobile viewport height fix for browser chrome */
+        @supports (height: 100dvh) {
+            .container {
+                height: 100dvh;
             }
         }
 
@@ -1331,8 +1347,8 @@
     </div>
 
     <script>
-        const API_BASE = '/api/ai';
-        const SESSIONS_API = '/api/ai/sessions';
+        const API_BASE = '/expense/api/ai';
+        const SESSIONS_API = '/expense/api/ai/sessions';
         let currentConversationId = null;
         let sessions = [];
 

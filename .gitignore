@@ -26,3 +26,4 @@ nbdist/
 bin/
 doc/
 .DS_Store
+/start/src/main/resources/application-remote.properties
