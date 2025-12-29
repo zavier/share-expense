@@ -41,4 +41,19 @@ public interface AiSessionService {
      * 获取会话的历史消息
      */
     List<MessageDto> getSessionMessages(String conversationId);
+
+    /**
+     * 确保会话存在（如果不存在则创建）
+     *
+     * @param conversationId 会话ID
+     * @param firstMessage 第一条消息（用于生成标题）
+     */
+    void ensureSessionExists(String conversationId, String firstMessage);
+
+    /**
+     * 更新会话时间戳
+     *
+     * @param conversationId 会话ID
+     */
+    void updateSessionTimestamp(String conversationId);
 }
