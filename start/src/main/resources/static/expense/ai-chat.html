@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 记账助手</title>
     <!-- 本地资源，无需网络 -->
-    <script src="/lib/marked.min.js"></script>
+    <script src="/expense/lib/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1331,8 +1331,8 @@
     </div>
 
     <script>
-        const API_BASE = '/api/ai';
-        const SESSIONS_API = '/api/ai/sessions';
+        const API_BASE = '/expense/api/ai';
+        const SESSIONS_API = '/expense/api/ai/sessions';
         let currentConversationId = null;
         let sessions = [];
 

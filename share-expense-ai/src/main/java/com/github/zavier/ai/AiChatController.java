@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ai")
+@RequestMapping("/expense/api/ai")
 public class AiChatController {
 
     @Resource

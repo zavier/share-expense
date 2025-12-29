@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/ai/sessions")
+@RequestMapping("/expense/api/ai/sessions")
 public class AiSessionController {
 
     @Resource
