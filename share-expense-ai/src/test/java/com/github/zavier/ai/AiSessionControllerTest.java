@@ -1,13 +1,9 @@
 package com.github.zavier.ai;
 
-import com.alibaba.cola.dto.SingleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zavier.ai.dto.MessageDto;
 import com.github.zavier.ai.dto.RenameSessionRequest;
 import com.github.zavier.ai.dto.SessionDto;
-import com.github.zavier.ai.dto.SessionListResponse;
-import com.github.zavier.ai.dto.SessionMessagesResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -50,7 +45,7 @@ class AiSessionControllerTest {
     private static final String TEST_TITLE = "测试会话";
     private static final Integer TEST_USER_ID = 1;
 
-    // ========== GET /api/ai/sessions ==========
+    // ========== GET /expense/api/ai/sessions ==========
 
     @Test
     void testListSessions_Success() throws Exception {
@@ -62,7 +57,7 @@ class AiSessionControllerTest {
         when(aiSessionService.listSessions()).thenReturn(List.of(session1, session2));
 
         // When & Then
-        mockMvc.perform(get("/api/ai/sessions"))
+        mockMvc.perform(get("/expense/api/ai/sessions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.sessions").isArray())
@@ -81,7 +76,7 @@ class AiSessionControllerTest {
         when(aiSessionService.listSessions()).thenReturn(List.of());
 
         // When & Then
-        mockMvc.perform(get("/api/ai/sessions"))
+        mockMvc.perform(get("/expense/api/ai/sessions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.sessions").isArray())
@@ -90,7 +85,7 @@ class AiSessionControllerTest {
         verify(aiSessionService).listSessions();
     }
 
-    // ========== POST /api/ai/sessions ==========
+    // ========== POST /expense/api/ai/sessions ==========
 
     @Test
     void testCreateSession_Success() throws Exception {
@@ -99,7 +94,7 @@ class AiSessionControllerTest {
         when(aiSessionService.createSession()).thenReturn(conversationId);
 
         // When & Then
-        mockMvc.perform(post("/api/ai/sessions")
+        mockMvc.perform(post("/expense/api/ai/sessions")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -109,7 +104,7 @@ class AiSessionControllerTest {
         verify(aiSessionService).createSession();
     }
 
-    // ========== DELETE /api/ai/sessions/{conversationId} ==========
+    // ========== DELETE /expense/api/ai/sessions/{conversationId} ==========
 
     @Test
     void testDeleteSession_Success() throws Exception {
@@ -117,7 +112,7 @@ class AiSessionControllerTest {
         doNothing().when(aiSessionService).deleteSession(eq(TEST_CONVERSATION_ID));
 
         // When & Then
-        mockMvc.perform(delete("/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
+        mockMvc.perform(delete("/expense/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -131,7 +126,7 @@ class AiSessionControllerTest {
                 .when(aiSessionService).deleteSession(eq(TEST_CONVERSATION_ID));
 
         // When & Then - 全局异常处理器返回 200 但 success: false
-        mockMvc.perform(delete("/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
+        mockMvc.perform(delete("/expense/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
 
@@ -145,14 +140,14 @@ class AiSessionControllerTest {
                 .when(aiSessionService).deleteSession(eq(TEST_CONVERSATION_ID));
 
         // When & Then - 全局异常处理器返回 200 但 success: false
-        mockMvc.perform(delete("/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
+        mockMvc.perform(delete("/expense/api/ai/sessions/{conversationId}", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
 
         verify(aiSessionService).deleteSession(TEST_CONVERSATION_ID);
     }
 
-    // ========== PUT /api/ai/sessions/{conversationId}/rename ==========
+    // ========== PUT /expense/api/ai/sessions/{conversationId}/rename ==========
 
     @Test
     void testRenameSession_Success() throws Exception {
@@ -162,7 +157,7 @@ class AiSessionControllerTest {
         doNothing().when(aiSessionService).renameSession(eq(TEST_CONVERSATION_ID), eq(newTitle));
 
         // When & Then
-        mockMvc.perform(put("/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
+        mockMvc.perform(put("/expense/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -178,7 +173,7 @@ class AiSessionControllerTest {
 
         // When & Then - @Valid 验证在 @WebMvcTest 中需要额外配置，这里跳过
         // 实际应用中验证会在 Service 层或全局异常处理器中处理
-        mockMvc.perform(put("/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
+        mockMvc.perform(put("/expense/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -192,7 +187,7 @@ class AiSessionControllerTest {
         RenameSessionRequest request = new RenameSessionRequest(null);
 
         // When & Then
-        mockMvc.perform(put("/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
+        mockMvc.perform(put("/expense/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -209,7 +204,7 @@ class AiSessionControllerTest {
                 .when(aiSessionService).renameSession(eq(TEST_CONVERSATION_ID), eq(newTitle));
 
         // When & Then - 全局异常处理器返回 200 但 success: false
-        mockMvc.perform(put("/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
+        mockMvc.perform(put("/expense/api/ai/sessions/{conversationId}/rename", TEST_CONVERSATION_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -218,7 +213,7 @@ class AiSessionControllerTest {
         verify(aiSessionService).renameSession(TEST_CONVERSATION_ID, newTitle);
     }
 
-    // ========== GET /api/ai/sessions/{conversationId}/messages ==========
+    // ========== GET /expense/api/ai/sessions/{conversationId}/messages ==========
 
     @Test
     void testGetSessionMessages_Success() throws Exception {
@@ -231,7 +226,7 @@ class AiSessionControllerTest {
                 .thenReturn(List.of(message1, message2));
 
         // When & Then
-        mockMvc.perform(get("/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
+        mockMvc.perform(get("/expense/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.messages").isArray())
@@ -251,7 +246,7 @@ class AiSessionControllerTest {
                 .thenReturn(List.of());
 
         // When & Then
-        mockMvc.perform(get("/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
+        mockMvc.perform(get("/expense/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.messages").isArray())
@@ -267,7 +262,7 @@ class AiSessionControllerTest {
                 .thenThrow(new IllegalArgumentException("会话不存在"));
 
         // When & Then - 全局异常处理器返回 200 但 success: false
-        mockMvc.perform(get("/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
+        mockMvc.perform(get("/expense/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
 
@@ -281,7 +276,7 @@ class AiSessionControllerTest {
                 .thenThrow(new IllegalArgumentException("无权访问该会话"));
 
         // When & Then - 全局异常处理器返回 200 但 success: false
-        mockMvc.perform(get("/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
+        mockMvc.perform(get("/expense/api/ai/sessions/{conversationId}/messages", TEST_CONVERSATION_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(false));
 
