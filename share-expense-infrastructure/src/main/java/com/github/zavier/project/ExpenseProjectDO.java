@@ -1,27 +1,37 @@
 package com.github.zavier.project;
 
-import io.mybatis.provider.Entity;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-@Entity.Table(value = "expense_project", remark = "费用项目信息", autoResultMap = true)
+@Entity
+@Table(name = "expense_project")
 public class ExpenseProjectDO {
-    @Entity.Column(value = "id", remark = "费用项目ID", id = true)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @Entity.Column(value = "name", remark = "项目名称")
+
+    @Column(name = "name")
     private String name;
-    @Entity.Column(value = "create_user_id", remark = "创建者用户ID")
+
+    @Column(name = "create_user_id")
     private Integer createUserId;
-    @Entity.Column(value = "locked", remark = "是否锁定")
+
+    @Column(name = "locked")
     private Boolean locked;
-    @Entity.Column(value = "description", remark = "项目描述")
+
+    @Column(name = "description")
     private String description;
-    @Entity.Column(value = "version", remark = "版本号")
+
+    @Column(name = "version")
     private Integer version;
-    @Entity.Column(value = "created_at", remark = "创建时间")
+
+    @Column(name = "created_at")
     private Date createdAt;
-    @Entity.Column(value = "updated_at", remark = "更新时间")
+
+    @Column(name = "updated_at")
     private Date updatedAt;
 }

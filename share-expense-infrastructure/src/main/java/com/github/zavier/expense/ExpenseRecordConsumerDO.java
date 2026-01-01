@@ -1,25 +1,31 @@
 package com.github.zavier.expense;
 
-import io.mybatis.provider.Entity;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-@Entity.Table(value = "expense_record_consumer", remark = "费用记录消费人信息", autoResultMap = true)
+@Entity
+@Table(name = "expense_record_consumer")
 public class ExpenseRecordConsumerDO {
-    @Entity.Column(value = "id", remark = "费用记录ID", id = true)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @Entity.Column(value = "project_id", remark = "费用项目ID")
+
+    @Column(name = "project_id")
     private Integer projectId;
-    @Entity.Column(value = "record_id", remark = "费用记录ID")
+
+    @Column(name = "record_id")
     private Integer recordId;
-    @Entity.Column(value = "member", remark = "消费用户名称")
+
+    @Column(name = "member")
     private String member;
-    @Entity.Column(value = "created_at", remark = "创建时间")
+
+    @Column(name = "created_at")
     private Date createdAt;
-    @Entity.Column(value = "updated_at", remark = "更新时间")
+
+    @Column(name = "updated_at")
     private Date updatedAt;
 }
-
-

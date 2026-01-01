@@ -1,32 +1,41 @@
 package com.github.zavier.expense;
 
-import io.mybatis.provider.Entity;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@Entity.Table(value = "expense_record", remark = "费用记录信息", autoResultMap = true)
+@Entity
+@Table(name = "expense_record")
 public class ExpenseRecordDO {
-    @Entity.Column(value = "id", remark = "费用记录ID", id = true)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @Entity.Column(value = "pay_member", remark = "付款的用户")
+
+    @Column(name = "pay_member")
     private String payMember;
-    @Entity.Column(value = "project_id", remark = "费用项目ID")
+
+    @Column(name = "project_id")
     private Integer projectId;
-    @Entity.Column(value = "amount", remark = "费用金额")
+
+    @Column(name = "amount")
     private BigDecimal amount;
-    @Entity.Column(value = "pay_date", remark = "费用日期")
+
+    @Column(name = "pay_date")
     private Date payDate;
-    @Entity.Column(value = "expense_type", remark = "费用类型")
+
+    @Column(name = "expense_type")
     private String expenseType;
-    @Entity.Column(value = "remark", remark = "备注")
+
+    @Column(name = "remark")
     private String remark;
-    @Entity.Column(value = "created_at", remark = "创建时间")
+
+    @Column(name = "created_at")
     private Date createdAt;
-    @Entity.Column(value = "updated_at", remark = "更新时间")
+
+    @Column(name = "updated_at")
     private Date updatedAt;
 }
-
-

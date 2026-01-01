@@ -1,31 +1,34 @@
 package com.github.zavier.user;
 
-import io.mybatis.provider.Entity;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-@Entity.Table(value = "user", remark = "用户信息表", autoResultMap = true)
+@Entity
+@Table(name = "user")
 public class UserDO {
-    @Entity.Column(value = "id", remark = "用户ID", id = true)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
-    @Entity.Column(value = "user_name", remark = "用户名")
+    @Column(name = "user_name")
     private String userName;
 
-    @Entity.Column(value = "email", remark = "电子邮件")
+    @Column(name = "email")
     private String email;
 
-    @Entity.Column(value = "password_hash", remark = "密码哈希")
+    @Column(name = "password_hash")
     private String passwordHash;
 
-    @Entity.Column(value = "open_id", remark = "微信openId")
+    @Column(name = "open_id")
     private String openId;
 
-    @Entity.Column(value = "created_at", remark = "创建时间")
+    @Column(name = "created_at")
     private Date createdAt;
 
-    @Entity.Column(value = "updated_at", remark = "更新时间")
+    @Column(name = "updated_at")
     private Date updatedAt;
 }

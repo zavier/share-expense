@@ -3,8 +3,6 @@ package com.github.zavier.project;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.exception.Assert;
 import com.alibaba.cola.exception.BizException;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.github.zavier.builder.ExpenseProjectBuilder;
 import com.github.zavier.converter.ExpenseProjectConverter;
 import com.github.zavier.converter.ExpenseRecordDoConverter;
@@ -14,19 +12,27 @@ import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.expense.ExpenseRecordConsumerDO;
-import com.github.zavier.expense.ExpenseRecordConsumerMapper;
+import com.github.zavier.expense.ExpenseRecordConsumerRepository;
 import com.github.zavier.expense.ExpenseRecordDO;
-import com.github.zavier.expense.ExpenseRecordMapper;
-import io.mybatis.mapper.example.ExampleWrapper;
+import com.github.zavier.expense.ExpenseRecordRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
-import java.util.*;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,13 +40,13 @@ import java.util.stream.Collectors;
 public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
     @Resource
-    private ExpenseProjectMapper expenseProjectMapper;
+    private ExpenseProjectRepository expenseProjectRepository;
     @Resource
-    private ExpenseProjectMemberMapper expenseProjectMemberMapper;
+    private ExpenseProjectMemberRepository expenseProjectMemberRepository;
     @Resource
-    private ExpenseRecordMapper expenseRecordMapper;
+    private ExpenseRecordRepository expenseRecordRepository;
     @Resource
-    private ExpenseRecordConsumerMapper expenseRecordConsumerMapper;
+    private ExpenseRecordConsumerRepository expenseRecordConsumerRepository;
 
     @Override
     @Transactional
@@ -62,21 +68,15 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void delete(Integer projectId) {
-        expenseProjectMapper.deleteByPrimaryKey(projectId);
-        expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getProjectId, projectId)
-                .delete();
-        expenseRecordMapper.wrapper()
-                .eq(ExpenseRecordDO::getProjectId, projectId)
-                .delete();
-        expenseRecordConsumerMapper.wrapper()
-                .eq(ExpenseRecordConsumerDO::getProjectId, projectId)
-                .delete();
+        expenseProjectRepository.deleteById(projectId);
+        expenseProjectMemberRepository.deleteByProjectId(projectId);
+        expenseRecordRepository.deleteByProjectId(projectId);
+        expenseRecordConsumerRepository.deleteByProjectId(projectId);
     }
 
     @Override
     public Optional<ExpenseProject> getProjectById(@NotNull Integer expenseProjectId) {
-        final Optional<ExpenseProjectDO> expenseProjectDO = expenseProjectMapper.selectByPrimaryKey(expenseProjectId);
+        final Optional<ExpenseProjectDO> expenseProjectDO = expenseProjectRepository.findById(expenseProjectId);
         if (!expenseProjectDO.isPresent()) {
             return Optional.empty();
         }
@@ -111,16 +111,23 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         switch (expenseProject.getChangingStatus()) {
             case NEW:
                 final ExpenseProjectDO projectDO = ExpenseProjectConverter.toInsertDO(expenseProject);
-                expenseProjectMapper.insertSelective(projectDO);
-                return projectDO.getId();
+                final ExpenseProjectDO saved = expenseProjectRepository.save(projectDO);
+                return saved.getId();
             case UPDATED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
                 final ExpenseProjectDO updateProjectDo = ExpenseProjectConverter.toUpdateDO(expenseProject);
-                final int update = expenseProjectMapper.wrapper()
-                        .eq(ExpenseProjectDO::getId, expenseProject.getId())
-                        .eq(ExpenseProjectDO::getVersion, expenseProject.getVersion())
-                        .updateSelective(updateProjectDo);
-                Assert.isTrue(update == 1, "当前项目已被其他人更新，请稍后重试");
+                // Optimistic locking check
+                final Optional<ExpenseProjectDO> existing = expenseProjectRepository.findById(expenseProject.getId());
+                if (existing.isPresent()) {
+                    final ExpenseProjectDO existingDO = existing.get();
+                    if (!existingDO.getVersion().equals(expenseProject.getVersion())) {
+                        throw new BizException("当前项目已被其他人更新，请稍后重试");
+                    }
+                    // Increment version
+                    updateProjectDo.setVersion(updateProjectDo.getVersion() + 1);
+                }
+                final ExpenseProjectDO updated = expenseProjectRepository.save(updateProjectDo);
+                Assert.isTrue(updated.getVersion().equals(expenseProject.getVersion() + 1), "乐观锁更新失败");
                 return expenseProject.getId();
             case UNCHANGED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
@@ -138,15 +145,13 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         }
 
         // 删除关联的人员
-        expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getProjectId, expenseProject.getId())
-                .delete();
+        expenseProjectMemberRepository.deleteByProjectId(expenseProject.getId());
 
         expenseProject.listAllMember().forEach(projectMember -> {
             final ExpenseProjectMemberDO expenseProjectMemberDO = new ExpenseProjectMemberDO();
             expenseProjectMemberDO.setProjectId(expenseProject.getId());
             expenseProjectMemberDO.setName(projectMember);
-            expenseProjectMemberMapper.insertSelective(expenseProjectMemberDO);
+            expenseProjectMemberRepository.save(expenseProjectMemberDO);
         });
     }
 
@@ -157,97 +162,107 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         }
 
         // 删除关联的费用
-        expenseRecordMapper.wrapper()
-                .eq(ExpenseRecordDO::getProjectId, project.getId())
-                .delete();
+        expenseRecordRepository.deleteByProjectId(project.getId());
         // 删除关联的费用消费人员
-        expenseRecordConsumerMapper.wrapper()
-                .eq(ExpenseRecordConsumerDO::getProjectId, project.getId())
-                .delete();
+        expenseRecordConsumerRepository.deleteByProjectId(project.getId());
 
         final List<ExpenseRecord> expenseRecords = project.listAllExpenseRecord();
         expenseRecords.forEach(expenseRecord -> {
             final ExpenseRecordDO insertExpenseRecordDO = ExpenseRecordDoConverter.toInsertExpenseRecordDO(expenseRecord);
-            expenseRecordMapper.insertSelective(insertExpenseRecordDO);
+            final ExpenseRecordDO savedRecord = expenseRecordRepository.save(insertExpenseRecordDO);
 
-            saveRecordMember(project, expenseRecord, insertExpenseRecordDO);
+            saveRecordMember(project, expenseRecord, savedRecord);
         });
     }
 
-    private void saveRecordMember(ExpenseProject project, ExpenseRecord expenseRecord, ExpenseRecordDO insertExpenseRecordDO) {
+    private void saveRecordMember(ExpenseProject project, ExpenseRecord expenseRecord, ExpenseRecordDO savedRecord) {
         expenseRecord.listAllConsumers().forEach(consumer -> {
             final ExpenseRecordConsumerDO consumerDO = new ExpenseRecordConsumerDO();
             consumerDO.setProjectId(project.getId());
-            consumerDO.setRecordId(insertExpenseRecordDO.getId());
+            consumerDO.setRecordId(savedRecord.getId());
             consumerDO.setMember(consumer);
             consumerDO.setCreatedAt(new Date());
             consumerDO.setUpdatedAt(new Date());
-            expenseRecordConsumerMapper.insertSelective(consumerDO);
+            expenseRecordConsumerRepository.save(consumerDO);
         });
     }
 
     private List<ExpenseRecordConsumerDO> listRecordConsumer(@NotNull Integer expenseProjectId) {
-        return expenseRecordConsumerMapper.wrapper()
-                .eq(ExpenseRecordConsumerDO::getProjectId, expenseProjectId)
-                .list();
+        return expenseRecordConsumerRepository.findByProjectId(expenseProjectId);
     }
 
     private List<ExpenseRecordDO> listRecord(@NotNull Integer expenseProjectId) {
-        return expenseRecordMapper.wrapper()
-                .eq(ExpenseRecordDO::getProjectId, expenseProjectId)
-                .orderByAsc(ExpenseRecordDO::getPayDate)
-                .list();
+        return expenseRecordRepository.findByProjectIdOrderByPayDateAsc(expenseProjectId);
     }
 
     private PageResponse<ExpenseProject> pageAllProject(ProjectListQry projectListQry) {
-        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize());
-        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper()
-                .orderByDesc(ExpenseProjectDO::getId);
-        if (StringUtils.isNotBlank(projectListQry.getName())) {
-            wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
-        }
-        if (projectListQry.getId() != null) {
-            wrapper.eq(ExpenseProjectDO::getId, projectListQry.getId());
-        }
-        final List<ExpenseProjectDO> list =  wrapper.list();
-        final Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) list;
+        // Build specification
+        Specification<ExpenseProjectDO> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        final List<Integer> projectIdList = list.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
+            if (StringUtils.isNotBlank(projectListQry.getName())) {
+                predicates.add(cb.like(root.get("name"), projectListQry.getName() + "%"));
+            }
+            if (projectListQry.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), projectListQry.getId()));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Create pageable
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(projectListQry.getPage() - 1, projectListQry.getSize(), sort);
+
+        // Execute query
+        Page<ExpenseProjectDO> page = expenseProjectRepository.findAll(spec, pageable);
+
+        final List<Integer> projectIdList = page.stream()
+                .map(ExpenseProjectDO::getId)
+                .collect(Collectors.toList());
 
         final List<ExpenseProject> projectList = listProjectByIds(projectIdList);
 
-        return PageResponse.of(projectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
+        return PageResponse.of(projectList, (int) page.getTotalElements(), page.getSize(), projectListQry.getPage());
     }
 
 
     private PageResponse<ExpenseProject> pageProjectByUser(ProjectListQry projectListQry) {
+        // Build specification
+        Specification<ExpenseProjectDO> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-        PageHelper.startPage(projectListQry.getPage(), projectListQry.getSize(), "id desc");
+            predicates.add(cb.equal(root.get("createUserId"), projectListQry.getOperatorId()));
 
-        // 自己创建的，按照ID倒序
-        final ExampleWrapper<ExpenseProjectDO, Integer> wrapper = expenseProjectMapper.wrapper()
-                .eq(ExpenseProjectDO::getCreateUserId, projectListQry.getOperatorId())
-                .orderByDesc(ExpenseProjectDO::getId);
-        if (StringUtils.isNotBlank(projectListQry.getName())) {
-            wrapper.like(ExpenseProjectDO::getName, projectListQry.getName() + "%");
-        }
-        if (projectListQry.getId() != null) {
-            wrapper.eq(ExpenseProjectDO::getId, projectListQry.getId());
-        }
-        final List<ExpenseProjectDO> projectList = wrapper.list();
+            if (StringUtils.isNotBlank(projectListQry.getName())) {
+                predicates.add(cb.like(root.get("name"), projectListQry.getName() + "%"));
+            }
+            if (projectListQry.getId() != null) {
+                predicates.add(cb.equal(root.get("id"), projectListQry.getId()));
+            }
 
-        if (CollectionUtils.isEmpty(projectList)) {
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Create pageable
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(projectListQry.getPage() - 1, projectListQry.getSize(), sort);
+
+        // Execute query
+        Page<ExpenseProjectDO> page = expenseProjectRepository.findAll(spec, pageable);
+
+        if (CollectionUtils.isEmpty(page.getContent())) {
             return PageResponse.of(projectListQry.getPage(), projectListQry.getSize());
         }
 
-        Page<ExpenseProjectDO> page = (Page<ExpenseProjectDO>) projectList;
-
         // 聚合member
-        final List<Integer> projectIdList = projectList.stream().map(ExpenseProjectDO::getId).collect(Collectors.toList());
+        final List<Integer> projectIdList = page.stream()
+                .map(ExpenseProjectDO::getId)
+                .collect(Collectors.toList());
 
         final List<ExpenseProject> expenseProjectList = listProjectByIds(projectIdList);
 
-        return PageResponse.of(expenseProjectList, (int) page.getTotal(), page.getPageSize(), page.getPageNum());
+        return PageResponse.of(expenseProjectList, (int) page.getTotalElements(), page.getSize(), projectListQry.getPage());
     }
 
     private List<ExpenseProject> listProjectByIds(List<Integer> projectIdList) {
@@ -259,8 +274,6 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     }
 
     private List<ExpenseProjectMemberDO> listProjectMembers(@NotNull Integer expenseProjectId) {
-        return expenseProjectMemberMapper.wrapper()
-                .eq(ExpenseProjectMemberDO::getProjectId, expenseProjectId)
-                .list();
+        return expenseProjectMemberRepository.findByProjectId(expenseProjectId);
     }
 }
