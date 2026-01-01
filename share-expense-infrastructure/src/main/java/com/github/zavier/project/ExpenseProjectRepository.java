@@ -12,7 +12,7 @@ import java.util.List;
 public interface ExpenseProjectRepository extends JpaRepository<ExpenseProjectDO, Integer>,
         JpaSpecificationExecutor<ExpenseProjectDO> {
 
-    List<ExpenseProjectDO> findByCreateUserIdOrderByCreated_atDesc(Integer createUserId);
+    List<ExpenseProjectDO> findByCreateUserIdOrderByCreatedAtDesc(Integer createUserId);
 
     Page<ExpenseProjectDO> findById(Integer id, Pageable pageable);
 }
