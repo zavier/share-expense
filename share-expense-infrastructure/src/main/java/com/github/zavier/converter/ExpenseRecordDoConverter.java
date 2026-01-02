@@ -35,8 +35,6 @@ public class ExpenseRecordDoConverter {
         expenseRecordDO.setPayDate(convertToLocalDateTime(expenseRecord.getDate()));
         expenseRecordDO.setExpenseType(expenseRecord.getExpenseType());
         expenseRecordDO.setRemark(expenseRecord.getRemark());
-        // 重要：显式设置 version=0
-        expenseRecordDO.setVersion(0);
         // createdAt 和 updatedAt 由 JPA Auditing 自动填充，无需手动设置
         return expenseRecordDO;
     }

@@ -26,12 +26,4 @@ public class ExpenseProjectMemberDO extends BaseEntity {
 
     @Column(name = "name")
     private String name;
-
-    /**
-     * 乐观锁版本号
-     * 使用 @Version 注解，JPA 自动管理并发控制
-     */
-    @Version
-    @Column(name = "version")
-    private Integer version;
 }

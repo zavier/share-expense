@@ -32,13 +32,4 @@ public class UserDO extends BaseEntity {
 
     @Column(name = "open_id")
     private String openId;
-
-    /**
-     * 乐观锁版本号
-     * 使用 @Version 注解，JPA 自动管理并发控制
-     * 每次更新时自动递增，检测并发冲突
-     */
-    @Version
-    @Column(name = "version")
-    private Integer version;
 }
