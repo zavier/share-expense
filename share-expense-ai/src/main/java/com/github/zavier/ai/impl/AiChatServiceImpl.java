@@ -44,27 +44,24 @@ public class AiChatServiceImpl implements AiChatService {
     @Resource
     private AiSessionService aiSessionService;
 
-    // AI 工具函数（7个）
+    // AI 工具函数（v2.0优化版 - 6个）
     @Resource
-    private CreateProjectFunction createProjectFunction;
+    private ExpenseCreateProjectFunction expenseCreateProjectFunction;
 
     @Resource
-    private AddMembersFunction addMembersFunction;
+    private ExpenseAddMembersFunction expenseAddMembersFunction;
 
     @Resource
-    private AddExpenseRecordFunction addExpenseRecordFunction;
+    private ExpenseAddExpenseFunction expenseAddExpenseFunction;
 
     @Resource
-    private GetSettlementFunction getSettlementFunction;
+    private ExpenseGetSettlementFunction expenseGetSettlementFunction;
 
     @Resource
-    private ListProjectsFunction listProjectsFunction;
+    private ExpenseListProjectsFunction expenseListProjectsFunction;
 
     @Resource
-    private GetProjectDetailsFunction getProjectDetailsFunction;
-
-    @Resource
-    private GetExpenseDetailsFunction getExpenseDetailsFunction;
+    private ExpenseGetExpenseDetailsFunction expenseGetExpenseDetailsFunction;
 
     // 辅助服务组件
     @Resource
@@ -85,17 +82,16 @@ public class AiChatServiceImpl implements AiChatService {
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .defaultSystem(promptProvider.getChatSystemPrompt())
                 .defaultTools(
-                        createProjectFunction,
-                        addMembersFunction,
-                        addExpenseRecordFunction,
-                        getSettlementFunction,
-                        listProjectsFunction,
-                        getProjectDetailsFunction,
-                        getExpenseDetailsFunction
+                        expenseCreateProjectFunction,
+                        expenseAddMembersFunction,
+                        expenseAddExpenseFunction,
+                        expenseGetSettlementFunction,
+                        expenseListProjectsFunction,
+                        expenseGetExpenseDetailsFunction
                 )
                 .build();
 
-        log.info("[AI聊天服务] 初始化完成");
+        log.info("[AI聊天服务] 初始化完成 - 使用v2.0优化版AI函数（6个工具）");
     }
 
     @Override
@@ -151,15 +147,11 @@ public class AiChatServiceImpl implements AiChatService {
         List<SuggestionGenerator.SuggestionItem> items =
             suggestionGenerator.generate(history, conversationId);
 
-        log.debug("[AI建议] 生成完成, conversationId={}, count={}", conversationId, items.size());
+        log.debug("[AI建议] 生成完成, conversationId={}, count={} items:{}", conversationId, items.size(), items);
 
         // 转换为响应格式
         List<SuggestionsResponse.Suggestion> suggestions = items.stream()
-            .map(item -> new SuggestionsResponse.Suggestion(
-                item.text(),
-                item.type(),
-                item.description()
-            ))
+            .map(item -> new SuggestionsResponse.Suggestion(item.text()))
             .toList();
 
         return SuggestionsResponse.builder()

@@ -9,10 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,6 +29,9 @@ public class MessagePersister {
 
     @Resource
     private ConversationRepository conversationRepository;
+
+    @Value("${app.ai.chat.max-history-messages:15}")
+    private int maxHistoryMessages;
 
     /**
      * 保存单条消息
@@ -72,14 +79,18 @@ public class MessagePersister {
     }
 
     /**
-     * 获取会话的所有消息，转换为 Spring AI Message 格式
+     * 获取会话的最新消息（数量由配置决定），转换为 Spring AI Message 格式
+     * 限制消息数量以避免超过上下文窗口并降低成本
      *
      * @param conversationId 会话ID
-     * @return Spring AI Message 列表
+     * @return Spring AI Message 列表（最多N条，按时间升序，N由 app.ai.chat.max-history-messages 配置）
      */
     public List<Message> findAllByConversationId(String conversationId) {
+        // 使用 Pageable 动态限制返回数量
+        Pageable pageable = PageRequest.of(0, maxHistoryMessages);
         List<ConversationEntity> history = conversationRepository
-            .findByConversationIdOrderByCreatedAtAsc(conversationId);
+            .findByConversationIdOrderByCreatedAtDesc(conversationId, pageable);
+        Collections.reverse(history);
 
         List<Message> messages = new ArrayList<>();
         for (ConversationEntity entity : history) {
@@ -91,6 +102,8 @@ public class MessagePersister {
             }
         }
 
+        log.debug("[消息持久化] 获取会话历史消息, conversationId={}, count={}, limit={}",
+            conversationId, messages.size(), maxHistoryMessages);
         return messages;
     }
 

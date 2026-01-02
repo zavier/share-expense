@@ -55,7 +55,7 @@ public class SuggestionGenerator {
                 .call()
                 .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {});
 
-            log.info("[建议生成] AI响应: conversationId={}, count={}", conversationId, suggestionList.size());
+            log.info("[建议生成] AI响应: conversationId={}, suggestionList={}", conversationId, suggestionList);
 
             // 如果解析失败或没有建议，返回默认建议
             if (CollectionUtils.isEmpty(suggestionList)) {
@@ -92,7 +92,7 @@ public class SuggestionGenerator {
             if (messages.getLast() instanceof UserMessage) {
                 messages.removeLast();
             }
-            messages.add(new UserMessage("你觉得我后续可能会和你说什么？或者如何回答你的问题"));
+            messages.add(new UserMessage("你觉得我后续可能会和你说什么？给出最可能的答复及原因"));
         }
 
         return messages;
@@ -106,45 +106,29 @@ public class SuggestionGenerator {
 
         if (isNewUser) {
             suggestions.add(new SuggestionItem(
-                "创建项目「周末聚餐」，成员有小明、小红、小李",
-                "create_project",
-                "创建新的费用分摊项目"
+                "创建项目「周末聚餐」，成员有小明、小红、小李", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "今天午饭AA，80元4个人分,小明出钱",
-                "add_expense",
-                "快速记录一笔支出"
+                "今天午饭AA，80元4个人分,小明出钱", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查看我的项目",
-                "list_projects",
-                "查看所有费用项目"
+                "查看我的项目", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查询「周末聚餐」的费用明细",
-                "query_expense_details",
-                "查看费用详细分析"
+                "查询「周末聚餐」的费用明细", null, 1
             ));
         } else {
             suggestions.add(new SuggestionItem(
-                "查看我的项目列表",
-                "list_projects",
-                "查看所有项目"
+                "查看我的项目列表", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "记录一笔费用",
-                "add_expense",
-                "记录支出"
+                "记录一笔费用", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查看费用明细",
-                "query_expense_details",
-                "查看费用详细分析"
+                "查看费用明细", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "创建新项目",
-                "create_project",
-                "新建项目"
+                "创建新项目", null, 1
             ));
         }
 
@@ -156,7 +140,7 @@ public class SuggestionGenerator {
      */
     public record SuggestionItem(
         String text,
-        String type,
-        String description
+        String reason,
+        double score
     ) {}
 }
