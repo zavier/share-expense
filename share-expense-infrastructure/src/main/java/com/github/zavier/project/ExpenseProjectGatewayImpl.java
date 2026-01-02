@@ -290,10 +290,56 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     }
 
     private List<ExpenseProject> listProjectByIds(List<Integer> projectIdList) {
-        return projectIdList.stream()
-                .map(this::getProjectById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        if (CollectionUtils.isEmpty(projectIdList)) {
+            return new ArrayList<>();
+        }
+
+        // 批量查询：一次性获取所有项目和关联数据，避免 N+1 查询问题
+        // 原方案：N个项目需要 N×4 次查询
+        // 优化后：仅需 4 次查询，无论项目数量多少
+
+        // 1. 批量查询所有项目
+        final List<ExpenseProjectDO> projectDOList = expenseProjectRepository.findAllById(projectIdList);
+
+        // 2. 批量查询所有成员
+        final List<ExpenseProjectMemberDO> allMembers = expenseProjectMemberRepository.findByProjectIdIn(projectIdList);
+
+        // 3. 批量查询所有费用记录
+        final List<ExpenseRecordDO> allRecords = expenseRecordRepository.findByProjectIdInOrderByPayDateAsc(projectIdList);
+
+        // 4. 批量查询所有消费人员
+        final List<Integer> recordIdList = allRecords.stream()
+                .map(ExpenseRecordDO::getId)
+                .collect(Collectors.toList());
+        final List<ExpenseRecordConsumerDO> allConsumers = CollectionUtils.isEmpty(recordIdList)
+                ? new ArrayList<>()
+                : expenseRecordConsumerRepository.findByRecordIdIn(recordIdList);
+
+        // 在内存中组装数据（使用 ExpenseProjectBuilder）
+        return projectDOList.stream()
+                .map(projectDO -> {
+                    // 查找当前项目的成员
+                    final List<ExpenseProjectMemberDO> members = allMembers.stream()
+                            .filter(member -> member.getProjectId().equals(projectDO.getId()))
+                            .collect(Collectors.toList());
+
+                    // 查找当前项目的费用记录
+                    final List<ExpenseRecordDO> records = allRecords.stream()
+                            .filter(record -> record.getProjectId().equals(projectDO.getId()))
+                            .collect(Collectors.toList());
+
+                    // 查找当前记录的消费人员
+                    final List<ExpenseRecordConsumerDO> consumers = allConsumers.stream()
+                            .filter(consumer -> projectIdList.contains(consumer.getProjectId()))
+                            .collect(Collectors.toList());
+
+                    return new ExpenseProjectBuilder()
+                            .setExpenseProjectDO(projectDO)
+                            .setMemberDOList(members)
+                            .setRecordDOList(records)
+                            .setExpenseRecordConsumerDOList(consumers)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
