@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,10 +63,20 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void delete(Integer projectId) {
+        // 删除关联记录（使用 JPA 批量删除，不需要 @Version）
+        // 从子表开始删除，避免外键约束
+        expenseRecordConsumerRepository.deleteAllInBatch(
+                expenseRecordConsumerRepository.findByProjectId(projectId)
+        );
+        expenseRecordRepository.deleteAllInBatch(
+                expenseRecordRepository.findByProjectIdOrderByPayDateAsc(projectId)
+        );
+        expenseProjectMemberRepository.deleteAllInBatch(
+                expenseProjectMemberRepository.findByProjectId(projectId)
+        );
+
+        // 删除项目主记录
         expenseProjectRepository.deleteById(projectId);
-        expenseProjectMemberRepository.deleteByProjectId(projectId);
-        expenseRecordRepository.deleteByProjectId(projectId);
-        expenseRecordConsumerRepository.deleteByProjectId(projectId);
     }
 
     @Override
@@ -111,21 +120,33 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 return saved.getId();
             case UPDATED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
-                // Manual version control and optimistic locking
-                final Optional<ExpenseProjectDO> existing = expenseProjectRepository.findById(expenseProject.getId());
-                if (existing.isPresent()) {
-                    final ExpenseProjectDO existingDO = existing.get();
-                    if (!existingDO.getVersion().equals(expenseProject.getVersion())) {
-                        throw new BizException("当前项目已被其他人更新，请稍后重试");
-                    }
-                    final ExpenseProjectDO updateProjectDo = ExpenseProjectConverter.toUpdateDO(expenseProject);
-                    updateProjectDo.setVersion(existingDO.getVersion() + 1);
-                    final ExpenseProjectDO updated = expenseProjectRepository.save(updateProjectDo);
+                log.info("更新项目，ID: {}, 当前版本: {}", expenseProject.getId(), expenseProject.getVersion());
+
+                final ExpenseProjectDO existingDO = expenseProjectRepository.findById(expenseProject.getId())
+                        .orElseThrow(() -> new BizException("项目不存在"));
+
+                log.info("数据库中的实体版本: {}", existingDO.getVersion());
+
+                // 修改字段值 - 确保值确实发生变化
+                if (!existingDO.getName().equals(expenseProject.getName()) ||
+                    !existingDO.getDescription().equals(expenseProject.getDescription()) ||
+                    !existingDO.getLocked().equals(expenseProject.getLocked())) {
+                    existingDO.setName(expenseProject.getName());
+                    existingDO.setDescription(expenseProject.getDescription());
+                    existingDO.setLocked(expenseProject.getLocked());
+
+                    // 使用 saveAndFlush 强制立即执行 SQL 并刷新持久化上下文
+                    final ExpenseProjectDO updated = expenseProjectRepository.saveAndFlush(existingDO);
+
+                    log.info("更新后实体版本: {}", updated.getVersion());
+
+                    // Sync version back to expenseProject
                     expenseProject.setVersion(updated.getVersion());
-                    return expenseProject.getId();
                 } else {
-                    throw new BizException("项目不存在");
+                    log.info("字段值未变化，跳过更新");
+                    expenseProject.setVersion(existingDO.getVersion());
                 }
+                return expenseProject.getId();
             case UNCHANGED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
                 log.info("项目无变化，无需更新");
@@ -185,8 +206,7 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             consumerDO.setProjectId(project.getId());
             consumerDO.setRecordId(savedRecord.getId());
             consumerDO.setMember(consumer);
-            consumerDO.setCreatedAt(new Date());
-            consumerDO.setUpdatedAt(new Date());
+            // createdAt 和 updatedAt 由 BaseEntity 的 JPA Auditing 自动填充
             expenseRecordConsumerRepository.save(consumerDO);
         });
     }

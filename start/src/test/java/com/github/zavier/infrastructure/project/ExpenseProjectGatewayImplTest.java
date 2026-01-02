@@ -117,7 +117,7 @@ public class ExpenseProjectGatewayImplTest {
 
         // When - update project
         testProject.setName("Updated Project");
-        testProject.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
+        testProject.setChangingStatus(ChangingStatus.UPDATED);
         System.out.println("Before second save, version: " + testProject.getVersion());
         expenseProjectGateway.save(testProject);
         System.out.println("After second save, version: " + testProject.getVersion());
