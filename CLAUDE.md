@@ -19,7 +19,7 @@ The project follows COLA architecture with these modules:
 - **share-expense-adapter**: Web layer with REST controllers and WeChat mini-program adapters
 - **share-expense-app**: Application service layer with Command/Query Executors that orchestrate business logic
 - **share-expense-domain**: Domain models, domain services, and gateway interfaces (core business rules)
-- **share-expense-infrastructure**: Data access implementations (MyBatis mappers) and external service integrations
+- **share-expense-infrastructure**: Data access implementations (Spring Data JPA repositories) and external service integrations
 - **start**: Spring Boot application starter module
 
 **Key architectural patterns:**
@@ -74,7 +74,8 @@ mvn test -Dtest=ClassName#methodName
 - Default username: `root`
 - Default password: `mysqlroot` (for development)
 - Connection URL: `jdbc:mysql://localhost:3306/share_expense`
-- MyBatis configuration: `classpath:mybatis/mybatis-config.xml`
+- **ORM**: Spring Data JPA (migrated from MyBatis)
+- JPA Configuration: `JpaConfig.java` in infrastructure module
 
 ### WeChat Mini-Program Configuration
 - App ID and App Secret: Configured in `start/src/main/resources/application.properties`
@@ -156,7 +157,7 @@ mvn spring-boot:run -DMYSQL_PWD=${pwd}
 
 ### IDE Configuration
 - **Recommended IDE**: IntelliJ IDEA
-- **Required plugins**: Lombok, MyBatis, Spring Boot
+- **Required plugins**: Lombok, Spring Boot
 - **Code style**: Follow Google Java Style Guide
 - **Encoding**: UTF-8 for all files
 
@@ -185,13 +186,13 @@ mysql -u root -p share_expense < share-expense-infrastructure/src/main/resources
 
 - Java 21
 - Spring Boot 3.2.0
-- MyBatis for data access
+- **Spring Data JPA** for data access (migrated from MyBatis)
 - COLA framework 4.3.2
 - JWT (io.jsonwebtoken:jjwt-api 0.12.5) for authentication
 - WeChat integration for mini-program
 - EasyExcel 3.3.4 for data export
-- PageHelper 5.3.3 for pagination
 - BCrypt for password hashing
+- Spring AI 1.0.0-M4 for AI Assistant features
 
 ## File Naming Conventions
 
@@ -199,7 +200,8 @@ mysql -u root -p share_expense < share-expense-infrastructure/src/main/resources
 - Query classes: `*ListQry`, `*DetailQry` (in share-expense-client)
 - Executor classes: `*CmdExe`, `*QryExe` (in share-expense-app)
 - Domain entities: `*` (in share-expense-domain)
-- Data objects: `*DO` (in share-expense-infrastructure, for MyBatis)
+- Data objects: `*DO` (in share-expense-infrastructure, JPA entities)
+- Repositories: `*Repository` (in share-expense-infrastructure, Spring Data JPA)
 - Integration tests: `*IT.java`
 - Unit tests: `*Test.java`
 
@@ -365,37 +367,42 @@ AI Assistant allows users to interact with the expense sharing system using natu
 The AI Assistant is implemented in the **share-expense-ai** module using:
 - **Spring AI 1.0.0-M4**: Framework for AI integration
 - **OpenAI GPT-4o-mini**: Language model for natural language processing
-- **Function Calling**: AI invokes backend functions through Spring AI's function calling mechanism
-- **Confirmation Pattern**: AI extracts parameters and asks for user confirmation before executing operations
+- **Function Calling**: AI invokes backend functions through Spring AI's `@Tool` annotation mechanism
+- **Multi-Session Management**: Users can create and manage multiple conversation sessions
 
 ### Module Structure
 
 ```
 share-expense-ai/
 ├── src/main/java/com/github/zavier/ai/
-│   ├── AiChatController.java          # REST endpoints
-│   ├── AiChatService.java             # Service interface
-│   ├── impl/AiChatServiceImpl.java    # Service implementation
-│   ├── AiFunctionRegistry.java        # Function registration center
+│   ├── AiChatController.java          # Chat REST endpoints
+│   ├── AiChatService.java             # Chat service interface
+│   ├── impl/AiChatServiceImpl.java    # Chat service implementation
+│   ├── AiSessionController.java       # Session management endpoints
+│   ├── AiSessionService.java          # Session service interface
+│   ├── impl/AiSessionServiceImpl.java # Session service implementation
 │   ├── config/
 │   │   └── AiConfig.java              # Spring AI configuration
 │   ├── dto/
 │   │   ├── AiChatRequest.java
 │   │   ├── AiChatResponse.java
 │   │   ├── ChatMessage.java
-│   │   └── PendingAction.java
+│   │   ├── SessionDto.java
+│   │   ├── MessageDto.java
+│   │   └── SuggestionsResponse.java
 │   ├── entity/
-│   │   └── ConversationEntity.java    # Conversation history entity
+│   │   ├── ConversationEntity.java    # Conversation history entity
+│   │   └── AiSessionEntity.java       # Session management entity
 │   ├── repository/
-│   │   └── ConversationRepository.java
+│   │   ├── ConversationRepository.java
+│   │   └── AiSessionRepository.java
 │   └── function/
-│       ├── AiFunction.java            # Function annotation
-│       ├── AiFunctionExecutor.java    # Function executor interface
-│       ├── FunctionContext.java       # Execution context
 │       ├── CreateProjectFunction.java
 │       ├── AddMembersFunction.java
 │       ├── AddExpenseRecordFunction.java
-│       └── GetSettlementFunction.java
+│       ├── GetSettlementFunction.java
+│       ├── ListProjectsFunction.java
+│       └── GetProjectDetailsFunction.java
 ```
 
 ### Available AI Functions
@@ -416,6 +423,18 @@ share-expense-ai/
    - Parameters: projectId
    - Example: "Check settlement status for project 5"
 
+5. **listProjects**: List all projects for the current user
+   - Parameters: None
+   - Example: "Show me all my projects"
+
+6. **getProjectDetails**: Get detailed information about a specific project
+   - Parameters: projectId
+   - Example: "Tell me about project 5"
+
+7. **getExpenseDetails**: Query expense details for analysis
+   - Parameters: projectId, filters (optional)
+   - Example: "Show me all lunch expenses in project 5"
+
 ### Configuration
 
 #### Environment Variables
@@ -428,7 +447,7 @@ export OPENAI_API_KEY=your-api-key-here
 
 #### Application Properties
 
-Configuration in `start/src/main/resources/application-ai.properties`:
+Configuration in `start/src/main/resources/application.properties`:
 
 ```properties
 # Spring AI Configuration
@@ -444,17 +463,18 @@ app.ai.chat.max-history-rounds=10
 
 ### API Endpoints
 
-- **POST /api/ai/chat**: Send a message to AI assistant
+**Chat Endpoints:**
+- **POST /expense/ai/chat**: Send a message to AI assistant
   - Request body: `{"message": "用户消息", "conversationId": "会话ID（可选）"}`
-  - Response: `{"conversationId": "...", "reply": "AI回复"}`
+  - Response: `{"conversationId": "...", "reply": "AI回复", "suggestions": [...]}`
 
-### User Flow
-
-1. User opens AI assistant page
-2. User types a natural language request (e.g., "创建项目'周末聚餐'，成员有小明、小红")
-3. AI parses the intent, extracts parameters, and executes the corresponding function
-4. AI returns the execution result
-5. Conversation history is saved for context maintenance
+**Session Management Endpoints:**
+- **GET /expense/ai/sessions**: List all user sessions
+- **POST /expense/ai/sessions**: Create new session
+- **GET /expense/ai/sessions/{id}**: Get session details
+- **PUT /expense/ai/sessions/{id}**: Rename session
+- **DELETE /expense/ai/sessions/{id}**: Delete session
+- **GET /expense/ai/sessions/{id}/messages**: Get session messages
 
 ### Database Schema
 
@@ -468,6 +488,17 @@ app.ai.chat.max-history-rounds=10
   - content: Message content
   - created_at: Message timestamp
 - **Indexes**: conversation_id, user_id, created_at
+
+#### AI Session Table (ai_chat_session)
+
+- **Purpose**: Stores AI chat sessions for multi-conversation management
+- **Key fields**:
+  - id: Unique session identifier
+  - user_id: User who owns the session
+  - title: Session title (auto-generated from first message)
+  - created_at: Session creation timestamp
+  - updated_at: Last update timestamp
+- **Indexes**: user_id, created_at, updated_at
 
 ### Testing
 
@@ -486,21 +517,9 @@ mvn test -pl share-expense-ai -Dtest=AiChatIntegrationTest
 - **API Key**: Never commit OpenAI API key to version control
 - **User Context**: All functions execute with authenticated user's context
 - **Parameter Validation**: Functions validate parameters before execution
-- **Conversation Isolation**: Users can only access their own conversations
-
-### Limitations and Future Enhancements
-
-**Current Limitations:**
-- Consumer ID mapping in AddExpenseRecordFunction requires member name to ID resolution
-- Pending actions stored in memory (should use Redis in production)
-- Limited to four core functions
-
-**Future Enhancements:**
-- Voice input support
-- Function calling result caching
-- Additional operation types (update/delete records, project locking)
-- Enhanced error handling and user prompts
-- Multi-language support
+- **Session Isolation**: Users can only access their own sessions
+- **Rate Limiting**: Implemented to prevent API abuse
+- **Intent Validation**: Protection against prompt injection attacks
 
 ## Business Logic Overview
 
@@ -530,6 +549,126 @@ The core business logic in `share-expense-domain` handles:
 - `ExpenseProject`: Project entity with fee calculation logic (`calculateMemberFees()`)
 - `ExpenseRecord`: Individual expense with consumer tracking
 - `ShareTokenHelper`: Generates tokens for project sharing without authentication
+
+## Recent Updates (Updated: 2025-01-02)
+
+### Major Migration: MyBatis → Spring Data JPA
+
+The data access layer has been completely migrated from MyBatis to Spring Data JPA for better ORM support, type safety, and developer productivity.
+
+**Key Changes:**
+- **Removed**: All MyBatis mappers (`*Mapper.java`) and XML configuration
+- **Added**: Spring Data JPA repositories (`*Repository.java`)
+- **Enhanced**: Entity objects with JPA annotations and DDD aggregate patterns
+- **Configuration**: Added `JpaConfig.java` for transaction management and entity scanning
+- **Base Entity**: Introduced `BaseEntity.java` for common audit fields (id, created_at, updated_at)
+
+**JPA Features Implemented:**
+- Entity relationships and cascade operations
+- Optimistic locking with `@Version` field
+- Automatic timestamp tracking with `@CreatedDate` and `@LastModifiedDate`
+- Custom repository methods with derived queries
+- Transaction management with `@Transactional`
+
+**Migration Benefits:**
+- No manual SQL writing for CRUD operations
+- Automatic dirty checking and change tracking
+- Better performance with lazy loading and batch operations
+- Type-safe queries derived from method names
+- Easier testing with Spring Boot test support
+
+### AI Assistant Enhancements
+
+The AI Assistant module has been significantly enhanced with new features and refactored architecture:
+
+**New Features:**
+1. **Multi-Session Management**: Users can create and manage multiple conversation sessions
+2. **Session Persistence**: Sessions are saved to `ai_chat_session` table with auto-generated titles
+3. **Dynamic Suggestions**: AI provides follow-up action suggestions based on conversation context
+4. **Rate Limiting**: Implemented rate limiting service to prevent API abuse
+5. **Intent Validation**: Added protection against prompt injection attacks
+6. **Project Query by Name**: `getSettlement` function now supports project name lookup instead of just ID
+
+**Architecture Refactoring:**
+- Removed custom `AiFunction` annotations in favor of Spring AI's standard `@Tool` annotation
+- Simplified function registration - no manual registry needed
+- Extracted services: `MessagePersister`, `SuggestionGenerator`, `IntentValidationService`
+- Better separation of concerns with dedicated providers and validators
+- Improved test coverage with comprehensive unit and integration tests
+
+**New AI Functions:**
+- `listProjects`: List all projects for the current user
+- `getProjectDetails`: Get detailed project information
+- `getExpenseDetails`: Query and analyze expense records with filters
+
+**Test Coverage:**
+- Added `AiSessionServiceTest` with 555 lines of comprehensive session management tests
+- Added `AiSessionControllerTest` with 290 lines of controller endpoint tests
+- Added `AiChatIntegrationTest` for full-stack testing
+- Added `RateLimitServiceTest` with 198 lines
+
+### Test Coverage Improvements
+
+**New Integration Tests:**
+- `ExpenseProjectGatewayImplTest`: 292 lines covering project CRUD operations
+- `ExpenseProjectGatewayOptimisticLockTest`: 219 lines testing concurrent modification scenarios
+- `UserGatewayImplTest`: 182 lines testing user management operations
+
+**Test Infrastructure:**
+- Added `logback-test.xml` for better test logging
+- Improved test configuration with proper database setup
+- Enhanced test data builders with `ExpenseProjectBuilder`
+
+### API Path Standardization
+
+All AI Assistant endpoints have been moved under the `/expense` prefix for consistency:
+- `/api/ai/chat` → `/expense/ai/chat`
+- `/api/ai/sessions` → `/expense/ai/sessions`
+
+### Documentation Updates
+
+- Removed outdated design documents from `docs/plans/` directory
+- Consolidated AI architecture into this CLAUDE.md file
+- Updated database schema documentation with new tables
+- Enhanced API documentation with session management endpoints
+
+### Code Quality Improvements
+
+- Replaced mutable DTOs with immutable `record` classes for better thread safety
+- Improved error handling with global exception handler
+- Enhanced code documentation and comments
+- Better naming conventions throughout the codebase
+- Removed unnecessary configuration files (e.g., `.vscode/settings.json`)
+
+## Important Notes for Developers
+
+### JPA Entity Management
+
+When working with JPA entities:
+- Always use `@Transactional` for write operations to ensure proper entity state management
+- Be aware of lazy loading - access relationships within a transactional context
+- Use repository methods instead of manual entity manipulation when possible
+- Clear entity manager after bulk operations to avoid memory issues
+- Test optimistic locking scenarios with concurrent updates
+
+### AI Function Development
+
+When adding new AI functions:
+- Use Spring AI's `@Tool` annotation instead of custom annotations
+- Functions are automatically discovered and registered via component scanning
+- Implement proper parameter validation within the function
+- Return clear, user-friendly error messages
+- Add comprehensive tests for each new function
+- Consider rate limiting for expensive operations
+
+### Testing Strategy
+
+- Unit tests (`*Test.java`) for individual components
+- Integration tests (`*IT.java`) for database operations and full request flows
+- Use `@DataJpaTest` for repository testing
+- Use `@SpringBootTest` for full context testing
+- Mock external dependencies (AI APIs) in unit tests
+- Use test builders for creating test data objects
 
 
 Always use context7 when I need code generation, setup or configuration steps, or

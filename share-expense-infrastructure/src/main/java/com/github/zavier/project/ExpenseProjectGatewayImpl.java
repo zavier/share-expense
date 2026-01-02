@@ -63,17 +63,12 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void delete(Integer projectId) {
-        // 删除关联记录（使用 JPA 批量删除，不需要 @Version）
+        // 删除关联记录（使用批量 DELETE 语句，不加载实体到内存）
         // 从子表开始删除，避免外键约束
-        expenseRecordConsumerRepository.deleteAllInBatch(
-                expenseRecordConsumerRepository.findByProjectId(projectId)
-        );
-        expenseRecordRepository.deleteAllInBatch(
-                expenseRecordRepository.findByProjectIdOrderByPayDateAsc(projectId)
-        );
-        expenseProjectMemberRepository.deleteAllInBatch(
-                expenseProjectMemberRepository.findByProjectId(projectId)
-        );
+        // 直接执行 DELETE SQL，避免 OutOfMemoryError
+        expenseRecordConsumerRepository.deleteByProjectId(projectId);
+        expenseRecordRepository.deleteByProjectId(projectId);
+        expenseProjectMemberRepository.deleteByProjectId(projectId);
 
         // 删除项目主记录
         expenseProjectRepository.deleteById(projectId);
@@ -179,14 +174,10 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             return;
         }
 
-        // 删除关联的费用消费人员（子表）- 使用批量删除立即执行
-        expenseRecordConsumerRepository.deleteAllInBatch(
-                expenseRecordConsumerRepository.findByProjectId(project.getId())
-        );
-        // 删除关联的费用（父表）- 使用批量删除立即执行
-        expenseRecordRepository.deleteAllInBatch(
-                expenseRecordRepository.findByProjectIdOrderByPayDateAsc(project.getId())
-        );
+        // 删除关联的费用消费人员（子表）- 使用批量 DELETE 语句，不加载实体到内存
+        expenseRecordConsumerRepository.deleteByProjectId(project.getId());
+        // 删除关联的费用（父表）- 使用批量 DELETE 语句，不加载实体到内存
+        expenseRecordRepository.deleteByProjectId(project.getId());
 
         final List<ExpenseRecord> expenseRecords = project.listAllExpenseRecord();
         expenseRecords.forEach(expenseRecord -> {
