@@ -29,7 +29,7 @@ public class ConversationEntity {
     @Column(name = "role", nullable = false, length = 20)
     private String role;
 
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false)
     private String content;
 
     @Column(name = "created_at")

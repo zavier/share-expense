@@ -1,27 +1,50 @@
 package com.github.zavier.project;
 
-import io.mybatis.provider.Entity;
+import com.github.zavier.infrastructure.common.BaseEntity;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.Date;
-
+/**
+ * 费用项目实体（聚合根）
+ * <p>
+ * 继承 BaseEntity 获得 JPA Auditing 功能，自动管理 createdAt, updatedAt
+ * 使用 @Version 注解实现自动乐观锁
+ * <p>
+ * DDD 聚合根设计：
+ * - 不声明 @OneToMany 关联，通过 Gateway 手动组装聚合
+ * - 手动管理子实体生命周期，通过 Repository 直接操作
+ * - 子实体保留 projectId 外键字段，支持独立查询和批量操作
+ * - 这种设计避免了 JPA 级联操作的性能问题，提供了更精确的控制
+ */
 @Data
-@Entity.Table(value = "expense_project", remark = "费用项目信息", autoResultMap = true)
-public class ExpenseProjectDO {
-    @Entity.Column(value = "id", remark = "费用项目ID", id = true)
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "expense_project")
+public class ExpenseProjectDO extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @Entity.Column(value = "name", remark = "项目名称")
+
+    @Column(name = "name")
     private String name;
-    @Entity.Column(value = "create_user_id", remark = "创建者用户ID")
+
+    @Column(name = "create_user_id")
     private Integer createUserId;
-    @Entity.Column(value = "locked", remark = "是否锁定")
+
+    @Column(name = "locked")
     private Boolean locked;
-    @Entity.Column(value = "description", remark = "项目描述")
+
+    @Column(name = "description")
     private String description;
-    @Entity.Column(value = "version", remark = "版本号")
+
+    /**
+     * 乐观锁版本号
+     * 使用 @Version 注解，JPA 自动管理并发控制
+     * 每次更新时自动递增，检测并发冲突
+     */
+    @Version
+    @Column(name = "version")
     private Integer version;
-    @Entity.Column(value = "created_at", remark = "创建时间")
-    private Date createdAt;
-    @Entity.Column(value = "updated_at", remark = "更新时间")
-    private Date updatedAt;
 }

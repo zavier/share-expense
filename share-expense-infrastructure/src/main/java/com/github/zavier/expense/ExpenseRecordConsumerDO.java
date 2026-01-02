@@ -1,25 +1,34 @@
 package com.github.zavier.expense;
 
-import io.mybatis.provider.Entity;
+import com.github.zavier.infrastructure.common.BaseEntity;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.Date;
-
+/**
+ * 费用记录消费人员实体
+ * <p>
+ * 继承 BaseEntity 获得 JPA Auditing 功能，自动管理 createdAt, updatedAt
+ * <p>
+ * 注意：此实体不添加 @Version，因为它是聚合内部的最小子实体
+ * 通过父实体（ExpenseRecordDO）的版本控制即可保证并发安全
+ */
 @Data
-@Entity.Table(value = "expense_record_consumer", remark = "费用记录消费人信息", autoResultMap = true)
-public class ExpenseRecordConsumerDO {
-    @Entity.Column(value = "id", remark = "费用记录ID", id = true)
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "expense_record_consumer")
+public class ExpenseRecordConsumerDO extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
-    @Entity.Column(value = "project_id", remark = "费用项目ID")
+
+    @Column(name = "project_id")
     private Integer projectId;
-    @Entity.Column(value = "record_id", remark = "费用记录ID")
+
+    @Column(name = "record_id")
     private Integer recordId;
-    @Entity.Column(value = "member", remark = "消费用户名称")
+
+    @Column(name = "member")
     private String member;
-    @Entity.Column(value = "created_at", remark = "创建时间")
-    private Date createdAt;
-    @Entity.Column(value = "updated_at", remark = "更新时间")
-    private Date updatedAt;
 }
-
-

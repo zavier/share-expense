@@ -47,6 +47,7 @@ public class ExpenseProjectBuilder {
         expenseProject.setName(expenseProjectDO.getName());
         expenseProject.setDescription(expenseProjectDO.getDescription());
         expenseProject.setVersion(expenseProjectDO.getVersion());
+        expenseProject.setLocked(expenseProjectDO.getLocked() != null ? expenseProjectDO.getLocked() : false);
 
         if (CollectionUtils.isNotEmpty(memberDOList)) {
             for (ExpenseProjectMemberDO memberDO : memberDOList) {
