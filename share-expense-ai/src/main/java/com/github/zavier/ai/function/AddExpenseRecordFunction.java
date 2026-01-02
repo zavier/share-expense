@@ -37,7 +37,7 @@ public class AddExpenseRecordFunction {
      * @param remark 备注（可选）
      * @return 添加结果消息
      */
-    @Tool(description = "添加一笔费用记录。需要提供项目ID、付款人、金额、费用类型、参与消费的成员列表。")
+    @Tool(description = "添加一笔费用记录。需要提供项目ID、付款人、金额、费用类型、参与消费的成员列表。用于在用户要记录费用时，进行持久化保存")
     public String addExpenseRecord(
             @ToolParam(description = "项目ID") Integer projectId,
             @ToolParam(description = "付款人姓名") String payer,

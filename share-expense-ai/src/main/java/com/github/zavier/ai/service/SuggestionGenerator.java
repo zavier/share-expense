@@ -1,12 +1,15 @@
 package com.github.zavier.ai.service;
 
+import com.github.zavier.ai.domain.MessageRole;
 import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.provider.AiPromptProvider;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +26,13 @@ public class SuggestionGenerator {
 
     private final ChatClient suggestionChatClient;
 
-    @Resource
-    private AiPromptProvider promptProvider;
 
-    public SuggestionGenerator(ChatModel chatModel) {
-        this.suggestionChatClient = ChatClient.builder(chatModel)
-            .build();
+    public SuggestionGenerator(ChatModelProvider chatModelProvider,
+                               AiPromptProvider promptProvider) {
+        this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectChatModel())
+                .defaultSystem(promptProvider.getSuggestionPrompt())
+                .defaultAdvisors(new SimpleLoggerAdvisor())
+                .build();
     }
 
     /**
@@ -42,16 +46,12 @@ public class SuggestionGenerator {
         boolean isNewUser = history.isEmpty();
 
         // 构建上下文
-        List<AiPromptProvider.ContextMessage> recentMessages = buildRecentMessages(history);
-        String contextSummary = promptProvider.buildContextSummary(recentMessages);
-
-        // 构建提示词
-        String suggestionPrompt = promptProvider.getSuggestionPrompt(contextSummary, isNewUser);
+        List<Message> recentMessages = buildRecentMessages(history);
 
         try {
             // 调用 AI 生成建议
             final List<SuggestionItem> suggestionList = suggestionChatClient.prompt()
-                .user(suggestionPrompt)
+                .messages(recentMessages)
                 .call()
                 .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {});
 
@@ -75,17 +75,26 @@ public class SuggestionGenerator {
     /**
      * 构建最近的消息列表（最多5条）
      */
-    private List<AiPromptProvider.ContextMessage> buildRecentMessages(List<ConversationEntity> history) {
+    private List<Message> buildRecentMessages(List<ConversationEntity> history) {
         int start = Math.max(0, history.size() - 5);
         List<ConversationEntity> recentHistory = history.subList(start, history.size());
-
-        List<AiPromptProvider.ContextMessage> messages = new ArrayList<>();
+        List<Message> messages = new ArrayList<>();
         for (ConversationEntity entity : recentHistory) {
-            messages.add(new AiPromptProvider.ContextMessage(
-                entity.getRole(),
-                entity.getContent()
-            ));
+            MessageRole role = MessageRole.fromCode(entity.getRole());
+            if (role == MessageRole.USER) {
+                messages.add(new UserMessage(entity.getContent()));
+            } else if (role == MessageRole.ASSISTANT) {
+                messages.add(new AssistantMessage(entity.getContent()));
+            }
         }
+
+        if (!messages.isEmpty()) {
+            if (messages.getLast() instanceof UserMessage) {
+                messages.removeLast();
+            }
+            messages.add(new UserMessage("你觉得我后续可能会和你说什么？或者如何回答你的问题"));
+        }
+
         return messages;
     }
 

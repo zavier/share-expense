@@ -8,6 +8,7 @@ import com.github.zavier.ai.dto.SuggestionsResponse;
 import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.function.*;
 import com.github.zavier.ai.provider.AiPromptProvider;
+import com.github.zavier.ai.service.ChatModelProvider;
 import com.github.zavier.ai.service.MessagePersister;
 import com.github.zavier.ai.service.SuggestionGenerator;
 import com.github.zavier.ai.validator.ChatRequestValidator;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class AiChatServiceImpl implements AiChatService {
     private ChatClient chatClient;
 
     @Resource
-    private ChatModel chatModel;
+    private ChatModelProvider chatModelProvider;
 
     @Resource
     private AiSessionService aiSessionService;
@@ -81,7 +81,7 @@ public class AiChatServiceImpl implements AiChatService {
 
     @PostConstruct
     public void init() {
-        this.chatClient = ChatClient.builder(chatModel)
+        this.chatClient = ChatClient.builder(chatModelProvider.selectChatModel())
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .defaultSystem(promptProvider.getChatSystemPrompt())
                 .defaultTools(
@@ -203,17 +203,17 @@ public class AiChatServiceImpl implements AiChatService {
     /**
      * 调用 AI 处理
      */
-    private String callAi(String conversationId) {
-        java.util.List<Message> messages = messagePersister.findAllByConversationId(conversationId);
+    public String callAi(String conversationId) {
+        List<Message> messages = messagePersister.findAllByConversationId(conversationId);
 
-        log.debug("[AI聊天] 调用AI, conversationId={}, 历史消息数={}", conversationId, messages.size() - 1);
+        log.debug("[AI聊天] 调用AI, conversationId={}, 历史消息数={}", conversationId, messages.size());
 
         String response = chatClient.prompt()
             .messages(messages)
             .call()
             .content();
 
-        log.debug("[AI聊天] AI响应完成, conversationId={}, replyLength={}", conversationId, response.length());
+        log.debug("[AI聊天] AI响应完成, conversationId={}, reply={}", conversationId, response);
 
         return response;
     }
