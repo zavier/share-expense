@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,14 @@ import static org.junit.Assert.*;
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Rollback
 @Transactional
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.globally_quoted_identifiers=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
+        "spring.jpa.properties.hibernate.use_sql_comments=true"
+})
 public class ProjectServiceIT {
 
     @Resource
@@ -62,12 +71,6 @@ public class ProjectServiceIT {
         assertEquals(members.size(), savedMember.size());
 
         assertTrue(savedMember.containsAll(members));
-    }
-
-
-    @Test
-    public void testAddMember() {
-//        projectService.addProjectMember()
     }
 
 }

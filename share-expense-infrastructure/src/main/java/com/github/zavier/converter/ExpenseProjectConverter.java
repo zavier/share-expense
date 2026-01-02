@@ -23,12 +23,13 @@ public class ExpenseProjectConverter {
 
     public static ExpenseProjectDO toUpdateDO(ExpenseProject expenseProject) {
         final ExpenseProjectDO expenseProjectDO = new ExpenseProjectDO();
+        expenseProjectDO.setId(expenseProject.getId());
         expenseProjectDO.setCreateUserId(expenseProject.getCreateUserId());
         expenseProjectDO.setName(expenseProject.getName());
         expenseProjectDO.setDescription(expenseProject.getDescription());
         expenseProjectDO.setLocked(expenseProject.getLocked());
         expenseProjectDO.setUpdatedAt(new Date());
-        expenseProjectDO.setVersion(expenseProject.getVersion() + 1);
+        expenseProjectDO.setVersion(expenseProject.getVersion());
         return expenseProjectDO;
     }
 }

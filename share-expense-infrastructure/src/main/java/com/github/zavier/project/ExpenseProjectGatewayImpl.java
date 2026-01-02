@@ -3,6 +3,7 @@ package com.github.zavier.project;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.exception.Assert;
 import com.alibaba.cola.exception.BizException;
+import com.alibaba.fastjson2.JSON;
 import com.github.zavier.builder.ExpenseProjectBuilder;
 import com.github.zavier.converter.ExpenseProjectConverter;
 import com.github.zavier.converter.ExpenseRecordDoConverter;
@@ -51,14 +52,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     @Override
     @Transactional
     public void save(ExpenseProject expenseProject) {
-        // 将 expenseProject 中的所有changingStatus日志打印出来
-        log.info("项目changingStatus:{} recordChangingStatus:{} memberChangingStatus:{}",
-                expenseProject.getChangingStatus(),
-                expenseProject.getRecordChangingStatus(),
-                expenseProject.getMemberChangingStatus());
+        log.info("save project:{}", JSON.toJSONString(expenseProject));
 
-        final Integer projectId = saveProject(expenseProject);
-        expenseProject.setId(projectId);
+        saveProject(expenseProject);
 
         saveProjectMembers(expenseProject);
 
@@ -91,9 +87,6 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 .setRecordDOList(recordDOList)
                 .setExpenseRecordConsumerDOList(recordConsumerDOList)
                 .build();
-        // 重置状态
-        build.resetChangeStatus();
-
         return Optional.of(build);
     }
 
@@ -112,23 +105,27 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             case NEW:
                 final ExpenseProjectDO projectDO = ExpenseProjectConverter.toInsertDO(expenseProject);
                 final ExpenseProjectDO saved = expenseProjectRepository.save(projectDO);
+                // Sync id and version back to expenseProject
+                expenseProject.setId(saved.getId());
+                expenseProject.setVersion(saved.getVersion());
                 return saved.getId();
             case UPDATED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
-                final ExpenseProjectDO updateProjectDo = ExpenseProjectConverter.toUpdateDO(expenseProject);
-                // Optimistic locking check
+                // Manual version control and optimistic locking
                 final Optional<ExpenseProjectDO> existing = expenseProjectRepository.findById(expenseProject.getId());
                 if (existing.isPresent()) {
                     final ExpenseProjectDO existingDO = existing.get();
                     if (!existingDO.getVersion().equals(expenseProject.getVersion())) {
                         throw new BizException("当前项目已被其他人更新，请稍后重试");
                     }
-                    // Increment version
-                    updateProjectDo.setVersion(updateProjectDo.getVersion() + 1);
+                    final ExpenseProjectDO updateProjectDo = ExpenseProjectConverter.toUpdateDO(expenseProject);
+                    updateProjectDo.setVersion(existingDO.getVersion() + 1);
+                    final ExpenseProjectDO updated = expenseProjectRepository.save(updateProjectDo);
+                    expenseProject.setVersion(updated.getVersion());
+                    return expenseProject.getId();
+                } else {
+                    throw new BizException("项目不存在");
                 }
-                final ExpenseProjectDO updated = expenseProjectRepository.save(updateProjectDo);
-                Assert.isTrue(updated.getVersion().equals(expenseProject.getVersion() + 1), "乐观锁更新失败");
-                return expenseProject.getId();
             case UNCHANGED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
                 log.info("项目无变化，无需更新");
@@ -168,8 +165,15 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
 
         final List<ExpenseRecord> expenseRecords = project.listAllExpenseRecord();
         expenseRecords.forEach(expenseRecord -> {
+            // Ensure projectId is set
+            if (expenseRecord.getProjectId() == null) {
+                expenseRecord.setProjectId(project.getId());
+            }
             final ExpenseRecordDO insertExpenseRecordDO = ExpenseRecordDoConverter.toInsertExpenseRecordDO(expenseRecord);
             final ExpenseRecordDO savedRecord = expenseRecordRepository.save(insertExpenseRecordDO);
+
+            // Sync the generated ID back to the domain object
+            expenseRecord.setId(savedRecord.getId());
 
             saveRecordMember(project, expenseRecord, savedRecord);
         });
