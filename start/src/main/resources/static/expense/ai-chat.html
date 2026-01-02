@@ -918,6 +918,28 @@
                 font-size: 12px;
             }
 
+            .user-info {
+                padding: 6px 12px;
+                gap: 8px;
+            }
+
+            .user-avatar-small {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            .user-name {
+                font-size: 13px;
+                max-width: 60px;
+            }
+
+            .logout-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
             .chat-wrapper {
                 border-radius: var(--radius-lg);
             }
@@ -1055,6 +1077,15 @@
         @media (max-width: 480px) {
             .header-subtitle {
                 display: none;
+            }
+
+            .user-name {
+                max-width: 50px;
+            }
+
+            .user-info {
+                padding: 5px 10px;
+                gap: 6px;
             }
 
             .message-content {
@@ -1220,6 +1251,237 @@
         .empty-state-sub {
             font-size: 14px;
         }
+
+        /* Auth View (Login/Register) */
+        .auth-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .form-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .form-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .form-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--danger);
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        /* User info in header */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-avatar-small {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .logout-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Hide chat view initially */
+        .chat-view.hidden {
+            display: none;
+        }
+
+        /* Auth view hidden by default */
+        .auth-view.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -1230,7 +1492,7 @@
         <div class="shape shape-3"></div>
     </div>
 
-    <div class="container">
+    <div class="container" id="chatContainer" style="display: none;">
         <!-- Sidebar Overlay for mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
@@ -1259,6 +1521,11 @@
                 <div class="header-content">
                     <div class="header-title">AI 记账助手</div>
                     <div class="header-subtitle">我可以帮你管理账单、记录支出、计算分摊</div>
+                </div>
+                <div class="user-info" id="userInfo" style="display: none;">
+                    <div class="user-avatar-small">👤</div>
+                    <span class="user-name" id="userName"></span>
+                    <button class="logout-btn" onclick="logout()" title="退出登录">🚪</button>
                 </div>
                 <div class="status-badge">
                     <span class="status-dot"></span>
@@ -1346,11 +1613,295 @@
         <span id="toastMessage"></span>
     </div>
 
+    <!-- Auth View (Login/Register) -->
+    <div class="auth-view" id="authView">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">✨</div>
+                <h2 class="auth-title" id="authTitle">登录</h2>
+                <p class="auth-subtitle" id="authSubtitle">登录以使用 AI 记账助手</p>
+            </div>
+
+            <div class="auth-error" id="authError"></div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="loginUsername" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="form-button" id="loginBtn">登录</button>
+                <div class="auth-switch">
+                    没有账号？<span class="auth-link" onclick="showRegisterForm()">点击注册</span>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="regUsername" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="请输入密码（至少6位）" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-input" id="regConfirmPassword" placeholder="请再次输入密码" minlength="6" required>
+                </div>
+                <button type="submit" class="form-button" id="registerBtn">注册</button>
+                <div class="auth-switch">
+                    已有账号？<span class="auth-link" onclick="showLoginForm()">点击登录</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const API_BASE = '/expense/api/ai';
         const SESSIONS_API = '/expense/api/ai/sessions';
         let currentConversationId = null;
         let sessions = [];
+        let currentUsername = null;
+
+        // ===== Authentication Functions =====
+
+        // Get JWT token from cookie
+        function getJwtToken() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'jwtToken') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Parse JWT token to get username (simple base64 decode)
+        function getUsernameFromToken(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                    const payload = JSON.parse(atob(parts[1]));
+                    return payload.sub || payload.username;
+                }
+            } catch (e) {
+                console.error('Failed to parse token:', e);
+            }
+            return null;
+        }
+
+        // Check login status on page load
+        function checkLoginStatus() {
+            const token = getJwtToken();
+            if (token) {
+                const username = getUsernameFromToken(token);
+                if (username) {
+                    showChatView(username);
+                    return;
+                }
+            }
+            showAuthView();
+        }
+
+        // Show authentication view (login/register)
+        function showAuthView() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('chatContainer').style.display = 'none';
+        }
+
+        // Show chat view
+        function showChatView(username) {
+            currentUsername = username;
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('chatContainer').style.display = 'flex';
+            // 不显示用户信息和登出按钮
+            // document.getElementById('userInfo').style.display = 'flex';
+            // document.getElementById('userName').textContent = username;
+
+            // Initialize chat features
+            loadSessions();
+            restoreCurrentSession();
+            loadSuggestions();
+            setupInputHandlers();
+        }
+
+        // Switch to login form
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'flex';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('authTitle').textContent = '登录';
+            document.getElementById('authSubtitle').textContent = '登录以使用 AI 记账助手';
+            hideAuthError();
+        }
+
+        // Switch to register form
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'flex';
+            document.getElementById('authTitle').textContent = '注册';
+            document.getElementById('authSubtitle').textContent = '创建新账号以使用 AI 记账助手';
+            hideAuthError();
+        }
+
+        // Show auth error message
+        function showAuthError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        // Hide auth error message
+        function hideAuthError() {
+            const errorEl = document.getElementById('authError');
+            errorEl.classList.remove('show');
+        }
+
+        // Handle login form submission
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideAuthError();
+
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+
+            if (!username || !password) {
+                showAuthError('请输入用户名和密码');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '登录中...';
+
+            try {
+                const response = await fetch('/expense/user/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.status !== -1 && response.ok) {
+                    // Login successful
+                    showToast('登录成功', 'success');
+                    showChatView(username);
+                    // Initialize chat features
+                    loadSessions();
+                    restoreCurrentSession();
+                    loadSuggestions();
+                    setupInputHandlers();
+                } else {
+                    showAuthError(result.msg || result.message || '登录失败，请检查用户名和密码');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '登录';
+            }
+        }
+
+        // Handle register form submission
+        async function handleRegister(event) {
+            event.preventDefault();
+            hideAuthError();
+
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const btn = document.getElementById('registerBtn');
+
+            if (!username || !email || !password) {
+                showAuthError('请填写所有必填项');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAuthError('两次输入的密码不一致');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('密码长度至少为6位');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '注册中...';
+
+            try {
+                const response = await fetch('/expense/user/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status !== -1 && response.ok) {
+                    // Registration successful, auto-login
+                    showToast('注册成功', 'success');
+                    showChatView(username);
+                    // Initialize chat features
+                    loadSessions();
+                    restoreCurrentSession();
+                    loadSuggestions();
+                    setupInputHandlers();
+                } else {
+                    showAuthError(result.msg || result.message || '注册失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showAuthError('网络错误，请稍后重试');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '注册';
+            }
+        }
+
+        // Handle logout
+        async function logout() {
+            if (!confirm('确定要退出登录吗？')) {
+                return;
+            }
+
+            try {
+                // Clear the JWT cookie by setting it to expire
+                document.cookie = 'jwtToken=; path=/; max-age=0';
+
+                // Redirect to auth view
+                currentUsername = null;
+                showAuthView();
+                showLoginForm();
+
+                showToast('已退出登录', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('退出登录失败', 'error');
+            }
+        }
+
+        // ===== End Authentication Functions =====
 
         // Configure marked
         if (typeof marked !== 'undefined') {
@@ -1362,10 +1913,8 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            loadSessions();
-            restoreCurrentSession();
-            loadSuggestions();
-            setupInputHandlers();
+            // Check login status first
+            checkLoginStatus();
         });
 
         function setupInputHandlers() {
@@ -1395,7 +1944,9 @@
 
         async function loadSessions() {
             try {
-                const response = await fetch(SESSIONS_API);
+                const response = await fetch(SESSIONS_API, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.success && result.data) {
@@ -1468,7 +2019,9 @@
 
         async function loadSessionMessages(conversationId) {
             try {
-                const response = await fetch(`${SESSIONS_API}/${conversationId}/messages`);
+                const response = await fetch(`${SESSIONS_API}/${conversationId}/messages`, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.success && result.data) {
@@ -1499,7 +2052,8 @@
 
             try {
                 const response = await fetch(`${SESSIONS_API}/${conversationId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
@@ -1543,6 +2097,7 @@
                     const response = await fetch(`${SESSIONS_API}/${conversationId}/rename`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
                         body: JSON.stringify({ title: newTitle })
                     });
 
@@ -1731,11 +2286,22 @@
                 const response = await fetch(`${API_BASE}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         message: message,
                         conversationId: currentConversationId
                     })
                 });
+
+                // Handle 401 Unauthorized
+                if (response.status === 401) {
+                    hideTypingIndicator();
+                    showToast('登录已过期，请重新登录', 'error');
+                    currentUsername = null;
+                    showAuthView();
+                    showLoginForm();
+                    return;
+                }
 
                 const result = await response.json();
                 hideTypingIndicator();
@@ -1766,7 +2332,9 @@
         async function loadSuggestions() {
             try {
                 const url = `${API_BASE}/suggestions${currentConversationId ? '?conversationId=' + encodeURIComponent(currentConversationId) : ''}`;
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    credentials: 'include'
+                });
                 const result = await response.json();
 
                 if (result.success && result.data && result.data.suggestions) {

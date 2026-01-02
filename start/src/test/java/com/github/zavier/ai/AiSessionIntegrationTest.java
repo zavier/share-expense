@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mockStatic;
 class AiSessionIntegrationTest {
 
     @Autowired
-    private com.github.zavier.ai.AiSessionService aiSessionService;
+    private AiSessionService aiSessionService;
 
     @Autowired
     private AiSessionRepository sessionRepository;

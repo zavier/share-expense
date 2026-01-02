@@ -123,24 +123,17 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
                 log.info("数据库中的实体版本: {}", existingDO.getVersion());
 
                 // 修改字段值 - 确保值确实发生变化
-                if (!existingDO.getName().equals(expenseProject.getName()) ||
-                    !existingDO.getDescription().equals(expenseProject.getDescription()) ||
-                    !existingDO.getLocked().equals(expenseProject.getLocked())) {
-                    existingDO.setName(expenseProject.getName());
-                    existingDO.setDescription(expenseProject.getDescription());
-                    existingDO.setLocked(expenseProject.getLocked());
+                existingDO.setName(expenseProject.getName());
+                existingDO.setDescription(expenseProject.getDescription());
+                existingDO.setLocked(expenseProject.getLocked());
 
-                    // 使用 saveAndFlush 强制立即执行 SQL 并刷新持久化上下文
-                    final ExpenseProjectDO updated = expenseProjectRepository.saveAndFlush(existingDO);
+                // 使用 saveAndFlush 强制立即执行 SQL 并刷新持久化上下文
+                final ExpenseProjectDO updated = expenseProjectRepository.saveAndFlush(existingDO);
 
-                    log.info("更新后实体版本: {}", updated.getVersion());
+                log.info("更新后实体版本: {}", updated.getVersion());
 
-                    // Sync version back to expenseProject
-                    expenseProject.setVersion(updated.getVersion());
-                } else {
-                    log.info("字段值未变化，跳过更新");
-                    expenseProject.setVersion(existingDO.getVersion());
-                }
+                // Sync version back to expenseProject
+                expenseProject.setVersion(updated.getVersion());
                 return expenseProject.getId();
             case UNCHANGED:
                 Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");

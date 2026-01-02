@@ -1,6 +1,5 @@
 package com.github.zavier.ai.validator;
 
-import com.github.zavier.ai.IntentValidationService;
 import com.github.zavier.ai.RateLimitService;
 import com.github.zavier.ai.dto.AiChatRequest;
 import com.github.zavier.ai.dto.AiChatResponse;
@@ -11,6 +10,10 @@ import org.springframework.stereotype.Component;
 /**
  * 聊天请求验证器
  * 使用责任链模式统一处理各种验证逻辑
+ *
+ * 优化说明：
+ * - 速率限制防止 API 滥用
+ * - 依赖系统提示词进行安全防护和职责边界控制
  */
 @Slf4j
 @Component
@@ -18,9 +21,6 @@ public class ChatRequestValidator {
 
     @Resource
     private RateLimitService rateLimitService;
-
-    @Resource
-    private IntentValidationService intentValidationService;
 
     /**
      * 验证聊天请求
@@ -31,18 +31,13 @@ public class ChatRequestValidator {
      * @return 验证结果，如果验证失败则包含拒绝响应
      */
     public ValidationResult validate(AiChatRequest request, String conversationId, Integer userId) {
-        // 1. 速率限制验证
+        // 速率限制验证
         ValidationResult rateLimitResult = checkRateLimit(conversationId, userId);
         if (rateLimitResult.isRejected()) {
             return rateLimitResult;
         }
 
-        // 2. 意图验证
-        ValidationResult intentResult = checkIntent(request, conversationId);
-        if (intentResult.isRejected()) {
-            return intentResult;
-        }
-
+        log.debug("[请求验证] 所有验证通过, conversationId={}, userId={}", conversationId, userId);
         return ValidationResult.approved();
     }
 
@@ -60,22 +55,6 @@ public class ChatRequestValidator {
         }
 
         log.debug("[请求验证] 速率限制检查通过, userId={}", userId);
-        return ValidationResult.approved();
-    }
-
-    /**
-     * 检查用户意图
-     */
-    private ValidationResult checkIntent(AiChatRequest request, String conversationId) {
-        if (!intentValidationService.isExpenseRelated(request.message())) {
-            log.info("[请求验证] 意图验证失败, conversationId={}, message={}",
-                conversationId, request.message());
-
-            String rejectionMessage = intentValidationService.getRejectionMessage();
-            return ValidationResult.rejected(rejectionMessage, true); // 需要保存拒绝消息
-        }
-
-        log.debug("[请求验证] 意图验证通过");
         return ValidationResult.approved();
     }
 
@@ -102,7 +81,7 @@ public class ChatRequestValidator {
         /**
          * 是否被拒绝（为了可读性）
          */
-        public boolean rejected() {
+        public boolean isRejected() {
             return isRejected;
         }
 

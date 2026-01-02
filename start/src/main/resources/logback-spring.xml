@@ -33,7 +33,7 @@
     <logger name="com.github.zavier" level="DEBUG"/>
 <!--    <logger name="com.alibaba.cola" level="DEBUG"/>-->
 
-    <logger name="org.springframework.ai" level="DEBUG"/>
+    <logger name="org.springframework.ai" level="INFO"/>
 
     <!--rootLogger是默认的logger-->
     <root level="INFO">
@@ -42,11 +42,4 @@
         <appender-ref ref="APPLICATION" />
     </root>
 
-    <!--数据库日志-->
-    <!--由于这个logger自动继承了root的appender，root中已经有stdout的appender了，自己这边又引入了stdout的appender-->
-    <!--如果没有设置 additivity="false" ,就会导致一条日志在控制台输出两次的情况-->
-    <!--additivity表示要不要使用rootLogger配置的appender进行输出-->
-    <logger name="com.apache.ibatis" level="TRACE" additivity="false">
-        <appender-ref ref="CONSOLE"/>
-    </logger>
 </configuration>
