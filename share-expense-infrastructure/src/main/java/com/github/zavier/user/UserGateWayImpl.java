@@ -19,7 +19,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,8 +60,6 @@ public class UserGateWayImpl implements UserGateway {
         userDO.setEmail(user.getEmail());
         userDO.setPasswordHash(user.getPasswordHash());
         userDO.setOpenId(user.getOpenId());
-        userDO.setCreatedAt(new Date());
-        userDO.setUpdatedAt(new Date());
         final UserDO saved = userRepository.save(userDO);
         user.setUserId(saved.getId());
         return user;

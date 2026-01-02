@@ -179,10 +179,14 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
             return;
         }
 
-        // 删除关联的费用
-        expenseRecordRepository.deleteByProjectId(project.getId());
-        // 删除关联的费用消费人员
-        expenseRecordConsumerRepository.deleteByProjectId(project.getId());
+        // 删除关联的费用消费人员（子表）- 使用批量删除立即执行
+        expenseRecordConsumerRepository.deleteAllInBatch(
+                expenseRecordConsumerRepository.findByProjectId(project.getId())
+        );
+        // 删除关联的费用（父表）- 使用批量删除立即执行
+        expenseRecordRepository.deleteAllInBatch(
+                expenseRecordRepository.findByProjectIdOrderByPayDateAsc(project.getId())
+        );
 
         final List<ExpenseRecord> expenseRecords = project.listAllExpenseRecord();
         expenseRecords.forEach(expenseRecord -> {
