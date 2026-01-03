@@ -29,7 +29,7 @@ public class SuggestionGenerator {
 
     public SuggestionGenerator(ChatModelProvider chatModelProvider,
                                AiPromptProvider promptProvider) {
-        this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectChatModel())
+        this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectFastChatModel())
                 .defaultSystem(promptProvider.getSuggestionPrompt())
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
@@ -76,7 +76,7 @@ public class SuggestionGenerator {
      * 构建最近的消息列表（最多5条）
      */
     private List<Message> buildRecentMessages(List<ConversationEntity> history) {
-        int start = Math.max(0, history.size() - 5);
+        int start = Math.max(0, history.size() - 30);
         List<ConversationEntity> recentHistory = history.subList(start, history.size());
         List<Message> messages = new ArrayList<>();
         for (ConversationEntity entity : recentHistory) {
@@ -92,7 +92,7 @@ public class SuggestionGenerator {
             if (messages.getLast() instanceof UserMessage) {
                 messages.removeLast();
             }
-            messages.add(new UserMessage("你觉得我后续可能会和你说什么？给出最可能的答复及原因"));
+            messages.add(new UserMessage("你觉得我后续可能会和你说什么？或者如何回复你的问题？给出最可能的答复及原因"));
         }
 
         return messages;

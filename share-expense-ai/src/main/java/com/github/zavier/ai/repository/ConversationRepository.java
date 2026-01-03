@@ -17,8 +17,6 @@ public interface ConversationRepository extends JpaRepository<ConversationEntity
      */
     List<ConversationEntity> findByConversationIdOrderByCreatedAtDesc(String conversationId, Pageable pageable);
 
-    void deleteByConversationIdAndCreatedAtBefore(String conversationId, java.time.LocalDateTime cutoff);
-
     /**
      * 统计指定会话的消息数量
      */
