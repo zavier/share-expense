@@ -60,11 +60,11 @@ public class AiMonitoringService {
      */
     public List<AiMonitoringLogDto> getCallHistory(String conversationId, CallType callType, Integer userId, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
         Page<AiMonitoringLogEntity> page;
-        if (conversationId != null) {
+        if (conversationId != null && !conversationId.isEmpty()) {
             page = monitoringRepository.findByConversationIdAndUserIdOrderByStartTimeDesc(conversationId, userId, pageable);
         } else {
-            // 使用统计查询替代自定义查询方法
-            page = monitoringRepository.findAll(pageable);
+            // 使用用户隔离查询确保安全性
+            page = monitoringRepository.findByUserIdOrderByStartTimeDesc(userId, pageable);
         }
 
         return page.getContent().stream()

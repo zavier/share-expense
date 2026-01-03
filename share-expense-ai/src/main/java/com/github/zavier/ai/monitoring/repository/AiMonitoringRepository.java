@@ -23,6 +23,11 @@ public interface AiMonitoringRepository extends JpaRepository<AiMonitoringLogEnt
     );
 
     /**
+     * 查询指定用户的监控记录（分页）- 用户隔离
+     */
+    Page<AiMonitoringLogEntity> findByUserIdOrderByStartTimeDesc(Integer userId, Pageable pageable);
+
+    /**
      * 统计查询 - 基础统计
      */
     @Query("""
