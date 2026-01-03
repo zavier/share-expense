@@ -58,13 +58,13 @@ public class AiMonitoringService {
     /**
      * 获取调用历史记录
      */
-    public List<AiMonitoringLogDto> getCallHistory(String conversationId, CallType callType, Integer userId, LocalDateTime startTime, LocalDateTime endTime, PageRequest pageRequest) {
+    public List<AiMonitoringLogDto> getCallHistory(String conversationId, CallType callType, Integer userId, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
         Page<AiMonitoringLogEntity> page;
         if (conversationId != null) {
-            page = monitoringRepository.findByConversationIdAndUserIdOrderByStartTimeDesc(conversationId, userId, pageRequest);
+            page = monitoringRepository.findByConversationIdAndUserIdOrderByStartTimeDesc(conversationId, userId, pageable);
         } else {
             // 使用统计查询替代自定义查询方法
-            page = monitoringRepository.findAll(pageRequest);
+            page = monitoringRepository.findAll(pageable);
         }
 
         return page.getContent().stream()
