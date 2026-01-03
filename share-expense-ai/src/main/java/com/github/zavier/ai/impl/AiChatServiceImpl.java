@@ -8,6 +8,9 @@ import com.github.zavier.ai.dto.SuggestionsResponse;
 import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.function.*;
+import com.github.zavier.ai.monitoring.context.AiCallContext;
+import com.github.zavier.ai.monitoring.context.AiCallContext.CallType;
+import com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor;
 import com.github.zavier.ai.provider.AiPromptProvider;
 import com.github.zavier.ai.service.ChatModelProvider;
 import com.github.zavier.ai.service.MessagePersister;
@@ -80,6 +83,9 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Resource
     private CachedSuggestionService cachedSuggestionService;
+
+    @Resource
+    private AiMonitoringAdvisor aiMonitoringAdvisor;
 
     @PostConstruct
     public void init() {
@@ -214,10 +220,13 @@ public class AiChatServiceImpl implements AiChatService {
 
         log.debug("[AI聊天] 调用AI, conversationId={}, 历史消息数={}", conversationId, messages.size());
 
-        String response = chatClient.prompt()
-            .messages(messages)
-            .call()
-            .content();
+        // 使用监控advisor包装调用（advisor会自动设置上下文）
+        String response = aiMonitoringAdvisor.monitorCall(CallType.CHAT, () -> {
+            return chatClient.prompt()
+                .messages(messages)
+                .call()
+                .content();
+        });
 
         log.debug("[AI聊天] AI响应完成, conversationId={}, reply={}", conversationId, response);
 

@@ -25,14 +25,14 @@ public class AiMonitoringAdvisor {
     /**
      * 拦截ChatClient调用
      */
-    public Object monitorCall(CallType callType, Runnable execution) {
+    public <T> T monitorCall(CallType callType, java.util.function.Supplier<T> execution) {
         AiCallContext.setContext(null, callType); // 会在具体业务方法中设置正确的conversationId
         CallInfo callInfo = AiCallContext.get();
         long startTime = System.currentTimeMillis();
 
         try {
             // 执行业务逻辑
-            execution.run();
+            T result = execution.get();
 
             // 记录成功调用
             long duration = System.currentTimeMillis() - startTime;
@@ -44,7 +44,7 @@ public class AiMonitoringAdvisor {
             );
 
             log.debug("[AI监控] 调用成功, duration={}ms, callInfo={}", duration, callInfo);
-            return null;
+            return result;
 
         } catch (Exception e) {
             // 记录失败调用
