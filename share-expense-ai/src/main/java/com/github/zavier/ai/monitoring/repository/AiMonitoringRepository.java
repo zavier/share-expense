@@ -1,5 +1,6 @@
 package com.github.zavier.ai.monitoring.repository;
 
+import com.github.zavier.ai.monitoring.dto.PerformanceStatisticsDto;
 import com.github.zavier.ai.monitoring.entity.AiMonitoringLogEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +26,14 @@ public interface AiMonitoringRepository extends JpaRepository<AiMonitoringLogEnt
      * 统计查询 - 基础统计
      */
     @Query("""
-        SELECT
+        SELECT new com.github.zavier.ai.monitoring.dto.PerformanceStatisticsDto(
             COUNT(e),
             AVG(e.latencyMs),
             MIN(e.latencyMs),
             MAX(e.latencyMs),
             SUM(e.totalTokens),
             SUM(CASE WHEN e.status = 'SUCCESS' THEN 1 ELSE 0 END)
+        )
         FROM AiMonitoringLogEntity e
         WHERE e.userId = :userId
         AND e.startTime BETWEEN :start AND :end
@@ -39,7 +41,7 @@ public interface AiMonitoringRepository extends JpaRepository<AiMonitoringLogEnt
         AND (:status IS NULL OR e.status = :status)
         AND (:callType IS NULL OR e.callType = :callType)
     """)
-    Object[] getBasicStatistics(
+    PerformanceStatisticsDto getBasicStatistics(
             @Param("userId") Integer userId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
