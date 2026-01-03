@@ -77,7 +77,7 @@ public class AiMonitoringService {
      */
     public PerformanceStatisticsDto getStatistics(Integer userId, LocalDateTime startTime, LocalDateTime endTime, CallType callType) {
         // 使用现有的统计查询方法
-        PerformanceStatisticsDto basicStats = monitoringRepository.getBasicStatistics(
+        Object[] basicStats = monitoringRepository.getBasicStatistics(
                 userId, startTime, endTime, modelName,
                 callType != null ? callType.name() : null,
                 "SUCCESS"
@@ -94,20 +94,59 @@ public class AiMonitoringService {
         double p90 = percentileData.isEmpty() || percentileData.get(0).length < 2 ? 0 : (double) percentileData.get(0)[1];
         double p99 = percentileData.isEmpty() || percentileData.get(0).length < 3 ? 0 : (double) percentileData.get(0)[2];
 
+        // 使用helper方法构造DTO
+        PerformanceStatisticsDto dto = buildStatisticsDto(basicStats, p50, p90, p99);
+
+        return dto;
+    }
+
+    /**
+     * 从Object[]构造PerformanceStatisticsDto
+     * 数组顺序: [totalCalls, avgLatency, minLatency, maxLatency, totalTokens, successCalls]
+     */
+    private PerformanceStatisticsDto buildStatisticsDto(Object[] stats, double p50, double p90, double p99) {
+        if (stats == null) {
+            return PerformanceStatisticsDto.builder()
+                    .totalCalls(0L)
+                    .successCalls(0L)
+                    .failureCalls(0L)
+                    .successRate(0.0)
+                    .avgLatencyMs(0.0)
+                    .maxLatencyMs(0L)
+                    .p90LatencyMs(p90)
+                    .p99LatencyMs(p99)
+                    .p50LatencyMs(p50)
+                    .minLatencyMs(0L)
+                    .totalPromptTokens(0L)
+                    .totalCompletionTokens(0L)
+                    .totalTokens(0L)
+                    .errorBreakdown(List.of())
+                    .build();
+        }
+
+        Long totalCalls = stats[0] != null ? ((Number) stats[0]).longValue() : 0L;
+        Double avgLatency = stats[1] != null ? ((Number) stats[1]).doubleValue() : 0.0;
+        Long minLatency = stats[2] != null ? ((Number) stats[2]).longValue() : 0L;
+        Long maxLatency = stats[3] != null ? ((Number) stats[3]).longValue() : 0L;
+        Long totalTokens = stats[4] != null ? ((Number) stats[4]).longValue() : 0L;
+        Long successCalls = stats[5] != null ? ((Number) stats[5]).longValue() : 0L;
+        Long failureCalls = totalCalls - successCalls;
+        Double successRate = totalCalls > 0 ? (successCalls * 100.0 / totalCalls) : 0.0;
+
         return PerformanceStatisticsDto.builder()
-                .totalCalls(basicStats != null ? basicStats.getTotalCalls() : 0L)
-                .successCalls(basicStats != null ? basicStats.getSuccessCalls() : 0L)
-                .failureCalls(basicStats != null ? basicStats.getFailureCalls() : 0L)
-                .successRate(basicStats != null ? basicStats.getSuccessRate() : 0.0)
-                .avgLatencyMs(basicStats != null ? basicStats.getAvgLatencyMs() : 0.0)
-                .maxLatencyMs(basicStats != null ? basicStats.getMaxLatencyMs() : 0L)
+                .totalCalls(totalCalls)
+                .successCalls(successCalls)
+                .failureCalls(failureCalls)
+                .successRate(successRate)
+                .avgLatencyMs(avgLatency)
+                .maxLatencyMs(maxLatency)
                 .p90LatencyMs(p90)
                 .p99LatencyMs(p99)
                 .p50LatencyMs(p50)
-                .minLatencyMs(basicStats != null ? basicStats.getMinLatencyMs() : 0L)
-                .totalPromptTokens(basicStats != null ? basicStats.getTotalPromptTokens() : 0L)
-                .totalCompletionTokens(basicStats != null ? basicStats.getTotalCompletionTokens() : 0L)
-                .totalTokens(basicStats != null ? basicStats.getTotalTokens() : 0L)
+                .minLatencyMs(minLatency)
+                .totalPromptTokens(0L) // 暂未统计
+                .totalCompletionTokens(0L) // 暂未统计
+                .totalTokens(totalTokens)
                 .errorBreakdown(List.of())
                 .build();
     }
