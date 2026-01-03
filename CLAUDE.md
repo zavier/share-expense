@@ -31,7 +31,15 @@ share-expense-ai/src/main/java/com/github/zavier/ai/
 ├── function/           # AI tool functions (@Tool annotation)
 ├── service/           # ChatModelProvider, CachedSuggestionService
 ├── concurrent/        # Lock management (WeakHashMapLockManager)
-└── resolver/          # ProjectIdentifierResolver
+├── resolver/          # ProjectIdentifierResolver
+└── monitoring/        # AI call monitoring system
+    ├── controller/     # REST controllers for monitoring APIs
+    ├── service/       # Monitoring business logic
+    ├── repository/    # JPA repositories
+    ├── entity/        # JPA entities
+    ├── dto/           # Data transfer objects
+    └── context/       # AI call context and advisor
+    └── advisor/       # AOP advisors for automatic monitoring
 
 share-expense-infrastructure/src/main/java/com/github/zavier/
 ├── expense/           # Expense JPA entities and repositories
@@ -87,6 +95,13 @@ export MYSQL_PWD=mysql-password
 - Session table: Active cache (read/write/delete)
 - Conversation table: Audit snapshot (append-only)
 - `WeakHashMapLockManager` for concurrent control
+
+**AI Monitoring:**
+- Automatic recording of all AI calls with timing, status, and error details
+- Performance statistics with P50/P90/P99 latency percentiles
+- Error analysis and trend analysis
+- REST APIs for querying monitoring data
+- Integration via AOP advisors (`@Around` advice on AI service methods)
 
 ## Important Notes
 

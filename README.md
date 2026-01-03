@@ -61,6 +61,40 @@
 - 支持**项目名称**自动识别（无需记住ID）
 - **灵活的响应格式**：精简模式 vs 详细模式
 
+### 📊 AI监控 ⭐
+
+新增AI调用监控系统，提供完整的性能监控和分析能力：
+
+#### 监控功能
+- 📈 **性能统计**：
+  - 平均延迟、最大/最小延迟
+  - P50/P90/P99 延迟百分位数
+  - 成功率和失败率统计
+  - Token使用量统计
+
+- 📋 **调用历史**：
+  - 按会话查询AI调用记录
+  - 支持按调用类型、状态筛选
+  - 详细的错误信息记录
+
+- 🔍 **错误分析**：
+  - 按错误类型分组统计
+  - 错误趋势分析
+  - 错误示例消息
+
+- 🎯 **API接口**：
+  - `GET /api/ai/monitoring/session/{conversationId}/history` - 调用历史
+  - `GET /api/ai/monitoring/overview` - 性能概览
+  - `GET /api/ai/monitoring/statistics` - 详细统计
+  - `GET /api/ai/monitoring/errors/analysis` - 错误分析
+  - `GET /api/ai/monitoring/trends` - 趋势数据
+
+#### 技术实现
+- 基于 **Spring Data JPA** 数据持久化
+- **MySQL 8.0+** 支持的百分位数查询
+- **AOP切面** 自动记录AI调用
+- **缓存优化** 提升查询性能
+
 ### 📱 多端支持
 
 | 端 | 技术栈 | 访问方式 |
