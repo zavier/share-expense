@@ -2,6 +2,9 @@ package com.github.zavier.ai.service;
 
 import com.github.zavier.ai.domain.MessageRole;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.monitoring.context.AiCallContext;
+import com.github.zavier.ai.monitoring.context.AiCallContext.CallType;
+import com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor;
 import com.github.zavier.ai.provider.AiPromptProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,14 +28,17 @@ import java.util.List;
 public class SuggestionGenerator {
 
     private final ChatClient suggestionChatClient;
+    private final AiMonitoringAdvisor aiMonitoringAdvisor;
 
 
     public SuggestionGenerator(ChatModelProvider chatModelProvider,
-                               AiPromptProvider promptProvider) {
+                               AiPromptProvider promptProvider,
+                               AiMonitoringAdvisor aiMonitoringAdvisor) {
         this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectFastChatModel())
                 .defaultSystem(promptProvider.getSuggestionPrompt())
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
+        this.aiMonitoringAdvisor = aiMonitoringAdvisor;
     }
 
     /**
@@ -45,31 +51,34 @@ public class SuggestionGenerator {
     public List<SuggestionItem> generate(List<ConversationEntity> history, String conversationId) {
         boolean isNewUser = history.isEmpty();
 
-        // 构建上下文
-        List<Message> recentMessages = buildRecentMessages(history);
+        // 使用监控advisor包装调用
+        return aiMonitoringAdvisor.monitorCall(CallType.SUGGESTION, () -> {
+            // 构建上下文
+            List<Message> recentMessages = buildRecentMessages(history);
 
-        try {
-            // 调用 AI 生成建议
-            final List<SuggestionItem> suggestionList = suggestionChatClient.prompt()
-                .messages(recentMessages)
-                .call()
-                .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {});
+            try {
+                // 调用 AI 生成建议
+                final List<SuggestionItem> suggestionList = suggestionChatClient.prompt()
+                    .messages(recentMessages)
+                    .call()
+                    .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {});
 
-            log.info("[建议生成] AI响应: conversationId={}, suggestionList={}", conversationId, suggestionList);
+                log.info("[建议生成] AI响应: conversationId={}, suggestionList={}", conversationId, suggestionList);
 
-            // 如果解析失败或没有建议，返回默认建议
-            if (CollectionUtils.isEmpty(suggestionList)) {
-                log.warn("[建议生成] AI响应为空，使用默认建议");
+                // 如果解析失败或没有建议，返回默认建议
+                if (CollectionUtils.isEmpty(suggestionList)) {
+                    log.warn("[建议生成] AI响应为空，使用默认建议");
+                    return getDefaultSuggestions(isNewUser);
+                }
+
+                // 最多返回 5 个建议
+                return suggestionList.stream().limit(5).toList();
+
+            } catch (Exception e) {
+                log.error("[建议生成] AI生成失败，使用默认建议", e);
                 return getDefaultSuggestions(isNewUser);
             }
-
-            // 最多返回 5 个建议
-            return suggestionList.stream().limit(5).toList();
-
-        } catch (Exception e) {
-            log.error("[建议生成] AI生成失败，使用默认建议", e);
-            return getDefaultSuggestions(isNewUser);
-        }
+        });
     }
 
     /**
