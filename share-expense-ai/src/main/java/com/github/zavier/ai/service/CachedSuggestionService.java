@@ -1,5 +1,6 @@
 package com.github.zavier.ai.service;
 
+import com.alibaba.ttl.threadpool.TtlExecutors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,16 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * 缓存建议服务
@@ -63,6 +59,8 @@ public class CachedSuggestionService {
     // 使用 ConcurrentHashMap 存储每个会话的生成任务
     private final ConcurrentHashMap<String, CompletableFuture<List<SuggestionGenerator.SuggestionItem>>> generatingTasks
         = new ConcurrentHashMap<>();
+
+    private Executor executor = TtlExecutors.getTtlExecutor(new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(20)));
 
     public CachedSuggestionService(ConversationRepository conversationRepository,
                                    AiSessionRepository sessionRepository,
@@ -161,7 +159,7 @@ public class CachedSuggestionService {
                                  conversationId, e);
                         return getDefaultSuggestions(isNewConversation(conversationId));
                     }
-                });
+                }, executor);
 
             // 保存任务引用，供其他请求等待
             generatingTasks.put(conversationId, task);

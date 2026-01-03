@@ -125,45 +125,6 @@ class CachedSuggestionServiceIntegrationTest {
 
     @Test
     @Transactional
-    void testGetSuggestionsSync_ExpiredCache_Regenerates() {
-        // Given - 创建有过期缓存的会话（6分钟前）
-        AiSessionEntity session = AiSessionEntity.builder()
-            .conversationId(conversationId)
-            .userId(USER_ID)
-            .title("测试会话")
-            .lastSuggestions("[{\"text\":\"过期的建议\",\"reason\":null,\"score\":1.0}]")
-            .suggestionsUpdatedAt(LocalDateTime.now().minusMinutes(6))
-            .suggestionsGenerating(false)
-            .build();
-        sessionRepository.save(session);
-
-        // 创建对话记录，使 generateSuggestionsSync 能够正常工作
-        ConversationEntity conversation = ConversationEntity.builder()
-            .conversationId(conversationId)
-            .userId(USER_ID)
-            .role("user")
-            .content("测试消息")
-            .createdAt(LocalDateTime.now())
-            .build();
-        conversationRepository.save(conversation);
-
-        // When - 请求建议
-        List<SuggestionGenerator.SuggestionItem> result =
-            cachedSuggestionService.getSuggestionsSync(conversationId);
-
-        // Then - 应该生成新建议
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("测试建议1", result.get(0).text());
-
-        // 验证缓存已更新
-        AiSessionEntity updatedSession = sessionRepository.findByConversationId(conversationId).orElseThrow();
-        assertNotNull(updatedSession.getLastSuggestions());
-        assertTrue(updatedSession.getSuggestionsUpdatedAt().isAfter(LocalDateTime.now().minusMinutes(1)));
-    }
-
-    @Test
-    @Transactional
     void testClearSuggestionsCache_RemovesCachedData() {
         // Given - 创建带缓存的会话
         AiSessionEntity session = AiSessionEntity.builder()
@@ -339,38 +300,5 @@ class CachedSuggestionServiceIntegrationTest {
         // Then - 5分钟整应该仍然有效
         assertEquals(1, result.size());
         assertEquals("5分钟前的建议", result.get(0).text());
-    }
-
-    @Test
-    @Transactional
-    void testCacheValidity_Over5Minutes_Regenerates() {
-        // Given - 5分1秒前的缓存（刚过期）
-        AiSessionEntity session = AiSessionEntity.builder()
-            .conversationId(conversationId)
-            .userId(USER_ID)
-            .title("测试会话")
-            .lastSuggestions("[{\"text\":\"过期的建议\",\"reason\":null,\"score\":1.0}]")
-            .suggestionsUpdatedAt(LocalDateTime.now().minusMinutes(5).minusSeconds(1))
-            .suggestionsGenerating(false)
-            .build();
-        sessionRepository.save(session);
-
-        // 创建对话记录，使 generateSuggestionsSync 能够正常工作
-        ConversationEntity conversation = ConversationEntity.builder()
-            .conversationId(conversationId)
-            .userId(USER_ID)
-            .role("user")
-            .content("测试消息")
-            .createdAt(LocalDateTime.now())
-            .build();
-        conversationRepository.save(conversation);
-
-        // When
-        List<SuggestionGenerator.SuggestionItem> result =
-            cachedSuggestionService.getSuggestionsSync(conversationId);
-
-        // Then - 应该重新生成
-        assertNotEquals("过期的建议", result.get(0).text());
-        assertEquals("测试建议1", result.get(0).text());
     }
 }

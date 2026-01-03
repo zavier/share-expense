@@ -1,10 +1,11 @@
 package com.github.zavier.web.filter;
 
+import com.alibaba.ttl.TransmittableThreadLocal;
 import com.github.zavier.domain.user.User;
 
 public class UserHolder {
 
-    private static ThreadLocal<User> userThreadLocal = new ThreadLocal<>();
+    private static TransmittableThreadLocal<User> userThreadLocal = new TransmittableThreadLocal<>();
 
     public static void setUser(User user) {
         userThreadLocal.set(user);

@@ -1,12 +1,28 @@
 package com.github.zavier.ai.monitoring.advisor;
 
-import com.github.zavier.ai.monitoring.context.AiCallContext;
-import com.github.zavier.ai.monitoring.context.AiCallContext.CallInfo;
-import com.github.zavier.ai.monitoring.context.AiCallContext.CallType;
+import com.github.zavier.ai.monitoring.entity.AiMonitoringLogEntity;
 import com.github.zavier.ai.monitoring.service.AiMonitoringService;
 import com.github.zavier.web.filter.UserHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
+import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.StreamAdvisor;
+import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+
+import javax.annotation.Nullable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Optional;
 
 /**
  * AI调用监控拦截器
@@ -14,7 +30,9 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class AiMonitoringAdvisor {
+public class AiMonitoringAdvisor implements CallAdvisor, StreamAdvisor {
+
+    public static final String CONVERSATION_ID_KEY = "conversationId";
 
     private final AiMonitoringService monitoringService;
 
@@ -22,47 +40,114 @@ public class AiMonitoringAdvisor {
         this.monitoringService = monitoringService;
     }
 
-    /**
-     * 拦截ChatClient调用
-     */
-    public <T> T monitorCall(CallType callType, java.util.function.Supplier<T> execution) {
-        AiCallContext.setContext(null, callType); // 会在具体业务方法中设置正确的conversationId
-        CallInfo callInfo = AiCallContext.get();
+    @Override
+    public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
+        log.info("[AI监控] adviseCall");
+        final Object conversationId = chatClientRequest.context().get(CONVERSATION_ID_KEY);
         long startTime = System.currentTimeMillis();
-
+        Optional<ChatResponseMetadata> metadataOptional = Optional.empty();
+        Optional<Usage> usageOptional = Optional.empty();
+        @Nullable ChatClientResponse chatClientResponse = null;
         try {
-            // 执行业务逻辑
-            T result = execution.get();
+            // execute the call
+            chatClientResponse = callAdvisorChain.nextCall(chatClientRequest);
+
+            metadataOptional = Optional.ofNullable(chatClientResponse.chatResponse())
+                    .map(ChatResponse::getMetadata);
+            usageOptional = metadataOptional.map(ChatResponseMetadata::getUsage);
 
             // 记录成功调用
-            long duration = System.currentTimeMillis() - startTime;
-            monitoringService.recordSuccess(
-                callInfo != null ? callInfo.conversationId() : null,
-                callInfo != null ? callInfo.callType() : null,
-                callInfo != null ? callInfo.userId() : UserHolder.getUser().getUserId(),
-                duration
-            );
+            final long endTime = System.currentTimeMillis();
 
-            log.debug("[AI监控] 调用成功, duration={}ms, callInfo={}", duration, callInfo);
-            return result;
+            final AiMonitoringLogEntity monitoringLog = AiMonitoringLogEntity.builder()
+                    .userId(UserHolder.getUser().getUserId())
+                    .conversationId(conversationId == null ? "-1" : conversationId.toString())
+                    .modelName(metadataOptional.map(ChatResponseMetadata::getModel).orElse(""))
+                    .startTime(convertMillisecondToDateTimeUTC(startTime))
+                    .endTime(convertMillisecondToDateTimeUTC(endTime))
+                    .latencyMs(endTime - startTime)
+                    .promptTokens(usageOptional.map(Usage::getPromptTokens).orElse(0))
+                    .completionTokens(usageOptional.map(Usage::getCompletionTokens).orElse(0))
+                    .totalTokens(usageOptional.map(Usage::getTotalTokens).orElse(0))
+                    .status("SUCCESS")
+                    .userMessagePreview(max500(chatClientRequest.prompt().getContents()))
+                    .assistantMessagePreview(getResponseMax500Len(chatClientResponse))
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            monitoringService.record(monitoringLog);
+
+            return chatClientResponse;
 
         } catch (Exception e) {
-            // 记录失败调用
-            long duration = System.currentTimeMillis() - startTime;
-            monitoringService.recordFailure(
-                callInfo != null ? callInfo.conversationId() : null,
-                callInfo != null ? callInfo.callType() : null,
-                callInfo != null ? callInfo.userId() : UserHolder.getUser().getUserId(),
-                duration,
-                e.getClass().getSimpleName(),
-                e.getMessage()
-            );
+            log.error("[AI监控] 调用失败", e);
+            final long endTime = System.currentTimeMillis();
+            final AiMonitoringLogEntity monitoringLog = AiMonitoringLogEntity.builder()
+                    .userId(UserHolder.getUser().getUserId())
+                    .conversationId(conversationId == null ? "-1" : conversationId.toString())
+                    .modelName(metadataOptional.map(ChatResponseMetadata::getModel).orElse(""))
+                    .startTime(convertMillisecondToDateTimeUTC(startTime))
+                    .endTime(convertMillisecondToDateTimeUTC(endTime))
+                    .latencyMs(endTime - startTime)
+                    .promptTokens(usageOptional.map(Usage::getPromptTokens).orElse(0))
+                    .completionTokens(usageOptional.map(Usage::getCompletionTokens).orElse(0))
+                    .totalTokens(usageOptional.map(Usage::getTotalTokens).orElse(0))
+                    .status("FAILED")
+                    .errorMessage(e.getMessage())
+                    .userMessagePreview(max500(chatClientRequest.prompt().getContents()))
+                    .assistantMessagePreview(getResponseMax500Len(chatClientResponse))
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            monitoringService.record(monitoringLog);
 
-            log.error("[AI监控] 调用失败, duration={}ms, callInfo={}", duration, callInfo, e);
-            throw e; // 重新抛出异常
-        } finally {
-            // 清理ThreadLocal上下文
-            AiCallContext.clear();
+            throw e;
         }
     }
+
+    @Override
+    public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain streamAdvisorChain) {
+        log.info("[AI监控] adviseStream");
+        return streamAdvisorChain.nextStream(chatClientRequest);
+    }
+
+    private static String getResponseMax500Len(ChatClientResponse chatClientResponse) {
+        if (chatClientResponse == null) {
+            return "";
+        }
+
+        final ChatResponse chatResponse = chatClientResponse.chatResponse();
+        if (chatResponse == null) {
+            return "";
+        }
+        final Generation result = chatResponse.getResult();
+        if (result == null || result.getOutput() == null) {
+            return "";
+        }
+
+        return max500(result.getOutput().toString());
+    }
+
+    private static String max500(String input) {
+        if (StringUtils.isBlank(input)) {
+            return "";
+        }
+        return input.length() > 500 ? input.substring(0, 500) : input;
+    }
+
+    private static LocalDateTime convertMillisecondToDateTimeUTC(long millisecond) {
+        // 将毫秒时间戳转换为 Instant
+        Instant instant = Instant.ofEpochMilli(millisecond);
+        // 使用 UTC 时区偏移量转换为 LocalDateTime
+        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+
 }

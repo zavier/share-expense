@@ -14,14 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ai_monitoring_log", indexes = {
-    @Index(name = "idx_conversation_id", columnList = "conversation_id"),
-    @Index(name = "idx_user_id", columnList = "user_id"),
-    @Index(name = "idx_model_name", columnList = "model_name"),
-    @Index(name = "idx_start_time", columnList = "start_time"),
-    @Index(name = "idx_status", columnList = "status"),
-    @Index(name = "idx_user_time", columnList = "user_id,start_time")
-})
+@Table(name = "ai_monitoring_log")
 public class AiMonitoringLogEntity {
 
     @Id
@@ -36,9 +29,6 @@ public class AiMonitoringLogEntity {
 
     @Column(name = "model_name", nullable = false, length = 50)
     private String modelName;
-
-    @Column(name = "call_type", nullable = false, length = 20)
-    private String callType;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -60,9 +50,6 @@ public class AiMonitoringLogEntity {
 
     @Column(name = "status", nullable = false, length = 20)
     private String status;
-
-    @Column(name = "error_type", length = 100)
-    private String errorType;
 
     @Column(name = "error_message")
     private String errorMessage;

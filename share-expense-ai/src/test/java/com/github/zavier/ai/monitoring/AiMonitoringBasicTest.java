@@ -1,6 +1,5 @@
 package com.github.zavier.ai.monitoring;
 
-import com.github.zavier.ai.monitoring.context.AiCallContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,18 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class AiMonitoringBasicTest {
 
-    /**
-     * 测试AI调用上下文
-     */
-    @Test
-    void testAiCallContext() {
-        // 测试CallType枚举
-        assertNotNull(AiCallContext.CallType.CHAT);
-        assertNotNull(AiCallContext.CallType.SUGGESTION);
-
-        assertEquals("CHAT", AiCallContext.CallType.CHAT.name());
-        assertEquals("SUGGESTION", AiCallContext.CallType.SUGGESTION.name());
-    }
 
     /**
      * 测试监控功能的基础验证

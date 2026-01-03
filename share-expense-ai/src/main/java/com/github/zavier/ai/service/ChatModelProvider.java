@@ -32,7 +32,7 @@ public class ChatModelProvider {
 
     public void initDeepSeekChatModel() {
         var apiKey = OpenAiApi.builder()
-                .apiKey(System.getenv("DEEPSEEK_API_KEY"))
+                .apiKey(getEnv("DEEPSEEK_API_KEY", "MOCK_KEY"))
                 .baseUrl("https://api.deepseek.com")
                 .build();
         var chatOptions = OpenAiChatOptions.builder()
@@ -49,7 +49,7 @@ public class ChatModelProvider {
 
     public void initLongCatChatModel() {
         var apiKey = OpenAiApi.builder()
-                .apiKey(System.getenv("LONGCAT_API_KEY"))
+                .apiKey(getEnv("LONGCAT_API_KEY", "MOCK_KEY"))
                 .baseUrl("https://api.longcat.chat/openai")
                 .build();
         var aiChatOptions = OpenAiChatOptions.builder()
@@ -61,5 +61,9 @@ public class ChatModelProvider {
                 .openAiApi(apiKey)
                 .defaultOptions(aiChatOptions)
                 .build();
+    }
+
+    private String getEnv(String key, String defaultValue) {
+        return System.getenv(key) == null ? defaultValue : System.getenv(key);
     }
 }

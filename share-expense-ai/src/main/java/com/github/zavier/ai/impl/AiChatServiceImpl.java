@@ -5,11 +5,8 @@ import com.github.zavier.ai.domain.MessageRole;
 import com.github.zavier.ai.dto.AiChatRequest;
 import com.github.zavier.ai.dto.AiChatResponse;
 import com.github.zavier.ai.dto.SuggestionsResponse;
-import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.function.*;
-import com.github.zavier.ai.monitoring.context.AiCallContext;
-import com.github.zavier.ai.monitoring.context.AiCallContext.CallType;
 import com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor;
 import com.github.zavier.ai.provider.AiPromptProvider;
 import com.github.zavier.ai.service.ChatModelProvider;
@@ -28,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor.CONVERSATION_ID_KEY;
 
 /**
  * AI 聊天服务实现（重构版）
@@ -79,9 +78,6 @@ public class AiChatServiceImpl implements AiChatService {
     private ChatRequestValidator requestValidator;
 
     @Resource
-    private SuggestionGenerator suggestionGenerator;
-
-    @Resource
     private CachedSuggestionService cachedSuggestionService;
 
     @Resource
@@ -90,7 +86,7 @@ public class AiChatServiceImpl implements AiChatService {
     @PostConstruct
     public void init() {
         this.chatClient = ChatClient.builder(chatModelProvider.selectChatModel())
-                .defaultAdvisors(new SimpleLoggerAdvisor())
+                .defaultAdvisors(List.of(new SimpleLoggerAdvisor(), aiMonitoringAdvisor))
                 .defaultSystem(promptProvider.getChatSystemPrompt())
                 .defaultTools(
                         expenseCreateProjectFunction,
@@ -221,12 +217,11 @@ public class AiChatServiceImpl implements AiChatService {
         log.debug("[AI聊天] 调用AI, conversationId={}, 历史消息数={}", conversationId, messages.size());
 
         // 使用监控advisor包装调用（advisor会自动设置上下文）
-        String response = aiMonitoringAdvisor.monitorCall(CallType.CHAT, () -> {
-            return chatClient.prompt()
-                .messages(messages)
-                .call()
-                .content();
-        });
+        String response = chatClient.prompt()
+                    .messages(messages)
+                    .advisors(a -> a.param(CONVERSATION_ID_KEY, conversationId))
+                    .call()
+                    .content();
 
         log.debug("[AI聊天] AI响应完成, conversationId={}, reply={}", conversationId, response);
 
