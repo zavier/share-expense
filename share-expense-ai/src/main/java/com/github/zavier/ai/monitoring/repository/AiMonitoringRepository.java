@@ -6,10 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface AiMonitoringRepository extends JpaRepository<AiMonitoringLogEntity, Long> {
 
     /**
@@ -23,14 +25,13 @@ public interface AiMonitoringRepository extends JpaRepository<AiMonitoringLogEnt
      * 统计查询 - 基础统计
      */
     @Query("""
-        SELECT new com.github.zavier.ai.monitoring.dto.PerformanceStatisticsDto(
+        SELECT
             COUNT(e),
             AVG(e.latencyMs),
             MIN(e.latencyMs),
             MAX(e.latencyMs),
             SUM(e.totalTokens),
             SUM(CASE WHEN e.status = 'SUCCESS' THEN 1 ELSE 0 END)
-        )
         FROM AiMonitoringLogEntity e
         WHERE e.userId = :userId
         AND e.startTime BETWEEN :start AND :end
