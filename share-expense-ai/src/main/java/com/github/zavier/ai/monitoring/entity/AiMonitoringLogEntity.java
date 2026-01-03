@@ -64,7 +64,7 @@ public class AiMonitoringLogEntity {
     @Column(name = "error_type", length = 100)
     private String errorType;
 
-    @Column(name = "error_message", columnDefinition = "TEXT")
+    @Column(name = "error_message")
     private String errorMessage;
 
     @Column(name = "user_message_preview", length = 500)
