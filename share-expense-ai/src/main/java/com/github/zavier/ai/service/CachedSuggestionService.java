@@ -29,6 +29,21 @@ import java.util.concurrent.TimeoutException;
 /**
  * 缓存建议服务
  * 提供同步获取建议的功能，支持缓存和并发控制
+ *
+ * 缓存策略：
+ * - Session 表：活跃缓存，用于快速读取，可以删除和更新
+ * - Conversation 表（最后一条记录）：快照，用于历史记录和审计，只更新不删除
+ *
+ * 读取流程：
+ * 1. 从 Session 表读取缓存（唯一读取来源）
+ * 2. 如果缓存过期，重新生成
+ *
+ * 写入流程：
+ * 1. 更新 Session 表（活跃缓存）
+ * 2. 更新 Conversation 表最后一条记录（快照）
+ *
+ * 清除流程：
+ * - 只清除 Session 表缓存，保留 Conversation 表快照
  */
 @Slf4j
 @Service
@@ -64,6 +79,7 @@ public class CachedSuggestionService {
 
     /**
      * 同步获取建议（核心方法）
+     * 只从 Session 表读取缓存，Conversation 表仅作为快照存储
      *
      * @param conversationId 会话ID
      * @return 建议列表
@@ -74,39 +90,28 @@ public class CachedSuggestionService {
             return getDefaultSuggestions(true);
         }
 
-        // 1. 尝试从 Session 表获取缓存（优先级更高，因为包含完整的会话信息）
-        Optional<String> sessionSuggestions = getSessionSuggestions(conversationId);
-        if (sessionSuggestions.isPresent() && isCacheValid(
-                sessionRepository.findByConversationId(conversationId)
-                    .map(AiSessionEntity::getSuggestionsUpdatedAt)
-                    .orElse(null))) {
-            log.debug("Returning cached suggestions from session for conversation {}", conversationId);
-            return parseSuggestions(sessionSuggestions.get());
-        }
-
-        // 2. 尝试从 Conversation 表获取缓存
-        Optional<ConversationEntity> lastConversation = getLastConversation(conversationId);
-        if (lastConversation.isPresent()) {
-            ConversationEntity entity = lastConversation.get();
+        // 1. 尝试从 Session 表获取缓存
+        Optional<AiSessionEntity> sessionOpt = sessionRepository.findByConversationId(conversationId);
+        if (sessionOpt.isPresent()) {
+            AiSessionEntity session = sessionOpt.get();
 
             // 如果有缓存且未过期，直接返回
-            if (StringUtils.isNotBlank(entity.getSuggestions()) &&
-                entity.getSuggestionsUpdatedAt() != null &&
-                isCacheValid(entity.getSuggestionsUpdatedAt())) {
-                log.debug("Returning cached suggestions for conversation {}", conversationId);
-                return parseSuggestions(entity.getSuggestions());
+            if (StringUtils.isNotBlank(session.getLastSuggestions()) &&
+                session.getSuggestionsUpdatedAt() != null &&
+                isCacheValid(session.getSuggestionsUpdatedAt())) {
+                log.debug("Returning cached suggestions from session for conversation {}", conversationId);
+                return parseSuggestions(session.getLastSuggestions());
             }
 
             // 如果正在生成，等待生成完成
-            if (Boolean.TRUE.equals(entity.getSuggestionsGenerating())) {
+            if (Boolean.TRUE.equals(session.getSuggestionsGenerating())) {
                 log.info("Suggestions are being generated, waiting for conversation {}", conversationId);
                 return waitForGeneration(conversationId);
             }
         }
 
-        // 3. 没有缓存或缓存过期，开始生成
-        ConversationEntity conversationEntity = lastConversation.orElse(null);
-        return generateSuggestionsSync(conversationId, conversationEntity);
+        // 2. 没有缓存或缓存过期，开始生成
+        return generateSuggestionsSync(conversationId);
     }
 
     /**
@@ -140,22 +145,22 @@ public class CachedSuggestionService {
         return age.toSeconds() <= CACHE_VALIDITY_MINUTES * 60;
     }
 
-    public List<SuggestionGenerator.SuggestionItem> generateSuggestionsSync(String conversationId,
-                                                                             ConversationEntity entity) {
-        if (entity == null) {
+    public List<SuggestionGenerator.SuggestionItem> generateSuggestionsSync(String conversationId) {
+        // 检查会话是否存在
+        if (conversationRepository.countByConversationId(conversationId) == 0) {
             log.debug("No conversation found for conversationId {}, returning default suggestions", conversationId);
             return getDefaultSuggestions(true);
         }
 
         try (LockContext lockContext = lockManager.acquireLock(conversationId, 100, TimeUnit.MILLISECONDS)) {
             // 再次检查（双重检查锁定）
-            Optional<ConversationEntity> updatedEntity = getLastConversation(conversationId);
-            if (updatedEntity.isPresent()) {
-                ConversationEntity updated = updatedEntity.get();
-                if (StringUtils.isNotBlank(updated.getSuggestions()) && isCacheValid(updated.getSuggestionsUpdatedAt())) {
-                    return parseSuggestions(updated.getSuggestions());
+            Optional<AiSessionEntity> sessionOpt = sessionRepository.findByConversationId(conversationId);
+            if (sessionOpt.isPresent()) {
+                AiSessionEntity session = sessionOpt.get();
+                if (StringUtils.isNotBlank(session.getLastSuggestions()) &&
+                    isCacheValid(session.getSuggestionsUpdatedAt())) {
+                    return parseSuggestions(session.getLastSuggestions());
                 }
-                entity = updated;
             }
 
             // 标记为生成中
@@ -181,7 +186,7 @@ public class CachedSuggestionService {
                 List<SuggestionGenerator.SuggestionItem> suggestions =
                     task.get(GENERATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-                // 保存到数据库
+                // 保存到数据库（Session表 + Conversation快照）
                 saveSuggestionsToDatabase(conversationId, suggestions);
 
                 log.info("Successfully generated and cached suggestions for conversation {}",
@@ -234,12 +239,9 @@ public class CachedSuggestionService {
             }
         }
 
-        // 如果没有找到任务，可能生成已经完成，重新从数据库查询
+        // 如果没有找到任务，可能生成已经完成，重新从 Session 表查询
         return getSessionSuggestions(conversationId)
             .map(this::parseSuggestions)
-            .or(() -> getLastConversation(conversationId)
-                .map(ConversationEntity::getSuggestions)
-                .map(this::parseSuggestions))
             .orElse(getDefaultSuggestions(isNewConversation(conversationId)));
     }
 
@@ -255,26 +257,36 @@ public class CachedSuggestionService {
         return suggestionGenerator.generate(history, conversationId);
     }
 
+    /**
+     * 保存建议到数据库
+     * - Session 表：更新活跃缓存（用于快速读取）
+     * - Conversation 表（最后一条记录）：更新快照（用于历史记录）
+     *
+     * @param conversationId 会话ID
+     * @param suggestions 建议列表
+     */
     public void saveSuggestionsToDatabase(String conversationId,
                                           List<SuggestionGenerator.SuggestionItem> suggestions) {
         try {
             String json = formatSuggestions(suggestions);
             LocalDateTime now = LocalDateTime.now();
 
-            // 更新 Session 表
+            // 更新 Session 表（活跃缓存）
             sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
                 session.setLastSuggestions(json);
                 session.setSuggestionsUpdatedAt(now);
                 session.setSuggestionsGenerating(false);
                 sessionRepository.save(session);
+                log.debug("Updated session cache for conversation {}", conversationId);
             });
 
-            // 更新 Conversation 表（最后一条记录）
+            // 更新 Conversation 表最后一条记录（快照）
             getLastConversation(conversationId).ifPresent(conversation -> {
                 conversation.setSuggestions(json);
                 conversation.setSuggestionsUpdatedAt(now);
-                conversation.setSuggestionsGenerating(false);
+                // 注意：Conversation 表不需要 suggestionsGenerating 字段，因为读取时不使用此表
                 conversationRepository.save(conversation);
+                log.debug("Updated conversation snapshot for conversation {}", conversationId);
             });
 
         } catch (Exception e) {
@@ -284,11 +296,14 @@ public class CachedSuggestionService {
 
     /**
      * 清除建议缓存（对话更新时调用）
+     * 只清除 Session 表的活跃缓存，保留 Conversation 表的历史快照
+     *
+     * @param conversationId 会话ID
      */
     @Transactional
     public void clearSuggestionsCache(String conversationId) {
         try {
-            // 清除 Session 表缓存
+            // 只清除 Session 表缓存
             sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
                 session.setLastSuggestions(null);
                 session.setSuggestionsUpdatedAt(null);
@@ -296,15 +311,7 @@ public class CachedSuggestionService {
                 sessionRepository.save(session);
             });
 
-            // 清除 Conversation 表缓存
-            getLastConversation(conversationId).ifPresent(conversation -> {
-                conversation.setSuggestions(null);
-                conversation.setSuggestionsUpdatedAt(null);
-                conversation.setSuggestionsGenerating(false);
-                conversationRepository.save(conversation);
-            });
-
-            log.debug("Cleared suggestions cache for conversation {}", conversationId);
+            log.debug("Cleared session suggestions cache for conversation {} (conversation snapshot preserved)", conversationId);
 
         } catch (Exception e) {
             log.error("Failed to clear suggestions cache", e);
@@ -346,17 +353,27 @@ public class CachedSuggestionService {
         }
     }
 
+    /**
+     * 标记建议生成中
+     * 在 Session 表设置生成标志
+     */
     protected void markAsGenerating(String conversationId) {
-        getLastConversation(conversationId).ifPresent(entity -> {
-            entity.setSuggestionsGenerating(true);
-            conversationRepository.save(entity);
+        sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
+            session.setSuggestionsGenerating(true);
+            sessionRepository.save(session);
+            log.debug("Marked suggestions as generating for conversation {}", conversationId);
         });
     }
 
+    /**
+     * 清除生成标志
+     * 在 Session 表清除生成标志
+     */
     protected void clearGeneratingFlag(String conversationId) {
-        getLastConversation(conversationId).ifPresent(entity -> {
-            entity.setSuggestionsGenerating(false);
-            conversationRepository.save(entity);
+        sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
+            session.setSuggestionsGenerating(false);
+            sessionRepository.save(session);
+            log.debug("Cleared generating flag for conversation {}", conversationId);
         });
     }
 

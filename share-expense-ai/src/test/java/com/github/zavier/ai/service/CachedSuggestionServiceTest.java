@@ -173,7 +173,7 @@ class CachedSuggestionServiceTest {
     }
 
     @Test
-    void testClearSuggestionsCache_ClearsBothSessionAndConversation() throws Exception {
+    void testClearSuggestionsCache_ClearsOnlySessionPreservesConversation() throws Exception {
         // Given
         AiSessionEntity session = AiSessionEntity.builder()
             .conversationId(CONVERSATION_ID)
@@ -182,40 +182,24 @@ class CachedSuggestionServiceTest {
             .suggestionsGenerating(false)
             .build();
 
-        ConversationEntity conversation = ConversationEntity.builder()
-            .conversationId(CONVERSATION_ID)
-            .suggestions("[{\"text\":\"建议\",\"icon\":null,\"priority\":1.0}]")
-            .suggestionsUpdatedAt(LocalDateTime.now())
-            .suggestionsGenerating(false)
-            .build();
-
         when(sessionRepository.findByConversationId(CONVERSATION_ID))
             .thenReturn(Optional.of(session));
-
-        when(conversationRepository.findByConversationIdOrderByCreatedAtDesc(eq(CONVERSATION_ID), any()))
-            .thenReturn(List.of(conversation));
 
         when(sessionRepository.save(any(AiSessionEntity.class)))
             .thenReturn(session);
 
-        when(conversationRepository.save(any(ConversationEntity.class)))
-            .thenReturn(conversation);
-
         // When
         cachedSuggestionService.clearSuggestionsCache(CONVERSATION_ID);
 
-        // Then
+        // Then - 验证只清除 Session 表缓存
         verify(sessionRepository, times(1)).save(argThat(s ->
             s.getLastSuggestions() == null &&
             s.getSuggestionsUpdatedAt() == null &&
             !s.getSuggestionsGenerating()
         ));
 
-        verify(conversationRepository, times(1)).save(argThat(c ->
-            c.getSuggestions() == null &&
-            c.getSuggestionsUpdatedAt() == null &&
-            !c.getSuggestionsGenerating()
-        ));
+        // 验证不会操作 Conversation 表（保留快照）
+        verify(conversationRepository, never()).save(any(ConversationEntity.class));
     }
 
     @Test
@@ -237,7 +221,7 @@ class CachedSuggestionServiceTest {
     }
 
     @Test
-    void testSaveSuggestionsToDatabase_SavesToBothTables() throws Exception {
+    void testSaveSuggestionsToDatabase_SavesToSessionAndConversationSnapshot() throws Exception {
         // Given
         List<SuggestionGenerator.SuggestionItem> suggestions =
             List.of(new SuggestionGenerator.SuggestionItem("测试建议", null, 1.0));
@@ -267,7 +251,7 @@ class CachedSuggestionServiceTest {
         // When
         cachedSuggestionService.saveSuggestionsToDatabase(CONVERSATION_ID, suggestions);
 
-        // Then
+        // Then - 验证 Session 表保存（活跃缓存）
         ArgumentCaptor<AiSessionEntity> sessionCaptor = ArgumentCaptor.forClass(AiSessionEntity.class);
         verify(sessionRepository).save(sessionCaptor.capture());
 
@@ -276,12 +260,13 @@ class CachedSuggestionServiceTest {
         assertNotNull(savedSession.getSuggestionsUpdatedAt());
         assertFalse(savedSession.getSuggestionsGenerating());
 
+        // 验证 Conversation 表保存快照（注意：不设置 suggestionsGenerating）
         ArgumentCaptor<ConversationEntity> conversationCaptor = ArgumentCaptor.forClass(ConversationEntity.class);
         verify(conversationRepository).save(conversationCaptor.capture());
 
         ConversationEntity savedConversation = conversationCaptor.getValue();
         assertNotNull(savedConversation.getSuggestions());
         assertNotNull(savedConversation.getSuggestionsUpdatedAt());
-        assertFalse(savedConversation.getSuggestionsGenerating());
+        // Conversation 表快照不需要 suggestionsGenerating 字段
     }
 }
