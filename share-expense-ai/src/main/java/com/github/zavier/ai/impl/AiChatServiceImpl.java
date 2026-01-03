@@ -12,6 +12,7 @@ import com.github.zavier.ai.provider.AiPromptProvider;
 import com.github.zavier.ai.service.ChatModelProvider;
 import com.github.zavier.ai.service.MessagePersister;
 import com.github.zavier.ai.service.SuggestionGenerator;
+import com.github.zavier.ai.service.CachedSuggestionService;
 import com.github.zavier.ai.validator.ChatRequestValidator;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.PostConstruct;
@@ -77,6 +78,9 @@ public class AiChatServiceImpl implements AiChatService {
     @Resource
     private SuggestionGenerator suggestionGenerator;
 
+    @Resource
+    private CachedSuggestionService cachedSuggestionService;
+
     @PostConstruct
     public void init() {
         this.chatClient = ChatClient.builder(chatModelProvider.selectChatModel())
@@ -132,6 +136,9 @@ public class AiChatServiceImpl implements AiChatService {
         messagePersister.save(context.conversationId(), MessageRole.ASSISTANT, response);
         aiSessionService.updateSessionTimestamp(context.conversationId());
 
+        // 8. 清除建议缓存，下次查询时重新生成
+        cachedSuggestionService.clearSuggestionsCache(context.conversationId());
+
         log.info("[AI聊天] 处理完成, conversationId={}", context.conversationId());
 
         return AiChatResponse.builder()
@@ -142,23 +149,19 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Override
     public SuggestionsResponse getSuggestions(String conversationId) {
-        log.debug("[AI建议] 生成建议开始, conversationId={}", conversationId);
+        log.debug("[AI建议] 获取建议开始, conversationId={}", conversationId);
 
         // 如果提供了conversationId，验证会话所有权
         if (conversationId != null && !conversationId.isBlank()) {
             verifyConversationOwnership(conversationId, getCurrentUserId());
         }
 
-        // 获取对话历史
-        List<ConversationEntity> history = conversationId != null && !conversationId.isBlank()
-            ? messagePersister.findEntitiesByConversationId(conversationId)
-            : List.of();
-
-        // 生成建议
+        // 使用缓存服务获取建议（同步等待生成完成）
         List<SuggestionGenerator.SuggestionItem> items =
-            suggestionGenerator.generate(history, conversationId);
+            cachedSuggestionService.getSuggestionsSync(conversationId);
 
-        log.debug("[AI建议] 生成完成, conversationId={}, count={} items:{}", conversationId, items.size(), items);
+        log.debug("[AI建议] 获取完成, conversationId={}, count={} items:{}",
+                 conversationId, items.size(), items);
 
         // 转换为响应格式
         List<SuggestionsResponse.Suggestion> suggestions = items.stream()

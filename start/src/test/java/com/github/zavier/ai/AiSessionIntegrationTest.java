@@ -5,6 +5,7 @@ import com.github.zavier.ai.dto.MessageDto;
 import com.github.zavier.ai.dto.SessionDto;
 import com.github.zavier.ai.entity.AiSessionEntity;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.repository.AiSessionRepository;
 import com.github.zavier.ai.repository.ConversationRepository;
 import com.github.zavier.domain.user.User;
@@ -174,13 +175,13 @@ class AiSessionIntegrationTest {
 
         // 用户 1 尝试访问用户 2 的会话应该失败
         mockedUserHolder.when(UserHolder::getUser).thenReturn(user1);
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(AuthenticationException.class, () -> {
             aiSessionService.getSessionMessages(conversationId2);
         });
 
         // 用户 2 尝试删除用户 1 的会话应该失败
         mockedUserHolder.when(UserHolder::getUser).thenReturn(user2);
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(AuthenticationException.class, () -> {
             aiSessionService.deleteSession(conversationId1);
         });
     }

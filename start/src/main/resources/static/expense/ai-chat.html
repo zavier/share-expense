@@ -2014,6 +2014,10 @@
 
             // Load messages
             await loadSessionMessages(conversationId);
+
+            // Load suggestions for the switched session
+            loadSuggestions();
+
             closeSidebar();
         }
 
