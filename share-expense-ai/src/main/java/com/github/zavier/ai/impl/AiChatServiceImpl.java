@@ -6,6 +6,7 @@ import com.github.zavier.ai.dto.AiChatRequest;
 import com.github.zavier.ai.dto.AiChatResponse;
 import com.github.zavier.ai.dto.SuggestionsResponse;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.function.*;
 import com.github.zavier.ai.provider.AiPromptProvider;
 import com.github.zavier.ai.service.ChatModelProvider;
@@ -102,7 +103,12 @@ public class AiChatServiceImpl implements AiChatService {
         log.info("[AI聊天] 收到请求, conversationId={}, userId={}, message={}",
             context.conversationId(), context.userId(), request.message());
 
-        // 2. 请求验证（速率限制 + 意图验证）
+        // 2. 验证会话所有权（如果使用现有会话）
+        if (!context.isNewConversation()) {
+            verifyConversationOwnership(context.conversationId(), context.userId());
+        }
+
+        // 3. 请求验证（速率限制 + 意图验证）
         ChatRequestValidator.ValidationResult validationResult =
             requestValidator.validate(request, context.conversationId(), context.userId());
 
@@ -111,18 +117,18 @@ public class AiChatServiceImpl implements AiChatService {
             return validationResult.toResponse(context.conversationId());
         }
 
-        // 3. 保存用户消息
+        // 4. 保存用户消息
         messagePersister.save(context.conversationId(), MessageRole.USER, request.message());
 
-        // 4. 确保会话存在
+        // 5. 确保会话存在
         if (context.isNewConversation()) {
             aiSessionService.ensureSessionExists(context.conversationId(), request.message());
         }
 
-        // 5. 调用 AI 处理
+        // 6. 调用 AI 处理
         String response = callAi(context.conversationId());
 
-        // 6. 保存 AI 回复并更新会话
+        // 7. 保存 AI 回复并更新会话
         messagePersister.save(context.conversationId(), MessageRole.ASSISTANT, response);
         aiSessionService.updateSessionTimestamp(context.conversationId());
 
@@ -137,6 +143,11 @@ public class AiChatServiceImpl implements AiChatService {
     @Override
     public SuggestionsResponse getSuggestions(String conversationId) {
         log.debug("[AI建议] 生成建议开始, conversationId={}", conversationId);
+
+        // 如果提供了conversationId，验证会话所有权
+        if (conversationId != null && !conversationId.isBlank()) {
+            verifyConversationOwnership(conversationId, getCurrentUserId());
+        }
 
         // 获取对话历史
         List<ConversationEntity> history = conversationId != null && !conversationId.isBlank()
@@ -214,7 +225,17 @@ public class AiChatServiceImpl implements AiChatService {
      * 获取当前用户 ID
      */
     private Integer getCurrentUserId() {
-        return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
+        if (UserHolder.getUser() == null) {
+            throw new AuthenticationException("用户未登录或认证信息已过期");
+        }
+        return UserHolder.getUser().getUserId();
+    }
+
+    /**
+     * 验证会话所有权
+     */
+    private void verifyConversationOwnership(String conversationId, Integer userId) {
+        aiSessionService.verifySessionOwnership(conversationId, userId);
     }
 
     /**

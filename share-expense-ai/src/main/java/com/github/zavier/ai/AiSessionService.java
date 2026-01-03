@@ -56,4 +56,14 @@ public interface AiSessionService {
      * @param conversationId 会话ID
      */
     void updateSessionTimestamp(String conversationId);
+
+    /**
+     * 验证会话所有权
+     *
+     * @param conversationId 会话ID
+     * @param userId 用户ID
+     * @throws IllegalArgumentException 如果会话不存在
+     * @throws com.github.zavier.ai.exception.AuthenticationException 如果用户无权访问该会话
+     */
+    void verifySessionOwnership(String conversationId, Integer userId);
 }

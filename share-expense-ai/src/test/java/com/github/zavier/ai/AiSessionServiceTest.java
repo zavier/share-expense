@@ -4,6 +4,7 @@ import com.github.zavier.ai.dto.MessageDto;
 import com.github.zavier.ai.dto.SessionDto;
 import com.github.zavier.ai.entity.AiSessionEntity;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.impl.AiSessionServiceImpl;
 import com.github.zavier.ai.repository.AiSessionRepository;
 import com.github.zavier.ai.repository.ConversationRepository;
@@ -227,8 +228,8 @@ class AiSessionServiceTest {
                 .thenReturn(Optional.of(session));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        AuthenticationException exception = assertThrows(
+                AuthenticationException.class,
                 () -> aiSessionService.deleteSession(TEST_CONVERSATION_ID)
         );
         assertEquals("无权访问该会话", exception.getMessage());
@@ -293,8 +294,8 @@ class AiSessionServiceTest {
                 .thenReturn(Optional.of(session));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        AuthenticationException exception = assertThrows(
+                AuthenticationException.class,
                 () -> aiSessionService.renameSession(TEST_CONVERSATION_ID, "新标题")
         );
         assertEquals("无权访问该会话", exception.getMessage());
@@ -378,8 +379,8 @@ class AiSessionServiceTest {
                 .thenReturn(Optional.of(session));
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        AuthenticationException exception = assertThrows(
+                AuthenticationException.class,
                 () -> aiSessionService.getSessionMessages(TEST_CONVERSATION_ID)
         );
         assertEquals("无权访问该会话", exception.getMessage());
