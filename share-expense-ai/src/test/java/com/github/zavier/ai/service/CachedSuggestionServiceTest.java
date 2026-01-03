@@ -115,7 +115,7 @@ class CachedSuggestionServiceTest {
             .thenReturn(Optional.of(AiSessionEntity.builder()
                 .conversationId(CONVERSATION_ID)
                 .lastSuggestions("[{\"text\":\"建议1\",\"icon\":null,\"priority\":1.0}]")
-                .suggestionsUpdatedAt(LocalDateTime.now().minusMinutes(2)) // 2分钟前，未过期
+                .suggestionsUpdatedAt(LocalDateTime.now().minusMinutes(120)) // 2小时前，仍然有效（无过期限制）
                 .build()));
 
         when(objectMapper.readValue(anyString(), any(TypeReference.class)))
@@ -133,7 +133,7 @@ class CachedSuggestionServiceTest {
     }
 
     @Test
-    void testGetSuggestionsSync_ExpiredCache_GeneratesNewSuggestions() throws Exception {
+    void testGetSuggestionsSync_NoCache_GeneratesNewSuggestions() throws Exception {
         // Given
         List<SuggestionGenerator.SuggestionItem> newItems =
             List.of(new SuggestionGenerator.SuggestionItem("新建议", null, 1.0));
@@ -141,7 +141,6 @@ class CachedSuggestionServiceTest {
         ConversationEntity conversation = ConversationEntity.builder()
             .conversationId(CONVERSATION_ID)
             .suggestions("[{\"text\":\"旧建议\",\"icon\":null,\"priority\":1.0}]")
-            .suggestionsUpdatedAt(LocalDateTime.now().minusMinutes(10)) // 10分钟前，已过期
             .suggestionsGenerating(false)
             .build();
 

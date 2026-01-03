@@ -30,13 +30,14 @@ import java.util.concurrent.TimeoutException;
  * 缓存建议服务
  * 提供同步获取建议的功能，支持缓存和并发控制
  *
- * 缓存策略：
+ * 缓存策略（无过期时间）：
  * - Session 表：活跃缓存，用于快速读取，可以删除和更新
  * - Conversation 表（最后一条记录）：快照，用于历史记录和审计，只更新不删除
+ * - 缓存失效：只在对话更新时清除，无时间过期限制
  *
  * 读取流程：
  * 1. 从 Session 表读取缓存（唯一读取来源）
- * 2. 如果缓存过期，重新生成
+ * 2. 如果有缓存直接返回，否则生成新建议
  *
  * 写入流程：
  * 1. 更新 Session 表（活跃缓存）
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeoutException;
  *
  * 清除流程：
  * - 只清除 Session 表缓存，保留 Conversation 表快照
+ * - 在对话更新（新增消息）时触发清除
  */
 @Slf4j
 @Service
@@ -54,9 +56,6 @@ public class CachedSuggestionService {
     private final SuggestionGenerator suggestionGenerator;
     private final ObjectMapper objectMapper;
     private final LockManager lockManager;
-
-    // 缓存有效期：5分钟
-    private static final long CACHE_VALIDITY_MINUTES = 5;
 
     // 生成超时时间：30秒
     private static final long GENERATION_TIMEOUT_SECONDS = 30;
@@ -80,6 +79,7 @@ public class CachedSuggestionService {
     /**
      * 同步获取建议（核心方法）
      * 只从 Session 表读取缓存，Conversation 表仅作为快照存储
+     * 无过期时间限制，只在对话更新时清除缓存
      *
      * @param conversationId 会话ID
      * @return 建议列表
@@ -95,10 +95,8 @@ public class CachedSuggestionService {
         if (sessionOpt.isPresent()) {
             AiSessionEntity session = sessionOpt.get();
 
-            // 如果有缓存且未过期，直接返回
-            if (StringUtils.isNotBlank(session.getLastSuggestions()) &&
-                session.getSuggestionsUpdatedAt() != null &&
-                isCacheValid(session.getSuggestionsUpdatedAt())) {
+            // 如果有缓存，直接返回（无过期时间限制）
+            if (StringUtils.isNotBlank(session.getLastSuggestions())) {
                 log.debug("Returning cached suggestions from session for conversation {}", conversationId);
                 return parseSuggestions(session.getLastSuggestions());
             }
@@ -110,7 +108,7 @@ public class CachedSuggestionService {
             }
         }
 
-        // 2. 没有缓存或缓存过期，开始生成
+        // 2. 没有缓存，开始生成
         return generateSuggestionsSync(conversationId);
     }
 
@@ -133,18 +131,6 @@ public class CachedSuggestionService {
         return conversations.isEmpty() ? Optional.empty() : Optional.of(conversations.get(0));
     }
 
-    /**
-     * 检查缓存是否有效
-     */
-    private boolean isCacheValid(LocalDateTime updatedAt) {
-        if (updatedAt == null) {
-            return false;
-        }
-        Duration age = Duration.between(updatedAt, LocalDateTime.now());
-        // 使用 <= 确保正好5分钟时仍然有效
-        return age.toSeconds() <= CACHE_VALIDITY_MINUTES * 60;
-    }
-
     public List<SuggestionGenerator.SuggestionItem> generateSuggestionsSync(String conversationId) {
         // 检查会话是否存在
         if (conversationRepository.countByConversationId(conversationId) == 0) {
@@ -153,12 +139,11 @@ public class CachedSuggestionService {
         }
 
         try (LockContext lockContext = lockManager.acquireLock(conversationId, 100, TimeUnit.MILLISECONDS)) {
-            // 再次检查（双重检查锁定）
+            // 再次检查（双重检查锁定）- 防止在等待锁期间其他线程已经生成
             Optional<AiSessionEntity> sessionOpt = sessionRepository.findByConversationId(conversationId);
             if (sessionOpt.isPresent()) {
                 AiSessionEntity session = sessionOpt.get();
-                if (StringUtils.isNotBlank(session.getLastSuggestions()) &&
-                    isCacheValid(session.getSuggestionsUpdatedAt())) {
+                if (StringUtils.isNotBlank(session.getLastSuggestions())) {
                     return parseSuggestions(session.getLastSuggestions());
                 }
             }
@@ -262,6 +247,9 @@ public class CachedSuggestionService {
      * - Session 表：更新活跃缓存（用于快速读取）
      * - Conversation 表（最后一条记录）：更新快照（用于历史记录）
      *
+     * 注意：虽然保存了 suggestionsUpdatedAt 时间戳，但不用于缓存过期判断
+     * 缓存只在对话更新时主动清除
+     *
      * @param conversationId 会话ID
      * @param suggestions 建议列表
      */
@@ -274,7 +262,7 @@ public class CachedSuggestionService {
             // 更新 Session 表（活跃缓存）
             sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
                 session.setLastSuggestions(json);
-                session.setSuggestionsUpdatedAt(now);
+                session.setSuggestionsUpdatedAt(now); // 保留时间戳用于审计，但不用于过期判断
                 session.setSuggestionsGenerating(false);
                 sessionRepository.save(session);
                 log.debug("Updated session cache for conversation {}", conversationId);
@@ -283,8 +271,7 @@ public class CachedSuggestionService {
             // 更新 Conversation 表最后一条记录（快照）
             getLastConversation(conversationId).ifPresent(conversation -> {
                 conversation.setSuggestions(json);
-                conversation.setSuggestionsUpdatedAt(now);
-                // 注意：Conversation 表不需要 suggestionsGenerating 字段，因为读取时不使用此表
+                conversation.setSuggestionsUpdatedAt(now); // 保留时间戳用于审计
                 conversationRepository.save(conversation);
                 log.debug("Updated conversation snapshot for conversation {}", conversationId);
             });
