@@ -30,6 +30,7 @@
         <guava.version>33.3.0-jre</guava.version>
         <easyexcel.version>3.3.4</easyexcel.version>
         <spring-ai.version>1.1.2</spring-ai.version>
+        <transmittable.thread.local.version>2.14.5</transmittable.thread.local.version>
     </properties>
 
     <modules>
@@ -196,6 +197,12 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>easyexcel</artifactId>
                 <version>${easyexcel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId>
+                <version>${transmittable.thread.local.version}</version>
             </dependency>
 
         </dependencies>

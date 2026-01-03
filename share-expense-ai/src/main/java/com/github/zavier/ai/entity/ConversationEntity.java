@@ -34,4 +34,14 @@ public class ConversationEntity {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "suggestions")
+    private String suggestions;
+
+    @Column(name = "suggestions_updated_at")
+    private LocalDateTime suggestionsUpdatedAt;
+
+    @Builder.Default
+    @Column(name = "suggestions_generating")
+    private Boolean suggestionsGenerating = false;
 }

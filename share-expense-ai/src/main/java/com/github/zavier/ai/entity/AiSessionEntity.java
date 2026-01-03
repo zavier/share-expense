@@ -37,4 +37,14 @@ public class AiSessionEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "last_suggestions")
+    private String lastSuggestions;
+
+    @Column(name = "suggestions_updated_at")
+    private LocalDateTime suggestionsUpdatedAt;
+
+    @Builder.Default
+    @Column(name = "suggestions_generating")
+    private Boolean suggestionsGenerating = false;
 }

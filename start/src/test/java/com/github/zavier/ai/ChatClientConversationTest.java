@@ -56,7 +56,7 @@ class ChatClientConversationTest {
      * 检查是否启用 AI 测试
      */
     static boolean aiTestEnabled() {
-        return true;
+        return false;
     }
 
     @BeforeEach

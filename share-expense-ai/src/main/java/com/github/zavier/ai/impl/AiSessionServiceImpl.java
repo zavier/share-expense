@@ -5,6 +5,7 @@ import com.github.zavier.ai.dto.MessageDto;
 import com.github.zavier.ai.dto.SessionDto;
 import com.github.zavier.ai.entity.AiSessionEntity;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.repository.AiSessionRepository;
 import com.github.zavier.ai.repository.ConversationRepository;
 import com.github.zavier.web.filter.UserHolder;
@@ -80,7 +81,7 @@ public class AiSessionServiceImpl implements AiSessionService {
                 .orElseThrow(() -> new IllegalArgumentException("会话不存在"));
 
         if (!session.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("无权访问该会话");
+            throw new AuthenticationException("无权访问该会话");
         }
 
         // 删除会话元数据
@@ -101,7 +102,7 @@ public class AiSessionServiceImpl implements AiSessionService {
                 .orElseThrow(() -> new IllegalArgumentException("会话不存在"));
 
         if (!session.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("无权访问该会话");
+            throw new AuthenticationException("无权访问该会话");
         }
 
         session.setTitle(title);
@@ -120,7 +121,7 @@ public class AiSessionServiceImpl implements AiSessionService {
                 .orElseThrow(() -> new IllegalArgumentException("会话不存在"));
 
         if (!session.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("无权访问该会话");
+            throw new AuthenticationException("无权访问该会话");
         }
 
         List<ConversationEntity> entities = conversationRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
@@ -174,12 +175,17 @@ public class AiSessionServiceImpl implements AiSessionService {
 
     /**
      * 更新会话时间戳（用于会话排序）
+     * 只有时会话属于当前用户时才更新
      */
     public void updateSessionTimestamp(String conversationId) {
         sessionRepository.findByConversationId(conversationId).ifPresent(session -> {
-            if (session.getUserId().equals(getCurrentUserId())) {
+            Integer currentUserId = getCurrentUserId();
+            if (session.getUserId().equals(currentUserId)) {
                 session.setUpdatedAt(LocalDateTime.now());
                 sessionRepository.save(session);
+            } else {
+                log.warn("[会话管理] 尝试更新其他用户的会话时间戳, conversationId={}, sessionUserId={}, currentUserId={}",
+                        conversationId, session.getUserId(), currentUserId);
             }
         });
     }
@@ -202,7 +208,25 @@ public class AiSessionServiceImpl implements AiSessionService {
         );
     }
 
+    /**
+     * 验证会话所有权
+     */
+    @Override
+    public void verifySessionOwnership(String conversationId, Integer userId) {
+        AiSessionEntity session = sessionRepository.findByConversationId(conversationId)
+                .orElseThrow(() -> new IllegalArgumentException("会话不存在"));
+
+        if (!session.getUserId().equals(userId)) {
+            log.warn("[会话管理] 会话所有权验证失败, conversationId={}, sessionUserId={}, requestUserId={}",
+                    conversationId, session.getUserId(), userId);
+            throw new AuthenticationException("无权访问该会话");
+        }
+    }
+
     private Integer getCurrentUserId() {
-        return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
+        if (UserHolder.getUser() == null) {
+            throw new AuthenticationException("用户未登录或认证信息已过期");
+        }
+        return UserHolder.getUser().getUserId();
     }
 }

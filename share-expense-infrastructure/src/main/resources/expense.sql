@@ -71,6 +71,9 @@ CREATE TABLE IF NOT EXISTS ai_conversation (
     role VARCHAR(20) NOT NULL COMMENT '角色: user/assistant/system',
     content TEXT NOT NULL COMMENT '消息内容',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    suggestions TEXT COMMENT '建议内容，JSON数组格式，存储序列化的 SuggestionItem 列表',
+    suggestions_updated_at DATETIME COMMENT '建议更新时间',
+    suggestions_generating TINYINT DEFAULT 0 COMMENT '是否正在生成建议 (0-否, 1-是)',
     INDEX idx_conversation (conversation_id),
     INDEX idx_user (user_id),
     INDEX idx_created (created_at)
@@ -82,8 +85,35 @@ CREATE TABLE IF NOT EXISTS ai_chat_session (
     conversation_id VARCHAR(64) UNIQUE NOT NULL COMMENT '会话ID',
     user_id INT NOT NULL COMMENT '用户ID',
     title VARCHAR(200) NOT NULL COMMENT '会话标题',
+    last_suggestions JSON COMMENT '最后一次建议内容，JSON数组格式',
+    suggestions_updated_at DATETIME COMMENT '建议更新时间',
+    suggestions_generating TINYINT(1) DEFAULT 0 COMMENT '是否正在生成建议 (0-否, 1-是)',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_user_created (user_id, created_at DESC),
     INDEX idx_conversation (conversation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI会话元数据表';
+
+CREATE TABLE IF NOT EXISTS ai_monitoring_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    conversation_id VARCHAR(64) NOT NULL COMMENT '会话ID',
+    user_id INT NOT NULL COMMENT '用户ID',
+    model_name VARCHAR(50) NOT NULL COMMENT '模型名称(deepseek-chat/LongCat-Flash-Chat)',
+    start_time DATETIME NOT NULL COMMENT '调用开始时间',
+    end_time DATETIME NOT NULL COMMENT '调用结束时间',
+    latency_ms BIGINT NOT NULL COMMENT '响应耗时(毫秒)',
+    prompt_tokens INT DEFAULT NULL COMMENT '输入token数',
+    completion_tokens INT DEFAULT NULL COMMENT '输出token数',
+    total_tokens INT DEFAULT NULL COMMENT '总token数',
+    status VARCHAR(20) NOT NULL COMMENT '调用状态(SUCCESS/FAILURE/TIMEOUT)',
+    error_message TEXT DEFAULT NULL COMMENT '错误详情',
+    user_message_preview VARCHAR(500) DEFAULT NULL COMMENT '用户消息摘要',
+    assistant_message_preview VARCHAR(500) DEFAULT NULL COMMENT 'AI响应摘要',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    INDEX idx_conversation_id (conversation_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_model_name (model_name),
+    INDEX idx_start_time (start_time),
+    INDEX idx_status (status),
+    INDEX idx_user_time (user_id, start_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI调用监控日志表';

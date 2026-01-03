@@ -2,6 +2,7 @@ package com.github.zavier.ai.service;
 
 import com.github.zavier.ai.domain.MessageRole;
 import com.github.zavier.ai.entity.ConversationEntity;
+import com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor;
 import com.github.zavier.ai.provider.AiPromptProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.zavier.ai.monitoring.advisor.AiMonitoringAdvisor.CONVERSATION_ID_KEY;
+
 /**
  * 智能建议生成服务
  * 根据对话历史为用户生成操作建议
@@ -28,17 +31,18 @@ public class SuggestionGenerator {
 
 
     public SuggestionGenerator(ChatModelProvider chatModelProvider,
-                               AiPromptProvider promptProvider) {
-        this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectChatModel())
+                               AiPromptProvider promptProvider,
+                               AiMonitoringAdvisor aiMonitoringService) {
+        this.suggestionChatClient = ChatClient.builder(chatModelProvider.selectFastChatModel())
                 .defaultSystem(promptProvider.getSuggestionPrompt())
-                .defaultAdvisors(new SimpleLoggerAdvisor())
+                .defaultAdvisors(new SimpleLoggerAdvisor(), aiMonitoringService)
                 .build();
     }
 
     /**
      * 根据对话历史生成建议
      *
-     * @param history 对话历史
+     * @param history        对话历史
      * @param conversationId 会话ID
      * @return 建议列表
      */
@@ -47,13 +51,14 @@ public class SuggestionGenerator {
 
         // 构建上下文
         List<Message> recentMessages = buildRecentMessages(history);
-
         try {
             // 调用 AI 生成建议
             final List<SuggestionItem> suggestionList = suggestionChatClient.prompt()
-                .messages(recentMessages)
-                .call()
-                .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {});
+                    .messages(recentMessages)
+                    .advisors(a -> a.param(CONVERSATION_ID_KEY, conversationId))
+                    .call()
+                    .entity(new ParameterizedTypeReference<List<SuggestionItem>>() {
+                    });
 
             log.info("[建议生成] AI响应: conversationId={}, suggestionList={}", conversationId, suggestionList);
 
@@ -76,7 +81,7 @@ public class SuggestionGenerator {
      * 构建最近的消息列表（最多5条）
      */
     private List<Message> buildRecentMessages(List<ConversationEntity> history) {
-        int start = Math.max(0, history.size() - 5);
+        int start = Math.max(0, history.size() - 30);
         List<ConversationEntity> recentHistory = history.subList(start, history.size());
         List<Message> messages = new ArrayList<>();
         for (ConversationEntity entity : recentHistory) {
@@ -92,7 +97,7 @@ public class SuggestionGenerator {
             if (messages.getLast() instanceof UserMessage) {
                 messages.removeLast();
             }
-            messages.add(new UserMessage("你觉得我后续可能会和你说什么？给出最可能的答复及原因"));
+            messages.add(new UserMessage("你觉得我后续可能会和你说什么？或者如何回复你的问题？给出最可能的答复及原因"));
         }
 
         return messages;
@@ -106,29 +111,29 @@ public class SuggestionGenerator {
 
         if (isNewUser) {
             suggestions.add(new SuggestionItem(
-                "创建项目「周末聚餐」，成员有小明、小红、小李", null, 1
+                    "创建项目「周末聚餐」，成员有小明、小红、小李", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "今天午饭AA，80元4个人分,小明出钱", null, 1
+                    "今天午饭AA，80元4个人分,小明出钱", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查看我的项目", null, 1
+                    "查看我的项目", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查询「周末聚餐」的费用明细", null, 1
+                    "查询「周末聚餐」的费用明细", null, 1
             ));
         } else {
             suggestions.add(new SuggestionItem(
-                "查看我的项目列表", null, 1
+                    "查看我的项目列表", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "记录一笔费用", null, 1
+                    "记录一笔费用", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "查看费用明细", null, 1
+                    "查看费用明细", null, 1
             ));
             suggestions.add(new SuggestionItem(
-                "创建新项目", null, 1
+                    "创建新项目", null, 1
             ));
         }
 
@@ -139,8 +144,9 @@ public class SuggestionGenerator {
      * 建议项
      */
     public record SuggestionItem(
-        String text,
-        String reason,
-        double score
-    ) {}
+            String text,
+            String reason,
+            double score
+    ) {
+    }
 }

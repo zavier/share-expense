@@ -1,6 +1,7 @@
 package com.github.zavier.ai;
 
 import com.alibaba.cola.dto.SingleResponse;
+import com.github.zavier.ai.exception.AuthenticationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +13,12 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public SingleResponse<Void> handleAuthenticationException(AuthenticationException e) {
+        log.warn("[AI模块] 认证失败: {}", e.getMessage());
+        return SingleResponse.buildFailure("AUTH_ERROR", e.getMessage());
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public SingleResponse<Void> handleIllegalArgumentException(IllegalArgumentException e) {
