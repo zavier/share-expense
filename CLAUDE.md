@@ -126,3 +126,17 @@ export MYSQL_PWD=mysql-password
 - `docs/ai-fix-tool-calling-hallucination.md` - Tool calling validation
 - `docs/lock-manager-design.md` - Lock manager architecture
 - `README.md` - Comprehensive project documentation
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues (via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo (one `CONTEXT.md` + `docs/adr/` at root). See `docs/agents/domain.md`.
