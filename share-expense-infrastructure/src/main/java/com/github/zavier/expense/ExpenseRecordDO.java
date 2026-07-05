@@ -4,6 +4,7 @@ import com.github.zavier.infrastructure.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,10 +19,12 @@ import java.time.LocalDateTime;
  * - 手动管理消费人员生命周期，通过 Repository 直接操作
  * - 消费人员保留 recordId 外键字段，支持独立查询和批量操作
  * - 使用 LocalDateTime 替代 Date（Java 8+ 时间 API）
+ * - @DynamicInsert: 插入时忽略 null 字段，让数据库默认值生效（兼容原 MyBatis insertSelective 行为）
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
+@DynamicInsert
 @Table(name = "expense_record")
 public class ExpenseRecordDO extends BaseEntity {
     @Id
