@@ -103,7 +103,7 @@
 | **AI助手** | Spring AI + Claude | [AI聊天](https://zhengw-tech.com/expense/ai-chat.html) |
 | **微信小程序** | 微信小程序 | 扫描下方二维码 |
 
-![小程序二维码](https://zhengw-tech.com/images/expense/share_expense_qrcode.jpg)
+![小程序二维码](https://zhengw-tech.com/images/expense/share_expense_qrcode.png)
 
 ---
 
