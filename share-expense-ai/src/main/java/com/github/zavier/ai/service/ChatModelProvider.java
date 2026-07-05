@@ -36,7 +36,7 @@ public class ChatModelProvider {
                 .baseUrl("https://api.deepseek.com")
                 .build();
         var chatOptions = OpenAiChatOptions.builder()
-                .model("deepseek-chat")
+                .model("deepseek-v4-flash")
                 .temperature(0.4)
                 .maxTokens(2000)
                 .build();
@@ -53,7 +53,7 @@ public class ChatModelProvider {
                 .baseUrl("https://api.longcat.chat/openai")
                 .build();
         var aiChatOptions = OpenAiChatOptions.builder()
-                .model("LongCat-Flash-Chat")
+                .model("LongCat-2.0")
                 .temperature(0.7)
                 .maxTokens(5000)
                 .build();
