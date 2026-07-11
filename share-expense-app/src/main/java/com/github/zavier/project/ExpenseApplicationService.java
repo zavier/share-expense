@@ -8,6 +8,7 @@ import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.ProjectSharingFee;
+import com.github.zavier.domain.expense.domainservice.ExpenseRecordValidator;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.*;
@@ -37,7 +38,7 @@ public class ExpenseApplicationService {
     private ExpenseProjectGateway expenseProjectGateway;
 
     @Resource
-    private com.github.zavier.domain.expense.domainservice.ExpenseRecordValidator expenseRecordValidator;
+    private ExpenseRecordValidator expenseRecordValidator;
 
     @Resource
     private com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter domainRecordConverter;
@@ -79,7 +80,7 @@ public class ExpenseApplicationService {
         Assert.isTrue(projectById.isPresent(), "项目不存在");
         final ExpenseProject expenseProject = projectById.get();
 
-        if (!Objects.equals(expenseProject.getCreateUserId(), qry.getOperatorId())) {
+        if (!expenseProject.isOwnedBy(qry.getOperatorId())) {
             return SingleResponse.of(Collections.emptyList());
         }
 
@@ -112,7 +113,7 @@ public class ExpenseApplicationService {
 
     // ==================== 费用记录操作 ====================
 
-    public void addExpenseRecord(ExpenseRecordAddCmd cmd) {
+    public Response addExpenseRecord(ExpenseRecordAddCmd cmd) {
         log.info("expenseRecordAddCmd: {}", cmd);
         expenseRecordValidator.valid(cmd);
 
@@ -121,9 +122,10 @@ public class ExpenseApplicationService {
         final ExpenseRecord expenseRecord = domainRecordConverter.toExpenseRecord(cmd);
         expenseProject.addExpenseRecord(expenseRecord);
         expenseProjectGateway.save(expenseProject);
+        return Response.buildSuccess();
     }
 
-    public void updateExpenseRecord(ExpenseRecordUpdateCmd cmd) {
+    public Response updateExpenseRecord(ExpenseRecordUpdateCmd cmd) {
         log.info("expenseRecordUpdateCmd: {}", cmd);
         expenseRecordValidator.valid(cmd);
 
@@ -132,9 +134,10 @@ public class ExpenseApplicationService {
         final ExpenseRecord expenseRecord = domainRecordConverter.toExpenseRecord(cmd);
         expenseProject.updateExpenseRecord(expenseRecord);
         expenseProjectGateway.save(expenseProject);
+        return Response.buildSuccess();
     }
 
-    public void deleteExpenseRecord(ExpenseRecordDeleteCmd cmd) {
+    public Response deleteExpenseRecord(ExpenseRecordDeleteCmd cmd) {
         log.info("ExpenseRecordDeleteCmd:{}", cmd);
         Assert.notNull(cmd.getProjectId(), "项目id不能为空");
         Assert.notNull(cmd.getRecordId(), "记录id不能为空");
@@ -144,6 +147,7 @@ public class ExpenseApplicationService {
 
         expenseProject.removeRecord(cmd.getRecordId());
         expenseProjectGateway.save(expenseProject);
+        return Response.buildSuccess();
     }
 
     public SingleResponse<List<ExpenseRecordDTO>> listRecord(ExpenseRecordQry qry) {
@@ -152,7 +156,7 @@ public class ExpenseApplicationService {
         final Optional<ExpenseProject> projectOpt = expenseProjectGateway.getProjectById(projectId);
         Assert.isTrue(projectOpt.isPresent(), "项目不存在");
 
-        if (!Objects.equals(qry.getOperatorId(), projectOpt.get().getCreateUserId())) {
+        if (!projectOpt.get().isOwnedBy(qry.getOperatorId())) {
             return SingleResponse.of(Collections.emptyList());
         }
 

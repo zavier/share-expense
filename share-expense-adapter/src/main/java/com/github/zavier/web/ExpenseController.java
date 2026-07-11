@@ -47,22 +47,22 @@ public class ExpenseController {
     @PostMapping("/project/addRecord")
     public ResponseVo saveExpenseRecord(@RequestBody ExpenseRecordAddCmd expenseRecordAddCmd) {
         expenseRecordAddCmd.setOperatorId(UserHolder.getUser().getUserId());
-        expenseApplicationService.addExpenseRecord(expenseRecordAddCmd);
-        return ResponseVo.buildSuccess();
+        final Response response = expenseApplicationService.addExpenseRecord(expenseRecordAddCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @PostMapping("/project/deleteRecord")
     public ResponseVo deleteExpenseRecord(@RequestBody ExpenseRecordDeleteCmd expenseRecordDeleteCmd) {
         expenseRecordDeleteCmd.setOperatorId(UserHolder.getUser().getUserId());
-        expenseApplicationService.deleteExpenseRecord(expenseRecordDeleteCmd);
-        return ResponseVo.buildSuccess();
+        final Response response = expenseApplicationService.deleteExpenseRecord(expenseRecordDeleteCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @PostMapping("/project/updateRecord")
     public ResponseVo updateExpenseRecord(@RequestBody ExpenseRecordUpdateCmd expenseRecordUpdateCmd) {
         expenseRecordUpdateCmd.setOperatorId(UserHolder.getUser().getUserId());
-        expenseApplicationService.updateExpenseRecord(expenseRecordUpdateCmd);
-        return ResponseVo.buildSuccess();
+        final Response response = expenseApplicationService.updateExpenseRecord(expenseRecordUpdateCmd);
+        return ResponseVo.buildFromResponse(response);
     }
 
     @GetMapping("/project/listRecord")
@@ -83,7 +83,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/project/addMember")
-    private ResponseVo addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
+    public ResponseVo addProjectMember(@RequestBody ProjectMemberAddCmd projectMemberAddCmd) {
         projectMemberAddCmd.setOperatorId(UserHolder.getUser().getUserId());
         final Response response =  expenseApplicationService.addProjectMember(projectMemberAddCmd);
         return ResponseVo.buildFromResponse(response);
@@ -91,7 +91,7 @@ public class ExpenseController {
 
     // 下拉列表使用
     @GetMapping("/project/listMember")
-    private SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
+    public SingleResponseVo<List<ExpenseProjectMemberDTO>> listProjectMember(ProjectMemberListQry projectMemberListQry) {
         projectMemberListQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = expenseApplicationService.listProjectMember(projectMemberListQry);
         return SingleResponseVo.buildFromSingleResponse(listSingleResponse);
@@ -99,7 +99,7 @@ public class ExpenseController {
 
     // 表格组件使用
     @GetMapping("/project/pageMember")
-    private SingleResponseVo pageProjectMember(ProjectMemberListQry projectMemberListQry) {
+    public SingleResponseVo pageProjectMember(ProjectMemberListQry projectMemberListQry) {
         projectMemberListQry.setOperatorId(UserHolder.getUser().getUserId());
         final SingleResponse<List<ExpenseProjectMemberDTO>> listSingleResponse = expenseApplicationService.listProjectMember(projectMemberListQry);
         final List<ExpenseProjectMemberDTO> data = listSingleResponse.getData();
@@ -133,8 +133,10 @@ public class ExpenseController {
     public void exportFeeRecordDetail(@RequestParam Integer projectId, HttpServletResponse response) throws Exception {
         final SingleResponse<List<ExpenseRecordExcelBO>> execute = expenseApplicationService.exportRecords(projectId, UserHolder.getUser().getUserId());
         Assert.isTrue(execute.isSuccess(), "导出异常");
+        final List<ExpenseRecordExcelBO> data = execute.getData();
+        Assert.isTrue(data != null && !data.isEmpty(), "无费用记录可供导出");
 
-        final String fileName = execute.getData().get(0).getProjectName() + "-费用信息.xlsx";
+        final String fileName = data.get(0).getProjectName() + "-费用信息.xlsx";
 
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         final String header = ContentDisposition.attachment()
