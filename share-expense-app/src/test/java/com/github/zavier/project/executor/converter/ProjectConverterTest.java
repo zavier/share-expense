@@ -2,7 +2,6 @@ package com.github.zavier.project.executor.converter;
 
 
 import com.alibaba.cola.exception.BizException;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.dto.ProjectAddCmd;
 import org.junit.Before;
@@ -48,7 +47,6 @@ public class ProjectConverterTest {
         assertEquals(validProjectAddCmd.getProjectName(), expenseProject.getName());
         assertEquals(validProjectAddCmd.getProjectDesc(), expenseProject.getDescription());
         assertFalse(expenseProject.getLocked());
-        assertEquals(ChangingStatus.NEW, expenseProject.getChangingStatus());
         assertEquals(validProjectAddCmd.getMembers(), expenseProject.listAllMember());
     }
 

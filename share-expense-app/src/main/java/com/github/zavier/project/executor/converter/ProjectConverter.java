@@ -1,6 +1,5 @@
 package com.github.zavier.project.executor.converter;
 
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.dto.ProjectAddCmd;
@@ -29,7 +28,6 @@ public class ProjectConverter {
         expenseProject.setName(projectAddCmd.getProjectName());
         expenseProject.setDescription(projectAddCmd.getProjectDesc());
         expenseProject.setLocked(false);
-        expenseProject.setChangingStatus(ChangingStatus.NEW);
 
         expenseProject.addMembers(projectAddCmd.getMembers());
         expenseProject.checkUserIdExist();

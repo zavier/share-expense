@@ -1,7 +1,6 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.Assert;
-import com.github.zavier.domain.common.ChangingStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -64,19 +63,6 @@ public class ExpenseProject {
     @Setter
     private Boolean locked;
 
-    @Getter
-    @Setter
-    private ChangingStatus changingStatus = ChangingStatus.UNCHANGED;
-
-    @Getter
-    @Setter
-    private ChangingStatus recordChangingStatus = ChangingStatus.UNCHANGED;
-
-    @Getter
-    @Setter
-    private ChangingStatus memberChangingStatus = ChangingStatus.UNCHANGED;
-
-
     public ProjectSharingFee calcMemberSharingFee() {
         // 计算每个成员的费用项的分摊
         final List<MemberRecordFee> memberFeeDetailList = expenseRecordList.stream()
@@ -101,12 +87,6 @@ public class ExpenseProject {
 
     public void addExpenseRecord(ExpenseRecord expenseRecord) {
         expenseRecordList.add(expenseRecord);
-
-        if (recordChangingStatus == ChangingStatus.UNCHANGED) {
-            setRecordChangingStatus(ChangingStatus.NEW);
-        }
-
-        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public boolean updateExpenseRecord(ExpenseRecord updateRecord) {
@@ -116,47 +96,18 @@ public class ExpenseProject {
         Assert.isTrue(findRecordList.size() == 1, "费用明细不存在或存在多条:" + updateRecord.getId());
         final ExpenseRecord expenseRecord = findRecordList.get(0);
 
-        final boolean update = expenseRecord.updateInfo(updateRecord);
-
-        if (update && recordChangingStatus == ChangingStatus.UNCHANGED) {
-
-            setRecordChangingStatus(ChangingStatus.UPDATED);
-
-            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
-        }
-
-        return update;
+        return expenseRecord.updateInfo(updateRecord);
     }
 
     public void removeRecord(Integer recordId) {
         final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
         Assert.isTrue(removed, "费用明细不存在:" + recordId);
-        setRecordChangingStatus(ChangingStatus.DELETED);
-
-        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public void addMember(String name) {
         Assert.isTrue(StringUtils.isNotBlank(name), "用户名不能为空");
         final boolean add = members.add(name);
         Assert.isTrue(add, "添加用户已存在:" + name);
-
-        if (memberChangingStatus == ChangingStatus.UNCHANGED) {
-            setMemberChangingStatus(ChangingStatus.NEW);
-            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
-        }
-    }
-
-    public void resetChangeStatus() {
-        setChangingStatus(ChangingStatus.UNCHANGED);
-        setMemberChangingStatus(ChangingStatus.UNCHANGED);
-        setRecordChangingStatus(ChangingStatus.UNCHANGED);
-    }
-
-    private void setChangingStatusIfNotChanged(ChangingStatus updateStatus) {
-        if (changingStatus == ChangingStatus.UNCHANGED) {
-            setChangingStatus(updateStatus);
-        }
     }
 
     public void addMembers(List<String> names) {

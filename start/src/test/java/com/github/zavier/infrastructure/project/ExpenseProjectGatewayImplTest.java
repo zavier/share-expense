@@ -3,7 +3,6 @@ package com.github.zavier.infrastructure.project;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.exception.BizException;
 import com.github.zavier.Application;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
@@ -49,9 +48,6 @@ public class ExpenseProjectGatewayImplTest {
         testProject.setCreateUserId(1);
         testProject.setLocked(false);
         testProject.setVersion(0);
-        testProject.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.NEW);
-        testProject.setMemberChangingStatus(com.github.zavier.domain.common.ChangingStatus.NEW);
-        testProject.setRecordChangingStatus(com.github.zavier.domain.common.ChangingStatus.UNCHANGED);
 
         // Add members
         testProject.addMember("Alice");
@@ -91,8 +87,6 @@ public class ExpenseProjectGatewayImplTest {
 
         final ExpenseProject expenseProject = found.get();
         expenseProject.addExpenseRecord(record1);
-        expenseProject.setRecordChangingStatus(ChangingStatus.NEW);
-        expenseProject.setChangingStatus(ChangingStatus.UPDATED);
 
         // When
         expenseProjectGateway.save(expenseProject);
@@ -117,7 +111,6 @@ public class ExpenseProjectGatewayImplTest {
 
         // When - update project
         testProject.setName("Updated Project");
-        testProject.setChangingStatus(ChangingStatus.UPDATED);
         System.out.println("Before second save, version: " + testProject.getVersion());
         expenseProjectGateway.save(testProject);
         System.out.println("After second save, version: " + testProject.getVersion());
@@ -181,9 +174,6 @@ public class ExpenseProjectGatewayImplTest {
             project.setCreateUserId(1);
             project.setLocked(false);
             project.setVersion(0);
-            project.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.NEW);
-            project.setMemberChangingStatus(com.github.zavier.domain.common.ChangingStatus.UNCHANGED);
-            project.setRecordChangingStatus(com.github.zavier.domain.common.ChangingStatus.UNCHANGED);
             expenseProjectGateway.save(project);
         }
 
@@ -211,9 +201,6 @@ public class ExpenseProjectGatewayImplTest {
         project2.setCreateUserId(1);
         project2.setLocked(false);
         project2.setVersion(0);
-        project2.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.NEW);
-        project2.setMemberChangingStatus(com.github.zavier.domain.common.ChangingStatus.UNCHANGED);
-        project2.setRecordChangingStatus(com.github.zavier.domain.common.ChangingStatus.UNCHANGED);
         expenseProjectGateway.save(project2);
 
         ProjectListQry query = new ProjectListQry();
@@ -238,8 +225,6 @@ public class ExpenseProjectGatewayImplTest {
 
         // When - add new member
         testProject.addMember("Charlie");
-        testProject.setMemberChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
-        testProject.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
         expenseProjectGateway.save(testProject);
 
         // Then
@@ -271,16 +256,12 @@ public class ExpenseProjectGatewayImplTest {
         record2.addConsumer("Alice");
         testProject.addExpenseRecord(record2);
 
-        testProject.setRecordChangingStatus(com.github.zavier.domain.common.ChangingStatus.NEW);
-        testProject.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
         expenseProjectGateway.save(testProject);
         assertEquals(2, testProject.listAllExpenseRecord().size());
 
         // When - remove one record
         Integer record1Id = testProject.listAllExpenseRecord().get(0).getId();
         testProject.removeRecord(record1Id);
-        testProject.setRecordChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
-        testProject.setChangingStatus(com.github.zavier.domain.common.ChangingStatus.UPDATED);
         expenseProjectGateway.save(testProject);
 
         // Then
