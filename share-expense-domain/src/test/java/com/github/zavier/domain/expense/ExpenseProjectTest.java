@@ -1,7 +1,7 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.BizException;
-import com.github.zavier.domain.common.ChangingStatus;
+
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -25,7 +25,6 @@ public class ExpenseProjectTest {
 
         assertTrue(project.containsMember("Alice"));
         assertEquals(1, project.totalMember());
-        assertEquals(ChangingStatus.NEW, project.getMemberChangingStatus());
     }
 
     @Test(expected = BizException.class)
@@ -69,7 +68,6 @@ public class ExpenseProjectTest {
         project.addExpenseRecord(record);
 
         assertEquals(1, project.listAllExpenseRecord().size());
-        assertEquals(ChangingStatus.NEW, project.getRecordChangingStatus());
     }
 
     @Test
@@ -77,7 +75,6 @@ public class ExpenseProjectTest {
         ExpenseProject project = createProjectWithMembers();
         ExpenseRecord record = createRecord(1, "Alice", 100);
         project.addExpenseRecord(record);
-        project.resetChangeStatus();
 
         ExpenseRecord updateRecord = createRecord(1, "Bob", 200);
         updateRecord.addConsumer("Charlie");
@@ -93,13 +90,11 @@ public class ExpenseProjectTest {
         ExpenseProject project = createProjectWithMembers();
         ExpenseRecord record = createRecord(1, "Alice", 100);
         project.addExpenseRecord(record);
-        project.resetChangeStatus();
 
         ExpenseRecord updateRecord = createRecord(1, "Alice", 100);
         boolean updated = project.updateExpenseRecord(updateRecord);
 
         assertFalse(updated);
-        assertEquals(ChangingStatus.UNCHANGED, project.getRecordChangingStatus());
     }
 
     @Test(expected = BizException.class)
@@ -118,7 +113,6 @@ public class ExpenseProjectTest {
         project.removeRecord(1);
 
         assertEquals(0, project.listAllExpenseRecord().size());
-        assertEquals(ChangingStatus.DELETED, project.getRecordChangingStatus());
     }
 
     @Test(expected = BizException.class)
@@ -363,21 +357,6 @@ public class ExpenseProjectTest {
     public void containsRecord_nonExisting_shouldReturnFalse() {
         ExpenseProject project = createProjectWithMembers();
         assertFalse(project.containsRecord(999));
-    }
-
-    // ==================== resetChangeStatus ====================
-
-    @Test
-    public void resetChangeStatus_shouldResetAll() {
-        ExpenseProject project = createProjectWithMembers();
-        ExpenseRecord record = createRecord(1, "Alice", 100);
-        project.addExpenseRecord(record);
-
-        project.resetChangeStatus();
-
-        assertEquals(ChangingStatus.UNCHANGED, project.getChangingStatus());
-        assertEquals(ChangingStatus.UNCHANGED, project.getMemberChangingStatus());
-        assertEquals(ChangingStatus.UNCHANGED, project.getRecordChangingStatus());
     }
 
     // ==================== helpers ====================

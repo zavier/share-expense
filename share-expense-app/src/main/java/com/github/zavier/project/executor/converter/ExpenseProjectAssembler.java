@@ -1,6 +1,6 @@
 package com.github.zavier.project.executor.converter;
 
-import com.github.zavier.domain.common.ChangingStatus;
+
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.MemberProjectFee;
@@ -54,7 +54,6 @@ public final class ExpenseProjectAssembler {
         expenseProject.setName(cmd.getProjectName());
         expenseProject.setDescription(cmd.getProjectDesc());
         expenseProject.setLocked(false);
-        expenseProject.setChangingStatus(ChangingStatus.NEW);
 
         expenseProject.addMembers(cmd.getMembers());
         expenseProject.checkUserIdExist();
