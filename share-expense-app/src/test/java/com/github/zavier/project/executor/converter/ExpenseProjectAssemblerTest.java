@@ -13,7 +13,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class ProjectConverterTest {
+public class ExpenseProjectAssemblerTest {
 
     private ProjectAddCmd validProjectAddCmd;
     private ProjectAddCmd invalidUserIdProjectAddCmd;
@@ -41,8 +41,8 @@ public class ProjectConverterTest {
     }
 
     @Test
-    public void convert2AddProject_ValidInput_ShouldConvertSuccessfully() {
-        ExpenseProject expenseProject = ProjectConverter.convert2AddProject(validProjectAddCmd);
+    public void toExpenseProject_ValidInput_ShouldConvertSuccessfully() {
+        ExpenseProject expenseProject = ExpenseProjectAssembler.toExpenseProject(validProjectAddCmd);
 
         assertEquals(validProjectAddCmd.getCreateUserId(), expenseProject.getCreateUserId());
         assertEquals(validProjectAddCmd.getProjectName(), expenseProject.getName());
@@ -53,10 +53,10 @@ public class ProjectConverterTest {
     }
 
     @Test
-    public void convert2AddProject_InvalidUserId_ShouldThrowException() {
+    public void toExpenseProject_InvalidUserId_ShouldThrowException() {
         invalidUserIdProjectAddCmd.setCreateUserId(null);
         try {
-            ProjectConverter.convert2AddProject(invalidUserIdProjectAddCmd);
+            ExpenseProjectAssembler.toExpenseProject(invalidUserIdProjectAddCmd);
             fail();
         } catch (BizException e) {
             assertEquals("创建人不能为空", e.getMessage());
@@ -64,9 +64,9 @@ public class ProjectConverterTest {
     }
 
     @Test
-    public void convert2AddProject_InvalidProjectName_ShouldThrowException() {
+    public void toExpenseProject_InvalidProjectName_ShouldThrowException() {
         try {
-            ProjectConverter.convert2AddProject(invalidProjectNameProjectAddCmd);
+            ExpenseProjectAssembler.toExpenseProject(invalidProjectNameProjectAddCmd);
             fail();
         } catch (BizException e) {
             assertEquals("项目名称不能为空", e.getMessage());

@@ -105,8 +105,6 @@ public class ExpenseProject {
         if (recordChangingStatus == ChangingStatus.UNCHANGED) {
             setRecordChangingStatus(ChangingStatus.NEW);
         }
-
-        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public boolean updateExpenseRecord(ExpenseRecord updateRecord) {
@@ -119,10 +117,7 @@ public class ExpenseProject {
         final boolean update = expenseRecord.updateInfo(updateRecord);
 
         if (update && recordChangingStatus == ChangingStatus.UNCHANGED) {
-
             setRecordChangingStatus(ChangingStatus.UPDATED);
-
-            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
         }
 
         return update;
@@ -132,8 +127,6 @@ public class ExpenseProject {
         final boolean removed = expenseRecordList.removeIf(it -> Objects.equals(it.getId(), recordId));
         Assert.isTrue(removed, "费用明细不存在:" + recordId);
         setRecordChangingStatus(ChangingStatus.DELETED);
-
-        setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
     }
 
     public void addMember(String name) {
@@ -143,7 +136,6 @@ public class ExpenseProject {
 
         if (memberChangingStatus == ChangingStatus.UNCHANGED) {
             setMemberChangingStatus(ChangingStatus.NEW);
-            setChangingStatusIfNotChanged(ChangingStatus.UPDATED);
         }
     }
 
@@ -151,12 +143,6 @@ public class ExpenseProject {
         setChangingStatus(ChangingStatus.UNCHANGED);
         setMemberChangingStatus(ChangingStatus.UNCHANGED);
         setRecordChangingStatus(ChangingStatus.UNCHANGED);
-    }
-
-    private void setChangingStatusIfNotChanged(ChangingStatus updateStatus) {
-        if (changingStatus == ChangingStatus.UNCHANGED) {
-            setChangingStatus(updateStatus);
-        }
     }
 
     public void addMembers(List<String> names) {

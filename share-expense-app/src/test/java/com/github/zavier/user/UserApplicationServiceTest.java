@@ -5,6 +5,8 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.UnitTestBase;
 import com.github.zavier.domain.user.User;
+import com.github.zavier.domain.user.domainservice.PasswordEncoder;
+import com.github.zavier.domain.user.domainservice.TokenProvider;
 import com.github.zavier.domain.user.domainservice.UserValidator;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserAddCmd;
@@ -28,6 +30,12 @@ public class UserApplicationServiceTest extends UnitTestBase {
     @Mock
     private UserValidator userValidator;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private TokenProvider tokenProvider;
+
     @InjectMocks
     private UserApplicationService userApplicationService;
 
@@ -38,6 +46,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
         cmd.setEmail("test@example.com");
         cmd.setPassword("password123");
 
+        when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
         when(userGateway.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
             u.setUserId(1);
@@ -50,6 +59,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
         verify(userValidator).validateUserName("testuser");
         verify(userValidator).validateEmail("test@example.com");
         verify(userValidator).validatePassword("password123");
+        verify(passwordEncoder).encode("password123");
         verify(userGateway).save(any(User.class));
     }
 
@@ -74,8 +84,8 @@ public class UserApplicationServiceTest extends UnitTestBase {
         cmd.setPassword("correct");
 
         User mockUser = mock(User.class);
-        when(mockUser.checkPassword("correct")).thenReturn(true);
-        when(mockUser.generateToken()).thenReturn("jwt-token-123");
+        when(mockUser.checkPassword("correct", passwordEncoder)).thenReturn(true);
+        when(mockUser.generateToken(tokenProvider)).thenReturn("jwt-token-123");
 
         when(userGateway.getByUserName("testuser")).thenReturn(Optional.of(mockUser));
 

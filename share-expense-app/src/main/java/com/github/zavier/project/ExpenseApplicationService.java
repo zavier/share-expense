@@ -14,12 +14,9 @@ import com.github.zavier.dto.*;
 import com.github.zavier.dto.data.*;
 import com.github.zavier.dto.data.statistics.PieStatisticsDTO;
 import com.github.zavier.project.executor.bo.ExpenseRecordExcelBO;
-import com.github.zavier.project.executor.converter.ExpenseRecordConverter;
-import com.github.zavier.project.executor.converter.ProjectConverter;
-import com.github.zavier.project.executor.converter.SharingConverter;
+import com.github.zavier.project.executor.converter.ExpenseProjectAssembler;
 import com.github.zavier.utils.FreemarkerUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -40,13 +37,10 @@ public class ExpenseApplicationService {
     @Resource
     private ExpenseRecordValidator expenseRecordValidator;
 
-    @Resource
-    private com.github.zavier.domain.expense.domainservice.ExpenseRecordConverter domainRecordConverter;
-
     // ==================== 项目操作 ====================
 
     public SingleResponse<Integer> createProject(ProjectAddCmd projectAddCmd) {
-        final ExpenseProject expenseProject = ProjectConverter.convert2AddProject(projectAddCmd);
+        final ExpenseProject expenseProject = ExpenseProjectAssembler.toExpenseProject(projectAddCmd);
         expenseProjectGateway.save(expenseProject);
         return SingleResponse.of(expenseProject.getId());
     }
@@ -84,12 +78,7 @@ public class ExpenseApplicationService {
             return SingleResponse.of(Collections.emptyList());
         }
 
-        final List<ExpenseProjectMemberDTO> collect = expenseProject.listAllMember().stream().map(it -> {
-            final ExpenseProjectMemberDTO dto = new ExpenseProjectMemberDTO();
-            dto.setMember(it);
-            dto.setProjectId(qry.getProjectId());
-            return dto;
-        }).collect(Collectors.toList());
+        final List<ExpenseProjectMemberDTO> collect = ExpenseProjectAssembler.toMemberDTOList(expenseProject);
         return SingleResponse.of(collect);
     }
 
@@ -119,7 +108,7 @@ public class ExpenseApplicationService {
 
         final ExpenseProject expenseProject = getAuthorizedProject(cmd.getProjectId(), cmd.getOperatorId());
 
-        final ExpenseRecord expenseRecord = domainRecordConverter.toExpenseRecord(cmd);
+        final ExpenseRecord expenseRecord = ExpenseProjectAssembler.toExpenseRecord(cmd);
         expenseProject.addExpenseRecord(expenseRecord);
         expenseProjectGateway.save(expenseProject);
         return Response.buildSuccess();
@@ -131,7 +120,7 @@ public class ExpenseApplicationService {
 
         final ExpenseProject expenseProject = getAuthorizedProject(cmd.getProjectId(), cmd.getOperatorId());
 
-        final ExpenseRecord expenseRecord = domainRecordConverter.toExpenseRecord(cmd);
+        final ExpenseRecord expenseRecord = ExpenseProjectAssembler.toExpenseRecord(cmd);
         expenseProject.updateExpenseRecord(expenseRecord);
         expenseProjectGateway.save(expenseProject);
         return Response.buildSuccess();
@@ -161,7 +150,7 @@ public class ExpenseApplicationService {
         }
 
         final List<ExpenseRecordDTO> collect = projectOpt.get().listAllExpenseRecord().stream()
-                .map(ProjectConverter::convertToDTO)
+                .map(ExpenseProjectAssembler::toRecordDTO)
                 .collect(Collectors.toList());
         return SingleResponse.of(collect);
     }
@@ -177,7 +166,7 @@ public class ExpenseApplicationService {
         Assert.isTrue(Objects.equals(expenseProject.getCreateUserId(), qry.getOperatorId()), "没有权限查看");
 
         final ProjectSharingFee projectSharingFee = expenseProject.calcMemberSharingFee();
-        final List<UserSharingDTO> sharingDTOList = SharingConverter.convert(projectSharingFee);
+        final List<UserSharingDTO> sharingDTOList = ExpenseProjectAssembler.toSharingDTOList(projectSharingFee);
         return SingleResponse.of(sharingDTOList);
     }
 
@@ -186,7 +175,7 @@ public class ExpenseApplicationService {
 
         final List<ExpenseRecord> expenseRecords = expenseProject.listAllExpenseRecord();
         final List<ExpenseRecordExcelBO> collect = expenseRecords.stream()
-                .map(ExpenseRecordConverter::convert)
+                .map(ExpenseProjectAssembler::toExcelBO)
                 .map(it -> {
                     it.setProjectName(expenseProject.getName());
                     return it;

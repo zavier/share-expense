@@ -2,7 +2,7 @@ package com.github.zavier.ai.monitoring.controller;
 
 import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.monitoring.dto.AiMonitoringLogDto;
-import com.github.zavier.ai.monitoring.dto.ErrorAnalysisDto;
+
 import com.github.zavier.ai.monitoring.service.AiMonitoringService;
 import com.github.zavier.web.filter.UserHolder;
 import com.github.zavier.vo.SingleResponseVo;

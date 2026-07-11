@@ -6,6 +6,8 @@ import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
 import com.alibaba.cola.exception.Assert;
 import com.github.zavier.domain.user.User;
+import com.github.zavier.domain.user.domainservice.PasswordEncoder;
+import com.github.zavier.domain.user.domainservice.TokenProvider;
 import com.github.zavier.domain.user.domainservice.UserValidator;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserAddCmd;
@@ -34,6 +36,12 @@ public class UserApplicationService {
     @Resource
     private WxGateWay wxGateWay;
 
+    @Resource
+    private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private TokenProvider tokenProvider;
+
     public Response addUser(UserAddCmd userAddCmd) {
         userValidator.validateUserName(userAddCmd.getUsername());
         userValidator.validateEmail(userAddCmd.getEmail());
@@ -42,7 +50,7 @@ public class UserApplicationService {
         User user = new User();
         user.setUserName(userAddCmd.getUsername());
         user.setEmail(userAddCmd.getEmail());
-        user.setPasswordHash(user.generatePasswordHash(userAddCmd.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(userAddCmd.getPassword()));
         userGateway.save(user);
         return Response.buildSuccess();
     }
@@ -91,12 +99,12 @@ public class UserApplicationService {
         }
 
         final User user = userOpt.get();
-        final boolean pwdSuccess = user.checkPassword(userLoginCmd.getPassword());
+        final boolean pwdSuccess = user.checkPassword(userLoginCmd.getPassword(), passwordEncoder);
         if (!pwdSuccess) {
             return SingleResponse.buildFailure("-1", "用户名/密码错误");
         }
 
-        final String token = user.generateToken();
+        final String token = user.generateToken(tokenProvider);
         return SingleResponse.of(token);
     }
 
@@ -105,13 +113,13 @@ public class UserApplicationService {
         final Optional<User> userOpt = userGateway.getByOpenId(openId);
         if (userOpt.isPresent()) {
             final User user = userOpt.get();
-            final String token = user.generateToken();
+            final String token = user.generateToken(tokenProvider);
             return SingleResponse.of(token);
         }
 
         // 不存在则注册
         final User user = saveWxUser(openId);
-        final String token = user.generateToken();
+        final String token = user.generateToken(tokenProvider);
         return SingleResponse.of(token);
     }
 
@@ -120,7 +128,7 @@ public class UserApplicationService {
         final String userName = user.generateWxUserName();
         user.setUserName(userName);
         user.setEmail("");
-        user.setPasswordHash(user.generatePasswordHash(userName));
+        user.setPasswordHash(passwordEncoder.encode(userName));
         user.setOpenId(openId);
         userGateway.save(user);
         return user;

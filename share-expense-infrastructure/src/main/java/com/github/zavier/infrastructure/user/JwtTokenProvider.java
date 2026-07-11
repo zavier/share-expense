@@ -1,9 +1,11 @@
-package com.github.zavier.domain.utils;
+package com.github.zavier.infrastructure.user;
 
 import com.alibaba.cola.exception.BizException;
 import com.github.zavier.domain.user.User;
+import com.github.zavier.domain.user.domainservice.TokenProvider;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -11,17 +13,17 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
- * 用户登录相关加解密工具
- *
+ * JWT Token 提供者实现
  */
-public class TokenHelper {
+@Component
+public class JwtTokenProvider implements TokenProvider {
 
     private static final String SECRET_KEY = "y=VFgqXLbQ,55v]H.kB0J=e)*1ND1q:B!,%CZ^";
 
-    private static SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
-    public static String generateToken(User user) {
-        // 30天有效
+    @Override
+    public String generateToken(User user) {
         final LocalDateTime localDateTime = LocalDateTime.now().plusDays(30);
         return Jwts.builder().subject(user.getUserName())
                 .claim("userId", user.getUserId())
@@ -30,22 +32,20 @@ public class TokenHelper {
                 .signWith(key).compact();
     }
 
-    public static boolean verifyToken(String token) {
+    @Override
+    public boolean verifyToken(String token) {
         final JwtParser jwtParser = Jwts.parser().verifyWith(key).build();
         try {
             final Jws<Claims> claims = jwtParser.parseSignedClaims(token);
             final Claims payload = claims.getPayload();
-            if (payload.getExpiration().before(new Date())) {
-                return false;
-            }
-
-            return true;
+            return !payload.getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    public static User getUser(String token) {
+    @Override
+    public User getUser(String token) {
         final JwtParser jwtParser = Jwts.parser().verifyWith(key).build();
         try {
             final Jws<Claims> claims = jwtParser.parseSignedClaims(token);
