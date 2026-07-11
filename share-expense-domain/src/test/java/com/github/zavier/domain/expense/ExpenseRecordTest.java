@@ -1,7 +1,7 @@
 package com.github.zavier.domain.expense;
 
 import com.alibaba.cola.exception.BizException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -9,12 +9,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ExpenseRecordTest {
+class ExpenseRecordTest {
 
     @Test
-    public void calcMembersFeeInRecord_payerIsConsumer_shouldSplitCorrectly() {
+    void calcMembersFeeInRecord_payerIsConsumer_shouldSplitCorrectly() {
         final ExpenseRecord expenseRecord = new ExpenseRecord();
         expenseRecord.addConsumer("u1");
         expenseRecord.addConsumer("u2");
@@ -36,7 +36,7 @@ public class ExpenseRecordTest {
     }
 
     @Test
-    public void calcMembersFeeInRecord_payerIsAlsoConsumer_shouldNotDuplicate() {
+    void calcMembersFeeInRecord_payerIsAlsoConsumer_shouldNotDuplicate() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Alice");
         record.addConsumer("Bob");
@@ -59,7 +59,7 @@ public class ExpenseRecordTest {
     }
 
     @Test
-    public void calcMembersFeeInRecord_singleConsumer_payerNotConsumer_shouldHaveTwoEntries() {
+    void calcMembersFeeInRecord_singleConsumer_payerNotConsumer_shouldHaveTwoEntries() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Bob");
         record.setPayMember("Alice");
@@ -72,7 +72,7 @@ public class ExpenseRecordTest {
     }
 
     @Test
-    public void calcMembersFeeInRecord_unevenAmount_shouldUseHighPrecision() {
+    void calcMembersFeeInRecord_unevenAmount_shouldUseHighPrecision() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Alice");
         record.addConsumer("Bob");
@@ -95,7 +95,7 @@ public class ExpenseRecordTest {
     // ==================== addConsumer ====================
 
     @Test
-    public void addConsumer_valid_shouldSucceed() {
+    void addConsumer_valid_shouldSucceed() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Alice");
 
@@ -104,15 +104,15 @@ public class ExpenseRecordTest {
         assertTrue(consumers.contains("Alice"));
     }
 
-    @Test(expected = BizException.class)
-    public void addConsumer_duplicate_shouldThrow() {
+    @Test
+    void addConsumer_duplicate_shouldThrow() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Alice");
-        record.addConsumer("Alice");
+        assertThrows(BizException.class, () -> record.addConsumer("Alice"));
     }
 
     @Test
-    public void addConsumers_list_shouldAddAll() {
+    void addConsumers_list_shouldAddAll() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumers(Arrays.asList("Alice", "Bob", "Charlie"));
 
@@ -120,23 +120,18 @@ public class ExpenseRecordTest {
     }
 
     @Test
-    public void listAllConsumers_shouldReturnUnmodifiable() {
+    void listAllConsumers_shouldReturnUnmodifiable() {
         ExpenseRecord record = new ExpenseRecord();
         record.addConsumer("Alice");
 
         Set<String> consumers = record.listAllConsumers();
-        try {
-            consumers.add("Bob");
-            fail();
-        } catch (UnsupportedOperationException e) {
-            // expected — unmodifiable set
-        }
+        assertThrows(UnsupportedOperationException.class, () -> consumers.add("Bob"));
     }
 
     // ==================== updateInfo ====================
 
     @Test
-    public void updateInfo_allFieldsChanged_shouldReturnTrue() {
+    void updateInfo_allFieldsChanged_shouldReturnTrue() {
         ExpenseRecord original = createRecord(1, 1, "Alice", 100, "餐饮");
         original.addConsumer("Alice");
         original.addConsumer("Bob");
@@ -153,7 +148,7 @@ public class ExpenseRecordTest {
     }
 
     @Test
-    public void updateInfo_noChanges_shouldReturnFalse() {
+    void updateInfo_noChanges_shouldReturnFalse() {
         ExpenseRecord original = createRecord(1, 1, "Alice", 100, "餐饮");
         original.addConsumer("Alice");
         original.addConsumer("Bob");
@@ -166,20 +161,20 @@ public class ExpenseRecordTest {
         assertFalse(changed);
     }
 
-    @Test(expected = BizException.class)
-    public void updateInfo_differentProject_shouldThrow() {
+    @Test
+    void updateInfo_differentProject_shouldThrow() {
         ExpenseRecord original = createRecord(1, 1, "Alice", 100, "餐饮");
         ExpenseRecord update = createRecord(1, 2, "Alice", 100, "餐饮");
 
-        original.updateInfo(update);
+        assertThrows(BizException.class, () -> original.updateInfo(update));
     }
 
-    @Test(expected = BizException.class)
-    public void updateInfo_differentId_shouldThrow() {
+    @Test
+    void updateInfo_differentId_shouldThrow() {
         ExpenseRecord original = createRecord(1, 1, "Alice", 100, "餐饮");
         ExpenseRecord update = createRecord(2, 1, "Alice", 100, "餐饮");
 
-        original.updateInfo(update);
+        assertThrows(BizException.class, () -> original.updateInfo(update));
     }
 
     // ==================== helpers ====================

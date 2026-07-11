@@ -1,25 +1,24 @@
 package com.github.zavier.project.executor.converter;
 
-
 import com.alibaba.cola.exception.BizException;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.dto.ProjectAddCmd;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ExpenseProjectAssemblerTest {
+class ExpenseProjectAssemblerTest {
 
     private ProjectAddCmd validProjectAddCmd;
     private ProjectAddCmd invalidUserIdProjectAddCmd;
     private ProjectAddCmd invalidProjectNameProjectAddCmd;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         validProjectAddCmd = new ProjectAddCmd();
         validProjectAddCmd.setCreateUserId(1);
         validProjectAddCmd.setProjectName("Valid Project");
@@ -40,7 +39,7 @@ public class ExpenseProjectAssemblerTest {
     }
 
     @Test
-    public void toExpenseProject_ValidInput_ShouldConvertSuccessfully() {
+    void toExpenseProject_ValidInput_ShouldConvertSuccessfully() {
         ExpenseProject expenseProject = ExpenseProjectAssembler.toExpenseProject(validProjectAddCmd);
 
         assertEquals(validProjectAddCmd.getCreateUserId(), expenseProject.getCreateUserId());
@@ -51,23 +50,17 @@ public class ExpenseProjectAssemblerTest {
     }
 
     @Test
-    public void toExpenseProject_InvalidUserId_ShouldThrowException() {
+    void toExpenseProject_InvalidUserId_ShouldThrowException() {
         invalidUserIdProjectAddCmd.setCreateUserId(null);
-        try {
-            ExpenseProjectAssembler.toExpenseProject(invalidUserIdProjectAddCmd);
-            fail();
-        } catch (BizException e) {
-            assertEquals("创建人不能为空", e.getMessage());
-        }
+        BizException ex = assertThrows(BizException.class,
+                () -> ExpenseProjectAssembler.toExpenseProject(invalidUserIdProjectAddCmd));
+        assertEquals("创建人不能为空", ex.getMessage());
     }
 
     @Test
-    public void toExpenseProject_InvalidProjectName_ShouldThrowException() {
-        try {
-            ExpenseProjectAssembler.toExpenseProject(invalidProjectNameProjectAddCmd);
-            fail();
-        } catch (BizException e) {
-            assertEquals("项目名称不能为空", e.getMessage());
-        }
+    void toExpenseProject_InvalidProjectName_ShouldThrowException() {
+        BizException ex = assertThrows(BizException.class,
+                () -> ExpenseProjectAssembler.toExpenseProject(invalidProjectNameProjectAddCmd));
+        assertEquals("项目名称不能为空", ex.getMessage());
     }
 }

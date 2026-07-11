@@ -11,18 +11,18 @@ import com.github.zavier.domain.user.domainservice.UserValidator;
 import com.github.zavier.domain.user.gateway.UserGateway;
 import com.github.zavier.dto.UserAddCmd;
 import com.github.zavier.dto.UserLoginCmd;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class UserApplicationServiceTest extends UnitTestBase {
+class UserApplicationServiceTest extends UnitTestBase {
 
     @Mock
     private UserGateway userGateway;
@@ -40,7 +40,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
     private UserApplicationService userApplicationService;
 
     @Test
-    public void addUser_validCmd_shouldReturnSuccess() {
+    void addUser_validCmd_shouldReturnSuccess() {
         UserAddCmd cmd = new UserAddCmd();
         cmd.setUsername("testuser");
         cmd.setEmail("test@example.com");
@@ -64,7 +64,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
     }
 
     @Test
-    public void login_invalidCredentials_shouldReturnFailure() {
+    void login_invalidCredentials_shouldReturnFailure() {
         UserLoginCmd cmd = new UserLoginCmd();
         cmd.setUsername("nonexistent");
         cmd.setPassword("wrong");
@@ -78,7 +78,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
     }
 
     @Test
-    public void login_validCredentials_shouldReturnToken() {
+    void login_validCredentials_shouldReturnToken() {
         UserLoginCmd cmd = new UserLoginCmd();
         cmd.setUsername("testuser");
         cmd.setPassword("correct");
@@ -96,7 +96,7 @@ public class UserApplicationServiceTest extends UnitTestBase {
     }
 
     @Test
-    public void listUser_validQuery_shouldReturnPage() {
+    void listUser_validQuery_shouldReturnPage() {
         com.github.zavier.dto.UserListQry qry = new com.github.zavier.dto.UserListQry();
         qry.setPage(1);
         qry.setSize(10);

@@ -1,14 +1,14 @@
 package com.github.zavier.domain.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.github.zavier.domain.utils.ShareTokenHelper.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ShareTokenHelperTest {
+class ShareTokenHelperTest {
 
     @Test
-    public void test() {
+    void test() {
         String token = "java@test.com";
 
         final String shareTokenBody = generateShareToken(token);

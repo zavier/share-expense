@@ -1,9 +1,11 @@
 package com.github.zavier.domain;
 
+import org.junit.jupiter.api.Test;
 
-public class CustomerEntityTest {
+class CustomerEntityTest {
 
-    public void testCustomerConflict() {
+    @Test
+    void testCustomerConflict() {
         System.out.println("Please mock gatewayimpl, test pure Domain Knowledge");
     }
 }
