@@ -3,7 +3,7 @@ package com.github.zavier.ai.function;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.ai.dto.ExpenseResponseFormat;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.dto.ProjectMemberListQry;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
@@ -37,7 +37,7 @@ import java.util.Map;
 public class ExpenseListProjectsFunction extends BaseExpenseFunction {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 查询用户的所有费用分摊项目。
@@ -81,7 +81,7 @@ public class ExpenseListProjectsFunction extends BaseExpenseFunction {
         qry.setPage(1);
         qry.setSize(limit);
 
-        PageResponse<ProjectDTO> response = projectService.pageProject(qry);
+        PageResponse<ProjectDTO> response = expenseApplicationService.pageProject(qry);
 
         if (!response.isSuccess() || response.getData() == null || response.getData().isEmpty()) {
             String result = "# 您的项目列表\n\n暂无项目";

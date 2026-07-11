@@ -57,6 +57,9 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
         saveProjectMembers(expenseProject);
 
         saveExpenseRecord(expenseProject);
+
+        // 保存完成后重置变更状态，避免下次保存时重复操作
+        expenseProject.resetChangeStatus();
     }
 
     @Override

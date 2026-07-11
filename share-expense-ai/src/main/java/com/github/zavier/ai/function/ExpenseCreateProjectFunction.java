@@ -1,7 +1,7 @@
 package com.github.zavier.ai.function;
 
 import com.alibaba.cola.dto.SingleResponse;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectAddCmd;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
@@ -30,7 +30,7 @@ import java.util.List;
 public class ExpenseCreateProjectFunction extends BaseExpenseFunction {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 创建一个新的费用分摊项目。
@@ -102,7 +102,7 @@ public class ExpenseCreateProjectFunction extends BaseExpenseFunction {
         cmd.setMembers(validMembers);
 
         // 4. 调用业务逻辑
-        SingleResponse<Integer> response = projectService.createProject(cmd);
+        SingleResponse<Integer> response = expenseApplicationService.createProject(cmd);
 
         if (!response.isSuccess()) {
             log.error("[AI工具] createProject 执行失败: {}", response.getErrMessage());

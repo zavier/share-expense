@@ -1,7 +1,7 @@
 package com.github.zavier.ai.monitoring.service;
 
 import com.github.zavier.ai.monitoring.dto.AiMonitoringLogDto;
-import com.github.zavier.ai.monitoring.dto.ErrorAnalysisDto;
+
 import com.github.zavier.ai.monitoring.entity.AiMonitoringLogEntity;
 import com.github.zavier.ai.monitoring.repository.AiMonitoringRepository;
 import jakarta.annotation.Resource;

@@ -2,7 +2,7 @@ package com.github.zavier.web;
 
 
 import com.alibaba.cola.dto.SingleResponse;
-import com.github.zavier.api.StatisticsService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.vo.SingleResponseVo;
 import com.github.zavier.web.filter.UserHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +17,11 @@ import jakarta.annotation.Resource;
 public class StatisticsController {
 
     @Resource
-    private StatisticsService statisticsService;
+    private ExpenseApplicationService expenseApplicationService;
 
     @GetMapping("/project/statistics/expenseType")
     public SingleResponseVo getProjectSharingDetail(@RequestParam Integer projectId) {
-        final SingleResponse<String> pieStatisticsDTOS = statisticsService.statisticsByExpenseType(projectId, UserHolder.getUser().getUserId());
+        final SingleResponse<String> pieStatisticsDTOS = expenseApplicationService.statisticsByExpenseType(projectId, UserHolder.getUser().getUserId());
         if (!pieStatisticsDTOS.isSuccess()) {
             return SingleResponseVo.buildFailure(pieStatisticsDTOS.getErrCode(), pieStatisticsDTOS.getErrMessage());
         }

@@ -1,7 +1,7 @@
 package com.github.zavier.ai.resolver;
 
 import com.alibaba.cola.dto.PageResponse;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.dto.data.ProjectDTO;
 import jakarta.annotation.Resource;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class ProjectIdentifierResolver {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 解析项目标识符（ID或名称）
@@ -88,7 +88,7 @@ public class ProjectIdentifierResolver {
         qry.setPage(1);
         qry.setSize(10);
 
-        PageResponse<ProjectDTO> response = projectService.pageProject(qry);
+        PageResponse<ProjectDTO> response = expenseApplicationService.pageProject(qry);
 
         if (!response.isSuccess() || response.getData() == null || response.getData().isEmpty()) {
             log.debug("[项目标识符解析] 未找到项目: projectName={}, userId={}", projectName, userId);

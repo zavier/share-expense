@@ -2,7 +2,7 @@ package com.github.zavier.ai.function;
 
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.ai.dto.ExpenseResponseFormat;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectSharingQry;
 import com.github.zavier.dto.data.UserSharingDTO;
 import com.github.zavier.web.filter.UserHolder;
@@ -34,7 +34,7 @@ import java.util.List;
 public class ExpenseGetSettlementFunction extends BaseExpenseFunction {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 查询项目的费用结算情况，显示每个人应付或应收的金额。
@@ -122,7 +122,7 @@ public class ExpenseGetSettlementFunction extends BaseExpenseFunction {
         qry.setProjectId(projectId);
         qry.setOperatorId(getCurrentUserId());
 
-        SingleResponse<List<UserSharingDTO>> response = projectService.getProjectSharingDetail(qry);
+        SingleResponse<List<UserSharingDTO>> response = expenseApplicationService.getProjectSharingDetail(qry);
         if (response.isSuccess() && response.getData() != null) {
             return response.getData();
         }

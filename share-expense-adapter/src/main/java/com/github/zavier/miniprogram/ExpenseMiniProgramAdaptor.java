@@ -4,8 +4,8 @@ import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.SingleResponse;
 import com.alibaba.cola.exception.Assert;
 import com.alibaba.fastjson2.JSON;
-import com.github.zavier.api.ProjectService;
-import com.github.zavier.api.UserService;
+import com.github.zavier.project.ExpenseApplicationService;
+import com.github.zavier.user.UserApplicationService;
 import com.github.zavier.domain.utils.ShareTokenHelper;
 import com.github.zavier.dto.ExpenseRecordQry;
 import com.github.zavier.dto.ProjectListQry;
@@ -40,9 +40,9 @@ public class ExpenseMiniProgramAdaptor {
 
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     @GetMapping("/user/login")
     public SingleResponseVo wxLogin(@RequestParam String code, HttpServletResponse httpServletResponse) {
@@ -50,7 +50,7 @@ public class ExpenseMiniProgramAdaptor {
             return SingleResponseVo.buildFailure("WX_LOGIN_FAILED", "微信登录失败");
         }
 
-        final SingleResponse<String> tokenResp = userService.wxLogin(code);
+        final SingleResponse<String> tokenResp = userApplicationService.wxLogin(code);
         if (!tokenResp.isSuccess()) {
             return SingleResponseVo.buildFailure("WX_LOGIN_FAILED", "微信登录失败");
         }
@@ -91,7 +91,7 @@ public class ExpenseMiniProgramAdaptor {
         final ExpenseRecordQry expenseRecordQry = new ExpenseRecordQry();
         expenseRecordQry.setProjectId(projectShareDTO.getProjectId());
         expenseRecordQry.setOperatorId(projectShareDTO.getUserId());
-        final SingleResponse<List<ExpenseRecordDTO>> listSingleResponse = projectService.listRecord(expenseRecordQry);
+        final SingleResponse<List<ExpenseRecordDTO>> listSingleResponse = expenseApplicationService.listRecord(expenseRecordQry);
         Map<String, List<ExpenseRecordDTO>> map = new HashMap<>();
         map.put("rows", listSingleResponse.getData());
         return SingleResponseVo.of(map);
@@ -109,7 +109,7 @@ public class ExpenseMiniProgramAdaptor {
         projectSharingQry.setProjectId(projectShareDTO.getProjectId());
         projectSharingQry.setOperatorId(projectShareDTO.getUserId());
 
-        final SingleResponse<List<UserSharingDTO>> projectSharingDetail = projectService.getProjectSharingDetail(projectSharingQry);
+        final SingleResponse<List<UserSharingDTO>> projectSharingDetail = expenseApplicationService.getProjectSharingDetail(projectSharingQry);
         if (!projectSharingDetail.isSuccess()) {
             return SingleResponseVo.buildFailure(projectSharingDetail.getErrCode(), projectSharingDetail.getErrMessage());
         }
@@ -124,7 +124,7 @@ public class ExpenseMiniProgramAdaptor {
         projectListQry.setPage(1);
         projectListQry.setSize(10);
         projectListQry.setId(projectId);
-        final PageResponse<ProjectDTO> projectDTOPageResponse = projectService.pageProject(projectListQry);
+        final PageResponse<ProjectDTO> projectDTOPageResponse = expenseApplicationService.pageProject(projectListQry);
         if (projectDTOPageResponse.getData().isEmpty()) {
             return false;
         }

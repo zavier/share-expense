@@ -1,6 +1,6 @@
 package com.github.zavier.web.filter;
 
-import com.github.zavier.domain.utils.TokenHelper;
+import com.github.zavier.domain.user.domainservice.TokenProvider;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
@@ -15,6 +15,12 @@ import java.util.Optional;
  * TODO 后续看是否切换到Spring Security
  */
 public class LoginFilter implements Filter {
+
+    private final TokenProvider tokenProvider;
+
+    public LoginFilter(TokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -43,7 +49,7 @@ public class LoginFilter implements Filter {
             // 设置用户信息到上下文
             Optional<String> token = getJwtToken(httpServletRequest);
             if (token.isPresent()) {
-                UserHolder.setUser(TokenHelper.getUser(token.get()));
+                UserHolder.setUser(tokenProvider.getUser(token.get()));
             }
 
             filterChain.doFilter(servletRequest, servletResponse);
@@ -59,7 +65,7 @@ public class LoginFilter implements Filter {
 
     private boolean verifyToken(HttpServletRequest httpServletRequest) {
         final Optional<Cookie> jwtCookie = getJwtCookie(httpServletRequest);
-        return jwtCookie.filter(cookie -> TokenHelper.verifyToken(cookie.getValue())).isPresent();
+        return jwtCookie.filter(cookie -> tokenProvider.verifyToken(cookie.getValue())).isPresent();
     }
 
     private Optional<String> getJwtToken(HttpServletRequest httpServletRequest) {
