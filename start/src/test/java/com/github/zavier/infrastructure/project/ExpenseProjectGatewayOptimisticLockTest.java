@@ -2,7 +2,6 @@ package com.github.zavier.infrastructure.project;
 
 import com.alibaba.cola.exception.BizException;
 import com.github.zavier.Application;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,14 +56,12 @@ public class ExpenseProjectGatewayOptimisticLockTest {
         // When - 第一次更新（版本0 → 1）
         ExpenseProject view1 = expenseProjectGateway.getProjectById(projectId).get();
         view1.setName("Update 1");
-        view1.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view1);
         assertEquals(1, view1.getVersion());
 
         // 第二次更新（版本1 → 2）
         ExpenseProject view2 = expenseProjectGateway.getProjectById(projectId).get();
         view2.setName("Update 2");
-        view2.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view2);
         assertEquals(2, view2.getVersion());
 
@@ -99,7 +96,6 @@ public class ExpenseProjectGatewayOptimisticLockTest {
         ExpenseProject view1 = expenseProjectGateway.getProjectById(projectId).get();
         Integer originalVersion = view1.getVersion();
         view1.setName("Update 1");
-        view1.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view1);
 
         // 第二次更新，如果使用原始版本号应该失败
@@ -110,7 +106,6 @@ public class ExpenseProjectGatewayOptimisticLockTest {
 
         // Then - 验证乐观锁机制正常工作（版本号自动递增）
         view2.setName("Update 2");
-        view2.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view2);
 
         ExpenseProject finalProject = expenseProjectGateway.getProjectById(projectId).get();
@@ -126,12 +121,10 @@ public class ExpenseProjectGatewayOptimisticLockTest {
         // When - 顺序更新，不应该有冲突
         ExpenseProject view1 = expenseProjectGateway.getProjectById(projectId).get();
         view1.setName("Update 1");
-        view1.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view1);
 
         ExpenseProject view2 = expenseProjectGateway.getProjectById(projectId).get();
         view2.setName("Update 2");
-        view2.setChangingStatus(ChangingStatus.UPDATED);
         expenseProjectGateway.save(view2);
 
         // Then - 两次更新都成功
@@ -196,7 +189,6 @@ public class ExpenseProjectGatewayOptimisticLockTest {
         // Given - 不存在的项目ID
         ExpenseProject project = createTestProject("Non-existent");
         project.setId(99999);
-        project.setChangingStatus(ChangingStatus.UPDATED);
 
         // When & Then - 应该抛出异常
         assertThrows(BizException.class, () -> {
@@ -211,9 +203,6 @@ public class ExpenseProjectGatewayOptimisticLockTest {
         project.setCreateUserId(1);
         project.setLocked(false);
         project.setVersion(0);
-        project.setChangingStatus(ChangingStatus.NEW);
-        project.setMemberChangingStatus(ChangingStatus.UNCHANGED);
-        project.setRecordChangingStatus(ChangingStatus.UNCHANGED);
         return project;
     }
 }

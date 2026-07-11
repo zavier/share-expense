@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSON;
 import com.github.zavier.builder.ExpenseProjectBuilder;
 import com.github.zavier.converter.ExpenseProjectConverter;
 import com.github.zavier.converter.ExpenseRecordDoConverter;
-import com.github.zavier.domain.common.ChangingStatus;
 import com.github.zavier.domain.expense.ExpenseProject;
 import com.github.zavier.domain.expense.ExpenseRecord;
 import com.github.zavier.domain.expense.gateway.ExpenseProjectGateway;
@@ -108,51 +107,41 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     }
 
     private Integer saveProject(ExpenseProject expenseProject) {
-        switch (expenseProject.getChangingStatus()) {
-            case NEW:
-                final ExpenseProjectDO projectDO = ExpenseProjectConverter.toInsertDO(expenseProject);
-                final ExpenseProjectDO saved = expenseProjectRepository.save(projectDO);
-                // Sync id and version back to expenseProject
-                expenseProject.setId(saved.getId());
-                expenseProject.setVersion(saved.getVersion());
-                return saved.getId();
-            case UPDATED:
-                Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
-                log.info("更新项目，ID: {}, 当前版本: {}", expenseProject.getId(), expenseProject.getVersion());
-
-                final ExpenseProjectDO existingDO = expenseProjectRepository.findById(expenseProject.getId())
-                        .orElseThrow(() -> new BizException("项目不存在"));
-
-                log.info("数据库中的实体版本: {}", existingDO.getVersion());
-
-                // 修改字段值 - 确保值确实发生变化
-                existingDO.setName(expenseProject.getName());
-                existingDO.setDescription(expenseProject.getDescription());
-                existingDO.setLocked(expenseProject.getLocked());
-
-                // 使用 saveAndFlush 强制立即执行 SQL 并刷新持久化上下文
-                final ExpenseProjectDO updated = expenseProjectRepository.saveAndFlush(existingDO);
-
-                log.info("更新后实体版本: {}", updated.getVersion());
-
-                // Sync version back to expenseProject
-                expenseProject.setVersion(updated.getVersion());
-                return expenseProject.getId();
-            case UNCHANGED:
-                Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
-                log.info("项目无变化，无需更新");
-                return expenseProject.getId();
-            default:
-                throw new BizException("不支持的操作");
+        if (expenseProject.getId() == null) {
+            // insert
+            final ExpenseProjectDO projectDO = ExpenseProjectConverter.toInsertDO(expenseProject);
+            final ExpenseProjectDO saved = expenseProjectRepository.save(projectDO);
+            // Sync id and version back to expenseProject
+            expenseProject.setId(saved.getId());
+            expenseProject.setVersion(saved.getVersion());
+            return saved.getId();
         }
+
+        // update
+        Assert.notNull(expenseProject.getId(), "费用项目ID不能为空");
+        log.info("更新项目，ID: {}, 当前版本: {}", expenseProject.getId(), expenseProject.getVersion());
+
+        final ExpenseProjectDO existingDO = expenseProjectRepository.findById(expenseProject.getId())
+                .orElseThrow(() -> new BizException("项目不存在"));
+
+        log.info("数据库中的实体版本: {}", existingDO.getVersion());
+
+        // 修改字段值 - 确保值确实发生变化
+        existingDO.setName(expenseProject.getName());
+        existingDO.setDescription(expenseProject.getDescription());
+        existingDO.setLocked(expenseProject.getLocked());
+
+        // 使用 saveAndFlush 强制立即执行 SQL 并刷新持久化上下文
+        final ExpenseProjectDO updated = expenseProjectRepository.saveAndFlush(existingDO);
+
+        log.info("更新后实体版本: {}", updated.getVersion());
+
+        // Sync version back to expenseProject
+        expenseProject.setVersion(updated.getVersion());
+        return expenseProject.getId();
     }
 
     private void saveProjectMembers(ExpenseProject expenseProject) {
-        if (expenseProject.getMemberChangingStatus() == ChangingStatus.UNCHANGED) {
-            log.info("成员无变化，无需更新");
-            return;
-        }
-
         // 删除关联的人员
         expenseProjectMemberRepository.deleteByProjectId(expenseProject.getId());
 
@@ -165,11 +154,6 @@ public class ExpenseProjectGatewayImpl implements ExpenseProjectGateway {
     }
 
     private void saveExpenseRecord(ExpenseProject project) {
-        if (project.getRecordChangingStatus() == ChangingStatus.UNCHANGED) {
-            log.info("费用记录无变化，无需更新");
-            return;
-        }
-
         // 删除关联的费用消费人员（子表）- 使用批量 DELETE 语句，不加载实体到内存
         expenseRecordConsumerRepository.deleteByProjectId(project.getId());
         // 删除关联的费用（父表）- 使用批量 DELETE 语句，不加载实体到内存
