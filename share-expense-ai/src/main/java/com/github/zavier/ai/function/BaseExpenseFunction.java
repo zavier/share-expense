@@ -1,7 +1,7 @@
 package com.github.zavier.ai.function;
 
 import com.github.zavier.ai.resolver.ProjectIdentifierResolver;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectMemberListQry;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.web.filter.UserHolder;
@@ -29,7 +29,7 @@ public abstract class BaseExpenseFunction {
     private ProjectIdentifierResolver projectIdentifierResolver;
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 解析项目标识符（ID或名称）
@@ -68,7 +68,7 @@ public abstract class BaseExpenseFunction {
         qry.setProjectId(projectId);
         qry.setOperatorId(getCurrentUserId());
 
-        var response = projectService.listProjectMember(qry);
+        var response = expenseApplicationService.listProjectMember(qry);
         if (response.isSuccess() && response.getData() != null) {
             return response.getData().stream()
                     .map(ExpenseProjectMemberDTO::getMember)

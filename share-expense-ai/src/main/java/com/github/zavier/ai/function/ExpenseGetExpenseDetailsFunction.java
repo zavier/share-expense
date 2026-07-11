@@ -3,7 +3,7 @@ package com.github.zavier.ai.function;
 import com.alibaba.cola.dto.SingleResponse;
 import com.github.zavier.ai.dto.ExpenseDetailSection;
 import com.github.zavier.ai.dto.ExpenseResponseFormat;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ExpenseRecordQry;
 import com.github.zavier.dto.data.ExpenseRecordDTO;
 import com.github.zavier.web.filter.UserHolder;
@@ -42,7 +42,7 @@ public class ExpenseGetExpenseDetailsFunction extends BaseExpenseFunction {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 查询项目的费用信息，包括汇总统计和/或明细记录。
@@ -183,7 +183,7 @@ public class ExpenseGetExpenseDetailsFunction extends BaseExpenseFunction {
         qry.setProjectId(projectId);
         qry.setOperatorId(getCurrentUserId());
 
-        SingleResponse<List<ExpenseRecordDTO>> response = projectService.listRecord(qry);
+        SingleResponse<List<ExpenseRecordDTO>> response = expenseApplicationService.listRecord(qry);
         if (response.isSuccess() && response.getData() != null) {
             return response.getData();
         }

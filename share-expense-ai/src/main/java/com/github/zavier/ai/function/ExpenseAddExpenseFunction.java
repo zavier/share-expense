@@ -1,7 +1,7 @@
 package com.github.zavier.ai.function;
 
 import com.alibaba.cola.dto.Response;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
@@ -34,7 +34,7 @@ import java.util.List;
 public class ExpenseAddExpenseFunction extends BaseExpenseFunction {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 添加一笔费用记录到指定项目。
@@ -150,11 +150,11 @@ public class ExpenseAddExpenseFunction extends BaseExpenseFunction {
         cmd.setDate(timestamp);
 
         // 8. 调用业务逻辑
-        Response response = projectService.addExpenseRecord(cmd);
-
-        if (!response.isSuccess()) {
-            log.error("[AI工具] addExpense 执行失败: {}", response.getErrMessage());
-            return "❌ 添加费用记录失败: " + response.getErrMessage();
+        try {
+            expenseApplicationService.addExpenseRecord(cmd);
+        } catch (Exception e) {
+            log.error("[AI工具] addExpense 执行失败: {}", e.getMessage());
+            return "❌ 添加费用记录失败: " + e.getMessage();
         }
 
         String result = String.format("✅ 费用记录添加成功！\n\n- 付款人：%s\n- 金额：%.2f 元\n- 类型：%s\n- 消费成员：%s\n- 日期：%s",

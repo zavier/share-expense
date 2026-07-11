@@ -3,7 +3,7 @@ package com.github.zavier.web;
 import com.alibaba.cola.dto.PageResponse;
 import com.alibaba.cola.dto.Response;
 import com.alibaba.cola.dto.SingleResponse;
-import com.github.zavier.api.UserService;
+import com.github.zavier.user.UserApplicationService;
 import com.github.zavier.dto.UserAddCmd;
 import com.github.zavier.dto.UserListQry;
 import com.github.zavier.dto.UserLoginCmd;
@@ -23,24 +23,24 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/expense/user")
 public class UserController {
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
 
     @PostMapping("/add")
     public ResponseVo addUser(@RequestBody UserAddCmd userAddCmd){
-        final Response response =  userService.addUser(userAddCmd);
+        final Response response =  userApplicationService.addUser(userAddCmd);
         return ResponseVo.buildFromResponse(response);
     }
 
     @GetMapping("/list")
     public PageResponseVo<UserDTO> listUser(UserListQry userListQry){
-        final PageResponse<UserDTO> pageResponse =  userService.listUser(userListQry);
+        final PageResponse<UserDTO> pageResponse =  userApplicationService.listUser(userListQry);
         return PageResponseVo.buildFromPageResponse(pageResponse);
     }
 
     @PostMapping("/login")
     public SingleResponseVo login(@RequestBody UserLoginCmd userLoginCmd, HttpServletResponse httpServletResponse) throws IOException {
-        final SingleResponse<String> tokenResp = userService.login(userLoginCmd);
+        final SingleResponse<String> tokenResp = userApplicationService.login(userLoginCmd);
         if (!tokenResp.isSuccess()) {
             return SingleResponseVo.buildFailure(tokenResp.getErrCode(), tokenResp.getErrMessage());
         }

@@ -171,6 +171,9 @@ public class ExpenseProject {
         return members.contains(name);
     }
 
+    public boolean isOwnedBy(Integer userId) {
+        return Objects.equals(this.createUserId, userId);
+    }
 
     public void checkUserIdExist() {
         Assert.notNull(createUserId, "创建人不能为空");

@@ -1,7 +1,7 @@
 package com.github.zavier.ai.function;
 
 import com.alibaba.cola.dto.Response;
-import com.github.zavier.api.ProjectService;
+import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectMemberAddCmd;
 import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
@@ -30,7 +30,7 @@ import java.util.List;
 public class ExpenseAddMembersFunction extends BaseExpenseFunction {
 
     @Resource
-    private ProjectService projectService;
+    private ExpenseApplicationService expenseApplicationService;
 
     /**
      * 向现有项目添加新成员。
@@ -97,7 +97,7 @@ public class ExpenseAddMembersFunction extends BaseExpenseFunction {
         cmd.setOperatorId(getCurrentUserId());
 
         // 4. 调用业务逻辑
-        Response response = projectService.addProjectMember(cmd);
+        Response response = expenseApplicationService.addProjectMember(cmd);
 
         if (!response.isSuccess()) {
             log.error("[AI工具] addMembers 执行失败: {}", response.getErrMessage());
