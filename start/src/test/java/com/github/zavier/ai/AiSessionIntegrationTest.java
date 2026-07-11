@@ -13,11 +13,6 @@ import com.github.zavier.web.filter.UserHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
@@ -28,15 +23,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 
 /**
  * AI 会话管理集成测试
  * 测试完整的会话生命周期流程，使用真实数据库
  */
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 @Rollback
@@ -57,8 +48,6 @@ class AiSessionIntegrationTest {
     @Autowired
     private ConversationRepository conversationRepository;
 
-    private MockedStatic<UserHolder> mockedUserHolder;
-
     private static final Integer TEST_USER_ID = 100;
     private static final String TEST_TITLE = "集成测试会话";
 
@@ -68,18 +57,15 @@ class AiSessionIntegrationTest {
         conversationRepository.deleteAll();
         sessionRepository.deleteAll();
 
-        // Mock UserHolder.getUser() 返回测试用户
-        User mockUser = mock(User.class);
-        org.mockito.Mockito.when(mockUser.getUserId()).thenReturn(TEST_USER_ID);
-        mockedUserHolder = mockStatic(UserHolder.class);
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(mockUser);
+        // 设置测试用户（模拟 LoginFilter 行为）
+        User testUser = new User();
+        testUser.setUserId(TEST_USER_ID);
+        UserHolder.setUser(testUser);
     }
 
     @AfterEach
     void tearDown() {
-        if (mockedUserHolder != null) {
-            mockedUserHolder.close();
-        }
+        UserHolder.clear();
     }
 
     // ========== 会话完整生命周期测试 ==========
@@ -148,39 +134,39 @@ class AiSessionIntegrationTest {
     @Test
     void testMultiUserIsolation() {
         // 用户 1 创建会话
-        User user1 = mock(User.class);
-        org.mockito.Mockito.when(user1.getUserId()).thenReturn(1);
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user1);
+        User user1 = new User();
+        user1.setUserId(1);
+        UserHolder.setUser(user1);
 
         String conversationId1 = aiSessionService.createSession("用户1的会话");
 
         // 用户 2 创建会话
-        User user2 = mock(User.class);
-        org.mockito.Mockito.when(user2.getUserId()).thenReturn(2);
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user2);
+        User user2 = new User();
+        user2.setUserId(2);
+        UserHolder.setUser(user2);
 
         String conversationId2 = aiSessionService.createSession("用户2的会话");
 
         // 用户 1 只能看到自己的会话
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user1);
+        UserHolder.setUser(user1);
         List<SessionDto> user1Sessions = aiSessionService.listSessions();
         assertEquals(1, user1Sessions.size());
         assertEquals("用户1的会话", user1Sessions.get(0).title());
 
         // 用户 2 只能看到自己的会话
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user2);
+        UserHolder.setUser(user2);
         List<SessionDto> user2Sessions = aiSessionService.listSessions();
         assertEquals(1, user2Sessions.size());
         assertEquals("用户2的会话", user2Sessions.get(0).title());
 
         // 用户 1 尝试访问用户 2 的会话应该失败
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user1);
+        UserHolder.setUser(user1);
         assertThrows(AuthenticationException.class, () -> {
             aiSessionService.getSessionMessages(conversationId2);
         });
 
         // 用户 2 尝试删除用户 1 的会话应该失败
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(user2);
+        UserHolder.setUser(user2);
         assertThrows(AuthenticationException.class, () -> {
             aiSessionService.deleteSession(conversationId1);
         });

@@ -2,7 +2,7 @@ package com.github.zavier.ai.monitoring.advisor;
 
 import com.github.zavier.ai.monitoring.entity.AiMonitoringLogEntity;
 import com.github.zavier.ai.monitoring.service.AiMonitoringService;
-import com.github.zavier.web.filter.UserHolder;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.client.ChatClientRequest;
@@ -36,8 +36,11 @@ public class AiMonitoringAdvisor implements CallAdvisor, StreamAdvisor {
 
     private final AiMonitoringService monitoringService;
 
-    public AiMonitoringAdvisor(AiMonitoringService monitoringService) {
+    private final CurrentUserProvider currentUserProvider;
+
+    public AiMonitoringAdvisor(AiMonitoringService monitoringService, CurrentUserProvider currentUserProvider) {
         this.monitoringService = monitoringService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @Override
@@ -60,7 +63,7 @@ public class AiMonitoringAdvisor implements CallAdvisor, StreamAdvisor {
             final long endTime = System.currentTimeMillis();
 
             final AiMonitoringLogEntity monitoringLog = AiMonitoringLogEntity.builder()
-                    .userId(UserHolder.getUser().getUserId())
+                    .userId(currentUserProvider.getCurrentUserId())
                     .conversationId(conversationId == null ? "-1" : conversationId.toString())
                     .modelName(metadataOptional.map(ChatResponseMetadata::getModel).orElse(""))
                     .startTime(convertMillisecondToDateTimeUTC(startTime))
@@ -82,7 +85,7 @@ public class AiMonitoringAdvisor implements CallAdvisor, StreamAdvisor {
             log.error("[AI监控] 调用失败", e);
             final long endTime = System.currentTimeMillis();
             final AiMonitoringLogEntity monitoringLog = AiMonitoringLogEntity.builder()
-                    .userId(UserHolder.getUser().getUserId())
+                    .userId(currentUserProvider.getCurrentUserId())
                     .conversationId(conversationId == null ? "-1" : conversationId.toString())
                     .modelName(metadataOptional.map(ChatResponseMetadata::getModel).orElse(""))
                     .startTime(convertMillisecondToDateTimeUTC(startTime))

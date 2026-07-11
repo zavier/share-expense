@@ -5,7 +5,6 @@ import com.github.zavier.ai.dto.ExpenseResponseFormat;
 import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectSharingQry;
 import com.github.zavier.dto.data.UserSharingDTO;
-import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;

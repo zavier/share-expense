@@ -14,7 +14,7 @@ import com.github.zavier.ai.service.MessagePersister;
 import com.github.zavier.ai.service.SuggestionGenerator;
 import com.github.zavier.ai.service.CachedSuggestionService;
 import com.github.zavier.ai.validator.ChatRequestValidator;
-import com.github.zavier.web.filter.UserHolder;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -76,6 +76,9 @@ public class AiChatServiceImpl implements AiChatService {
 
     @Resource
     private ChatRequestValidator requestValidator;
+
+    @Resource
+    private CurrentUserProvider currentUserProvider;
 
     @Resource
     private CachedSuggestionService cachedSuggestionService;
@@ -232,10 +235,7 @@ public class AiChatServiceImpl implements AiChatService {
      * 获取当前用户 ID
      */
     private Integer getCurrentUserId() {
-        if (UserHolder.getUser() == null) {
-            throw new AuthenticationException("用户未登录或认证信息已过期");
-        }
-        return UserHolder.getUser().getUserId();
+        return currentUserProvider.getCurrentUserId();
     }
 
     /**

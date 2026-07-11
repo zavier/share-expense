@@ -9,15 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
-import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 
 /**
  * AI ChatClient 对话集成测试
@@ -47,9 +44,6 @@ class ChatClientConversationTest {
 
     @Autowired
     private AiChatService aiChatService;
-
-    private MockedStatic<UserHolder> mockedUserHolder;
-
     private static final Integer TEST_USER_ID = 100;
 
     /**
@@ -61,18 +55,15 @@ class ChatClientConversationTest {
 
     @BeforeEach
     void setUp() {
-        // Mock UserHolder.getUser() 返回测试用户
-        User mockUser = mock(User.class);
-        org.mockito.Mockito.when(mockUser.getUserId()).thenReturn(TEST_USER_ID);
-        mockedUserHolder = mockStatic(UserHolder.class);
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(mockUser);
+        // 设置测试用户（模拟 LoginFilter 行为）
+        User testUser = new User();
+        testUser.setUserId(TEST_USER_ID);
+        UserHolder.setUser(testUser);
     }
 
     @AfterEach
     void tearDown() {
-        if (mockedUserHolder != null) {
-            mockedUserHolder.close();
-        }
+        UserHolder.clear();
     }
 
     // ========== 基础对话测试 ==========

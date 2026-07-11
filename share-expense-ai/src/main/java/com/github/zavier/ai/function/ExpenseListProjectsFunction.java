@@ -8,7 +8,6 @@ import com.github.zavier.dto.ProjectListQry;
 import com.github.zavier.dto.ProjectMemberListQry;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
 import com.github.zavier.dto.data.ProjectDTO;
-import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;

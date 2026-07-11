@@ -3,7 +3,6 @@ package com.github.zavier.ai.function;
 import com.alibaba.cola.dto.Response;
 import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ExpenseRecordAddCmd;
-import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;

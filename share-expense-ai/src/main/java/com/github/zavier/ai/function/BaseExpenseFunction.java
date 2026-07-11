@@ -1,10 +1,10 @@
 package com.github.zavier.ai.function;
 
 import com.github.zavier.ai.resolver.ProjectIdentifierResolver;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import com.github.zavier.project.ExpenseApplicationService;
 import com.github.zavier.dto.ProjectMemberListQry;
 import com.github.zavier.dto.data.ExpenseProjectMemberDTO;
-import com.github.zavier.web.filter.UserHolder;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -31,6 +31,9 @@ public abstract class BaseExpenseFunction {
     @Resource
     private ExpenseApplicationService expenseApplicationService;
 
+    @Resource
+    private CurrentUserProvider currentUserProvider;
+
     /**
      * 解析项目标识符（ID或名称）
      * <p>
@@ -53,8 +56,7 @@ public abstract class BaseExpenseFunction {
      * @return 用户ID，如果未登录返回默认值1
      */
     protected Integer getCurrentUserId() {
-        Assert.notNull(UserHolder.getUser(), "用户未登录");
-        return UserHolder.getUser().getUserId();
+        return currentUserProvider.getCurrentUserId();
     }
 
     /**

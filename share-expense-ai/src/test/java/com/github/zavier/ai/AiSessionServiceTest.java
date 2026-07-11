@@ -8,15 +8,12 @@ import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.impl.AiSessionServiceImpl;
 import com.github.zavier.ai.repository.AiSessionRepository;
 import com.github.zavier.ai.repository.ConversationRepository;
-import com.github.zavier.domain.user.User;
-import com.github.zavier.web.filter.UserHolder;
-import org.junit.jupiter.api.AfterEach;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -43,10 +40,11 @@ class AiSessionServiceTest {
     @Mock
     private ConversationRepository conversationRepository;
 
+    @Mock
+    private CurrentUserProvider currentUserProvider;
+
     @InjectMocks
     private AiSessionServiceImpl aiSessionService;
-
-    private MockedStatic<UserHolder> mockedUserHolder;
 
     private static final Integer TEST_USER_ID = 1;
     private static final String TEST_CONVERSATION_ID = "test-conv-123";
@@ -54,18 +52,7 @@ class AiSessionServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Mock UserHolder.getUser() 返回测试用户
-        User mockUser = mock(User.class);
-        when(mockUser.getUserId()).thenReturn(TEST_USER_ID);
-        mockedUserHolder = mockStatic(UserHolder.class);
-        mockedUserHolder.when(UserHolder::getUser).thenReturn(mockUser);
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (mockedUserHolder != null) {
-            mockedUserHolder.close();
-        }
+        when(currentUserProvider.getCurrentUserId()).thenReturn(TEST_USER_ID);
     }
 
     // ========== listSessions 测试 ==========

@@ -33,10 +33,6 @@
             <groupId>com.github.zavier</groupId>
             <artifactId>share-expense-app</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.github.zavier</groupId>
-            <artifactId>share-expense-adapter</artifactId>
-        </dependency>
 
         <!-- Spring Boot -->
         <dependency>
@@ -46,6 +42,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Transmittable ThreadLocal (previously transitively from adapter) -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
         </dependency>
 
         <!-- Validation -->

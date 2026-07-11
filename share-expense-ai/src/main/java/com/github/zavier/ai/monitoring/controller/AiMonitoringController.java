@@ -1,11 +1,10 @@
 package com.github.zavier.ai.monitoring.controller;
 
-import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.monitoring.dto.AiMonitoringLogDto;
 
 import com.github.zavier.ai.monitoring.service.AiMonitoringService;
-import com.github.zavier.web.filter.UserHolder;
-import com.github.zavier.vo.SingleResponseVo;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
+import com.alibaba.cola.dto.SingleResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,16 +24,18 @@ import java.util.List;
 public class AiMonitoringController {
 
     private final AiMonitoringService monitoringService;
+    private final CurrentUserProvider currentUserProvider;
 
-    public AiMonitoringController(AiMonitoringService monitoringService) {
+    public AiMonitoringController(AiMonitoringService monitoringService, CurrentUserProvider currentUserProvider) {
         this.monitoringService = monitoringService;
+        this.currentUserProvider = currentUserProvider;
     }
 
     /**
      * 获取调用历史记录
      */
     @GetMapping("/session/{conversationId}/history")
-    public SingleResponseVo<List<AiMonitoringLogDto>> getCallHistory(
+    public SingleResponse<List<AiMonitoringLogDto>> getCallHistory(
             @PathVariable String conversationId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -46,7 +47,7 @@ public class AiMonitoringController {
             conversationId, userId, pageable
         );
 
-        return SingleResponseVo.of(history);
+        return SingleResponse.of(history);
     }
 
 
@@ -54,9 +55,6 @@ public class AiMonitoringController {
      * 获取当前用户ID（从安全上下文）
      */
     private Integer getCurrentUserId() {
-        if (UserHolder.getUser() == null) {
-            throw new AuthenticationException("用户未登录");
-        }
-        return UserHolder.getUser().getUserId();
+        return currentUserProvider.getCurrentUserId();
     }
 }

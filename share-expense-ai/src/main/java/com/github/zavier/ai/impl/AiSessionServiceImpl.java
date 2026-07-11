@@ -8,7 +8,7 @@ import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.exception.AuthenticationException;
 import com.github.zavier.ai.repository.AiSessionRepository;
 import com.github.zavier.ai.repository.ConversationRepository;
-import com.github.zavier.web.filter.UserHolder;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,9 @@ public class AiSessionServiceImpl implements AiSessionService {
 
     @Resource
     private ConversationRepository conversationRepository;
+
+    @Resource
+    private CurrentUserProvider currentUserProvider;
 
     @Override
     public List<SessionDto> listSessions() {
@@ -224,9 +227,6 @@ public class AiSessionServiceImpl implements AiSessionService {
     }
 
     private Integer getCurrentUserId() {
-        if (UserHolder.getUser() == null) {
-            throw new AuthenticationException("用户未登录或认证信息已过期");
-        }
-        return UserHolder.getUser().getUserId();
+        return currentUserProvider.getCurrentUserId();
     }
 }

@@ -3,7 +3,7 @@ package com.github.zavier.ai.service;
 import com.github.zavier.ai.domain.MessageRole;
 import com.github.zavier.ai.entity.ConversationEntity;
 import com.github.zavier.ai.repository.ConversationRepository;
-import com.github.zavier.web.filter.UserHolder;
+import com.github.zavier.domain.user.domainservice.CurrentUserProvider;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -29,6 +29,9 @@ public class MessagePersister {
 
     @Resource
     private ConversationRepository conversationRepository;
+
+    @Resource
+    private CurrentUserProvider currentUserProvider;
 
     @Value("${app.ai.chat.max-history-messages:15}")
     private int maxHistoryMessages;
@@ -121,7 +124,7 @@ public class MessagePersister {
      * 获取当前用户 ID
      */
     private Integer getCurrentUserId() {
-        return UserHolder.getUser() != null ? UserHolder.getUser().getUserId() : 1;
+        return currentUserProvider.getCurrentUserId();
     }
 
     /**
