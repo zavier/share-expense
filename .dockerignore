@@ -1,0 +1,12 @@
+**/target/
+**/.git/
+**/.idea/
+**/.claude/
+**/.codegraph/
+**/.omm/
+**/graphify-out/
+**/docs/
+**/node_modules/
+*.md
+.gitignore
+.DS_Store
