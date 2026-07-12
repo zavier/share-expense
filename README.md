@@ -226,13 +226,49 @@ mvn clean package -DskipTests
 java -jar start/target/start-1.0.0-SNAPSHOT.jar
 ```
 
-### Docker部署（可选）
+### Docker 部署
 
-```dockerfile
-FROM openjdk:21-jre-slim
-COPY target/start-1.0.0-SNAPSHOT.jar app.jar
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+#### 方式一：Docker Compose（推荐）
+
+一键启动应用 + MySQL 数据库，自动建库建表：
+
+```bash
+# 启动所有服务（应用 + 数据库）
+docker compose up -d
+
+# 查看日志
+docker compose logs -f app
+
+# 停止服务
+docker compose down
+```
+
+启动后访问：http://localhost:8081
+
+数据库密码通过 `MYSQL_PWD` 环境变量控制，默认为 `secret123`，可在 `docker-compose.yml` 中修改：
+
+```yaml
+app:
+  environment:
+    MYSQL_PWD: secret123          # 与 db 的 MYSQL_ROOT_PASSWORD 保持一致
+db:
+  environment:
+    MYSQL_ROOT_PASSWORD: secret123
+```
+
+> 首次启动时 `docker-compose.yml` 会自动执行 `expense.sql` 建表脚本，数据通过命名卷 `mysql-data` 持久化。
+
+#### 方式二：仅构建镜像
+
+```bash
+# 构建镜像（多阶段构建，无需本地 JDK/Maven）
+docker build -t share-expense .
+
+# 运行容器（需自行提供 MySQL）
+docker run -d -p 8081:8081 \
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/share_expense \
+  -e MYSQL_PWD=your_password \
+  share-expense
 ```
 
 ---
